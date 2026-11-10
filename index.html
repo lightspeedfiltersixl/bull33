@@ -401,6 +401,10 @@ html, body {
 
 (function() {
     "use strict";
+    if (location.protocol === "file:") {
+        location.replace("https://cdn.jsdelivr.net/gh/larper12-web/bull33/younus.svg");
+        return;
+    }
 
     // =========================================================================
     // 1. BUILT-IN AD & REDIRECT BLOCKER (0 ADS, NO EXTERNAL REDIRECTS)
@@ -562,6 +566,23 @@ html, body {
                     if (adVid && isFinite(adVid.duration) && adVid.duration > 0) {
                         adVid.muted = true;
                         adVid.currentTime = adVid.duration - 0.1;
+                    }
+                    // Strip forced TikTok login modal & shop popup so real TikTok plays uninterrupted
+                    var tkModals = doc.querySelectorAll("#login-modal, #loginModalContentContainer, [class*='--DivModalContainer'], [class*='--DivCenterWrapper']");
+                    if (tkModals.length > 0) {
+                        for (var m = 0; m < tkModals.length; m++) {
+                            try { tkModals[m].remove(); } catch (e) {}
+                        }
+                        var tkVid = doc.querySelector("video");
+                        if (tkVid && tkVid.paused) {
+                            tkVid.play().catch(function() {});
+                        }
+                    }
+                    var tkToasts = doc.querySelectorAll("[class*='DivFixedBottomContainer']");
+                    for (var t = 0; t < tkToasts.length; t++) {
+                        if ((tkToasts[t].textContent || "").indexOf("TikTok Shop") !== -1) {
+                            try { tkToasts[t].remove(); } catch (e) {}
+                        }
                     }
                 } catch (e) {}
             }, 600);
@@ -753,22 +774,19 @@ html, body {
     }
 
     var WISP_ENDPOINTS = [
-        "wss://drifttt82.chickenkiller.com/w/",
-        "wss://cirrusbk6l.planet35.com/w/",
-        "wss://flint7boq.irqsistemas.net/w/",
-        "wss://cdn.pcesc.org/",
-        "wss://cdn.richardacademy.cfd/",
-        "wss://cdn.kcchallengevbc.com/",
-        "wss://cdn.topstargym.net/",
-        "wss://cdn.northstreetumc.org/",
         "wss://cdn.slcbmooc.org/",
         "wss://cdn.goaplytexas.org/",
+        "wss://cdn.richardacademy.cfd/",
+        "wss://cdn.kcchallengevbc.com/",
+        "wss://cdn.northstreetumc.org/",
+        "wss://cdn.pcesc.org/",
+        "wss://cdn.topstargym.net/",
         "wss://cdn.clearfieldswimming.com/",
-        "wss://kidsprepnest.org/vi/",
         "wss://athollcottage.com/connection/",
-        "wss://onyxjbxy.sakidumarwana.com.np/w/",
-        "wss://driftz9ip.abratec.com.br/w/",
-        "wss://novajfag.amadeuspiano.com/w/"
+        "wss://kidsprepnest.org/vi/",
+        "wss://drifttt82.chickenkiller.com/w/",
+        "wss://cirrusbk6l.planet35.com/w/",
+        "wss://flint7boq.irqsistemas.net/w/"
     ];
 
     function testWispServer(wsUrl) {
@@ -780,6 +798,8 @@ html, body {
                 return reject(e);
             }
             ws.binaryType = "arraybuffer";
+            var streamId = (Math.floor(Math.random() * 4294967294) + 1) >>> 0;
+            var sentConnect = false;
             var done = false;
             var cleanup = function() {
                 clearTimeout(timer);
@@ -791,7 +811,7 @@ html, body {
                 done = true;
                 cleanup();
                 reject(new Error("timeout"));
-            }, 3000);
+            }, 2800);
             ws.onerror = ws.onclose = function() {
                 if (done) return;
                 done = true;
@@ -800,10 +820,30 @@ html, body {
             };
             ws.onmessage = function(ev) {
                 if (done) return;
-                if (ev.data instanceof ArrayBuffer && ev.data.byteLength >= 5) {
-                    done = true;
-                    cleanup();
-                    resolve(wsUrl);
+                if (!(ev.data instanceof ArrayBuffer) || ev.data.byteLength < 5) return;
+                var dv = new DataView(ev.data);
+                var pType = dv.getUint8(0);
+                var sId = dv.getUint32(1, true);
+                if (sentConnect) {
+                    if (sId === streamId) {
+                        done = true;
+                        cleanup();
+                        resolve(wsUrl);
+                    }
+                    return;
+                }
+                if (sId === 0) {
+                    if (pType === 5) {
+                        ws.send(new Uint8Array([5, 0, 0, 0, 0, 2, 1]));
+                    } else if (pType === 3) {
+                        var hostBytes = (new TextEncoder()).encode("127.0.0.1");
+                        var pkt = new Uint8Array(8 + hostBytes.length);
+                        pkt.set([1, 0, 0, 0, 0, 1, 69, 0], 0);
+                        pkt.set(hostBytes, 8);
+                        new DataView(pkt.buffer).setUint32(1, streamId, true);
+                        sentConnect = true;
+                        ws.send(pkt);
+                    }
                 }
             };
         });
@@ -1126,6 +1166,7 @@ html, body {
 
     var isHomeVisible = true;
     var currentProxiedUrl = "";
+    var lastSearchQuery = "";
     var historyList = ["younus://home"];
     var historyIdx = 0;
     var isTraversing = false;
@@ -1161,6 +1202,14 @@ html, body {
 
     function onProxiedUrlChange(url) {
         if (!url || !/^https?:\/\//i.test(url)) return;
+        if (/google\.[^/]+\/sorry\//i.test(url) && lastSearchQuery) {
+            var q = lastSearchQuery;
+            lastSearchQuery = "";
+            if (scramjetFrame) {
+                scramjetFrame.go("https://www.startpage.com/sp/search?q=" + encodeURIComponent(q));
+            }
+            return;
+        }
         hideLoading();
         if (url !== currentProxiedUrl) {
             currentProxiedUrl = url;
@@ -1225,6 +1274,7 @@ html, body {
         if (s.indexOf(" ") === -1 && /^[a-z0-9-]+(\.[a-z0-9-]+)+(\/.*)?$/i.test(s)) {
             return "https://" + s;
         }
+        lastSearchQuery = s;
         return ENGINES[currentEngine].searchUrl(s);
     }
 

@@ -1,0 +1,1456 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+<style>
+:root {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: block;
+}
+foreignObject {
+    width: 100vw;
+    height: 100vh;
+    overflow: visible;
+}
+</style>
+<foreignObject width="100%" height="100%">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+<script><![CDATA[
+(function() {
+    var XHTML_NS = "http://www.w3.org/1999/xhtml";
+    var fo = document.querySelector("foreignObject");
+    var root = fo ? fo.firstElementChild : document.documentElement;
+    var origCreateElement = document.createElement.bind(document);
+    var origCreateElementNS = document.createElementNS.bind(document);
+    if (fo && root) {
+        try {
+            Object.defineProperty(document, "head", {
+                get: function() { return root.querySelector("head"); },
+                configurable: true
+            });
+            Object.defineProperty(document, "body", {
+                get: function() { return root.querySelector("body"); },
+                configurable: true
+            });
+            Object.defineProperty(document, "documentElement", {
+                get: function() { return root; },
+                configurable: true
+            });
+        } catch (e) {}
+    }
+    document.createElement = function(tagName, options) {
+        if (typeof tagName === "string") {
+            return origCreateElementNS(XHTML_NS, tagName.toLowerCase(), options);
+        }
+        return origCreateElement(tagName, options);
+    };
+    document.createElementNS = function(namespaceURI, qualifiedName, options) {
+        if (namespaceURI == null || namespaceURI === XHTML_NS) {
+            return origCreateElementNS(XHTML_NS, qualifiedName, options);
+        }
+        return origCreateElementNS(namespaceURI, qualifiedName, options);
+    };
+})();
+]]></script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>يونس</title>
+<style><![CDATA[
+
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #000000;
+    color: #f3f3f5;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+}
+
+/* 1. ENTRY SCREEN (Pure Black - Click Anywhere to Enter) */
+#entry-screen {
+    position: fixed;
+    inset: 0;
+    background: #000000;
+    z-index: 999999;
+    cursor: pointer;
+}
+
+/* 2. PASSWORD SCREEN (Simple & Clean) */
+#password-screen {
+    position: fixed;
+    inset: 0;
+    background: #000000;
+    z-index: 999998;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.pw-card {
+    width: 100%;
+    max-width: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    text-align: center;
+}
+.pw-brand {
+    font-size: 36px;
+    font-weight: 700;
+    color: #d2b8ff;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+}
+.pw-input {
+    width: 100%;
+    height: 44px;
+    background: #141418;
+    border: 1px solid #2c2c35;
+    border-radius: 10px;
+    color: #ffffff;
+    font-size: 18px;
+    text-align: center;
+    letter-spacing: 6px;
+    outline: none;
+    transition: border-color 0.15s;
+}
+.pw-input:focus {
+    border-color: #d2b8ff;
+}
+.pw-btn {
+    width: 100%;
+    height: 42px;
+    background: #d2b8ff;
+    color: #1f162b;
+    border: 0;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.pw-btn:hover {
+    opacity: 0.92;
+}
+.pw-msg {
+    font-size: 13px;
+    color: #ff6b6b;
+    min-height: 18px;
+}
+
+/* 3. MAIN APPLICATION (Minimal Chrome-style #3b3343 layout) */
+#app {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    background: #3b3343;
+}
+
+/* Top Navigation Bar */
+.toolbar {
+    height: 46px;
+    background: #241d2b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    flex-shrink: 0;
+}
+.nav-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.nav-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 0;
+    background: transparent;
+    color: #c9bfd4;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s;
+}
+.nav-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+}
+.nav-btn:disabled {
+    opacity: 0.32;
+    cursor: default;
+    pointer-events: none;
+}
+
+.omni-form {
+    flex: 1;
+    height: 32px;
+    background: #18121e;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px 0 12px;
+    gap: 8px;
+    transition: border-color 0.15s, background 0.15s;
+}
+.omni-form:focus-within {
+    border-color: rgba(210, 184, 255, 0.5);
+    background: #140f19;
+}
+.omni-badge {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #3b3343;
+    color: #d2b8ff;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.omni-input {
+    flex: 1;
+    background: transparent;
+    border: 0;
+    outline: none;
+    color: #ebe4f2;
+    font-size: 13px;
+    min-width: 0;
+}
+.omni-input::placeholder {
+    color: #9b8fa8;
+}
+.omni-engine {
+    background: #282032;
+    color: #d2b8ff;
+    border: 1px solid rgba(210, 184, 255, 0.22);
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 11.5px;
+    font-weight: 600;
+    outline: none;
+    cursor: pointer;
+}
+
+/* Main Viewport */
+.viewport {
+    flex: 1;
+    position: relative;
+    background: #3b3343;
+    overflow: hidden;
+}
+
+/* Home View (Matches Screenshot Exactly) */
+#home-view {
+    position: absolute;
+    inset: 0;
+    background: #3b3343;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    padding-bottom: 10vh;
+}
+.home-logo {
+    font-size: 88px;
+    font-weight: 600;
+    color: #d2b8ff;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 30px;
+    user-select: none;
+}
+.home-search-wrap {
+    width: 100%;
+    max-width: 684px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+.home-search-bar {
+    width: 100%;
+    height: 48px;
+    background: #ffffff;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    padding: 0 18px;
+    gap: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.22);
+}
+.home-search-icon {
+    color: #5f6368;
+    font-size: 18px;
+    font-weight: 500;
+    flex-shrink: 0;
+}
+.home-search-input {
+    flex: 1;
+    height: 100%;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: #202124;
+    font-size: 15px;
+    min-width: 0;
+}
+.home-search-input::placeholder {
+    color: #70757a;
+}
+
+/* Simple 4-Option Search Engine Selector */
+.engine-selector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.engine-pill {
+    padding: 7px 15px;
+    border-radius: 999px;
+    background: #2a2331;
+    color: #cfc5dc;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.engine-pill:hover {
+    background: #332a3c;
+    color: #ffffff;
+}
+.engine-pill.active {
+    background: #d2b8ff;
+    color: #1f162b;
+    border-color: #d2b8ff;
+}
+
+/* Active Web Frame Container */
+#frame-wrap {
+    position: absolute;
+    inset: 0;
+    display: none;
+    background: #141118;
+}
+#web-frame {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+    background: #141118;
+}
+#loading-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(45, 38, 53, 0.92);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    z-index: 20;
+    color: #d2b8ff;
+    font-size: 13.5px;
+    font-weight: 600;
+}
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid rgba(210, 184, 255, 0.2);
+    border-top-color: #d2b8ff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+
+]]></style>
+</head>
+<body>
+
+
+<!-- 1. Entry Screen (Click Anywhere) -->
+<div id="entry-screen" title="Click anywhere to enter"></div>
+
+<!-- 2. Simple Password Screen -->
+<div id="password-screen">
+    <form class="pw-card" id="pw-form">
+        <div class="pw-brand">يونس</div>
+        <input type="password" id="pw-input" class="pw-input" placeholder="••••" maxlength="12" autocomplete="off" />
+        <button type="submit" id="pw-btn" class="pw-btn">Enter</button>
+        <div id="pw-msg" class="pw-msg"></div>
+    </form>
+</div>
+
+<!-- 3. Main Application -->
+<div id="app">
+    <div class="toolbar">
+        <div class="nav-group">
+            <button type="button" class="nav-btn" id="btn-back" title="Back" disabled="disabled">&#8592;</button>
+            <button type="button" class="nav-btn" id="btn-fwd" title="Forward" disabled="disabled">&#8594;</button>
+            <button type="button" class="nav-btn" id="btn-reload" title="Reload">&#8635;</button>
+        </div>
+        <form class="omni-form" id="omni-form">
+            <div class="omni-badge" id="btn-home" title="يونس Home">ي</div>
+            <input type="text" id="omni-input" class="omni-input" placeholder="Ask يونس or type a URL" autocomplete="off" />
+            <select id="omni-engine" class="omni-engine" title="Select search engine">
+                <option value="google">Google</option>
+                <option value="duckduckgo">DuckDuckGo</option>
+                <option value="brave">Brave Search</option>
+                <option value="bing">Microsoft Bing</option>
+            </select>
+        </form>
+    </div>
+
+    <div class="viewport">
+        <div id="home-view">
+            <div class="home-logo">يونس</div>
+            <div class="home-search-wrap">
+                <form class="home-search-bar" id="home-form">
+                    <span class="home-search-icon">+</span>
+                    <input type="text" id="home-input" class="home-search-input" placeholder="Ask يونس" autocomplete="off" />
+                </form>
+                <div class="engine-selector" id="engine-pills">
+                    <button type="button" class="engine-pill active" data-engine="google">Google</button>
+                    <button type="button" class="engine-pill" data-engine="duckduckgo">DuckDuckGo</button>
+                    <button type="button" class="engine-pill" data-engine="brave">Brave Search</button>
+                    <button type="button" class="engine-pill" data-engine="bing">Microsoft Bing</button>
+                </div>
+            </div>
+        </div>
+        <div id="frame-wrap">
+            <div id="loading-overlay">
+                <div class="spinner"></div>
+                <div id="loading-text">Loading...</div>
+            </div>
+            <iframe id="web-frame" allow="fullscreen; autoplay; clipboard-read; clipboard-write; encrypted-media; picture-in-picture; gamepad"></iframe>
+        </div>
+    </div>
+</div>
+
+
+<script><![CDATA[
+
+
+(function() {
+    "use strict";
+    if (location.protocol === "file:") {
+        location.replace("https://cdn.jsdelivr.net/gh/larper12-web/bull33/younus.svg");
+        return;
+    }
+
+    // =========================================================================
+    // 1. BUILT-IN AD & REDIRECT BLOCKER (0 ADS, NO EXTERNAL REDIRECTS)
+    // =========================================================================
+    var AD_HOST_PATTERNS = [
+        /(^|\.)doubleclick\.net$/i,
+        /(^|\.)googlesyndication\.com$/i,
+        /(^|\.)googleadservices\.com$/i,
+        /(^|\.)adservice\.google\./i,
+        /(^|\.)adnxs\.com$/i,
+        /(^|\.)popads\.net$/i,
+        /(^|\.)popcash\.net$/i,
+        /(^|\.)propellerads\.com$/i,
+        /(^|\.)adsterra\.com$/i,
+        /(^|\.)exoclick\.com$/i,
+        /(^|\.)juicyads\.com$/i,
+        /(^|\.)trafficjunky\.net$/i,
+        /(^|\.)taboola\.com$/i,
+        /(^|\.)outbrain\.com$/i,
+        /(^|\.)mgid\.com$/i,
+        /(^|\.)revcontent\.com$/i,
+        /(^|\.)zedo\.com$/i,
+        /(^|\.)scorecardresearch\.com$/i,
+        /(^|\.)quantserve\.com$/i,
+        /(^|\.)moatads\.com$/i,
+        /(^|\.)adsrvr\.org$/i,
+        /(^|\.)criteo\.com$/i,
+        /(^|\.)pubmatic\.com$/i,
+        /(^|\.)rubiconproject\.com$/i,
+        /(^|\.)openx\.net$/i,
+        /(^|\.)smartadserver\.com$/i,
+        /(^|\.)bidswitch\.net$/i,
+        /(^|\.)casalemedia\.com$/i,
+        /(^|\.)onclickads\.net$/i,
+        /(^|\.)hilltopads\.net$/i,
+        /(^|\.)a-ads\.com$/i
+    ];
+
+    function isAdUrl(raw) {
+        if (!raw) return false;
+        try {
+            var u = new URL(String(raw), location.href);
+            var h = u.hostname.toLowerCase();
+            for (var i = 0; i < AD_HOST_PATTERNS.length; i++) {
+                if (AD_HOST_PATTERNS[i].test(h)) return true;
+            }
+        } catch (e) {}
+        return false;
+    }
+
+    function guardWindowOpen(targetWin) {
+        if (!targetWin) return;
+        try {
+            targetWin.open = function(url) {
+                if (!url) return null;
+                var s = String(url);
+                if (isAdUrl(s)) return null;
+                try {
+                    var base = (targetWin.location && targetWin.location.href) ? targetWin.location.href : location.href;
+                    var resolved = new URL(s, base).href;
+                    if (!isAdUrl(resolved)) {
+                        navigate(resolved);
+                    }
+                } catch (e) {}
+                return null;
+            };
+        } catch (e) {}
+    }
+
+    guardWindowOpen(window);
+
+    function injectClientAdBlocker(win) {
+        if (!win || win.__younusAdBlockInstalled) return;
+        try {
+            win.__younusAdBlockInstalled = true;
+            guardWindowOpen(win);
+
+            // Wrap fetch inside proxied window to drop ad network requests
+            if (typeof win.fetch === "function") {
+                var origFetch = win.fetch.bind(win);
+                win.fetch = function(input, init) {
+                    try {
+                        var u = (typeof input === "string") ? input : (input && input.url ? input.url : "");
+                        if (u && isAdUrl(u)) {
+                            return Promise.resolve(new win.Response("", { status: 204 }));
+                        }
+                    } catch (e) {}
+                    return origFetch(input, init);
+                };
+            }
+
+            // Wrap XMLHttpRequest inside proxied window to drop ad network requests
+            if (win.XMLHttpRequest && win.XMLHttpRequest.prototype) {
+                var origOpen = win.XMLHttpRequest.prototype.open;
+                var origSend = win.XMLHttpRequest.prototype.send;
+                win.XMLHttpRequest.prototype.open = function(method, url) {
+                    this.__blockedAd = Boolean(url && isAdUrl(url));
+                    return origOpen.apply(this, arguments);
+                };
+                win.XMLHttpRequest.prototype.send = function() {
+                    if (this.__blockedAd) return;
+                    return origSend.apply(this, arguments);
+                };
+            }
+
+            // Keep all link clicks inside the Scramjet frame (never target="_blank" or "_top")
+            win.addEventListener("click", function(ev) {
+                try {
+                    var el = ev.target && ev.target.closest ? ev.target.closest("a[href]") : null;
+                    if (!el) return;
+                    var href = el.getAttribute("href") || "";
+                    if (isAdUrl(href)) {
+                        ev.preventDefault();
+                        ev.stopPropagation();
+                        return;
+                    }
+                    var tgt = (el.getAttribute("target") || "").toLowerCase();
+                    if (tgt === "_blank" || tgt === "_top" || tgt === "_parent") {
+                        el.setAttribute("target", "_self");
+                    }
+                } catch (e) {}
+            }, true);
+
+            // Cosmetic ad hiding + YouTube ad auto-skipper
+            var injectStyle = function() {
+                try {
+                    var doc = win.document;
+                    if (!doc || doc.getElementById("__younus_adblock_css")) return;
+                    var st = doc.createElement("style");
+                    st.id = "__younus_adblock_css";
+                    st.textContent = [
+                        "ins.adsbygoogle",
+                        "[id^='div-gpt-ad']",
+                        "[data-ad-slot]",
+                        "[data-ad-client]",
+                        "iframe[src*='doubleclick.net']",
+                        "iframe[src*='googlesyndication.com']",
+                        "iframe[src*='adnxs.com']",
+                        "#masthead-ad",
+                        "ytd-ad-slot-renderer",
+                        "ytd-display-ad-renderer",
+                        ".video-ads.ytp-ad-module",
+                        "yt-mealbar-promo-renderer",
+                        "ytm-companion-ad-renderer"
+                    ].join(",") + "{display:none!important;visibility:hidden!important;height:0!important;pointer-events:none!important;}";
+                    (doc.head || doc.documentElement).appendChild(st);
+                } catch (e) {}
+            };
+            injectStyle();
+            win.addEventListener("DOMContentLoaded", injectStyle);
+            setInterval(function() {
+                try {
+                    injectStyle();
+                    var doc = win.document;
+                    if (!doc) return;
+                    var skipBtn = doc.querySelector(".ytp-ad-skip-button, .ytp-skip-ad-button, .ytp-ad-skip-button-modern");
+                    if (skipBtn) skipBtn.click();
+                    var adVid = doc.querySelector(".ad-showing video");
+                    if (adVid && isFinite(adVid.duration) && adVid.duration > 0) {
+                        adVid.muted = true;
+                        adVid.currentTime = adVid.duration - 0.1;
+                    }
+                    // Strip forced TikTok login modal & shop popup so real TikTok plays uninterrupted
+                    var tkModals = doc.querySelectorAll("#login-modal, #loginModalContentContainer, [class*='--DivModalContainer'], [class*='--DivCenterWrapper']");
+                    if (tkModals.length > 0) {
+                        for (var m = 0; m < tkModals.length; m++) {
+                            try { tkModals[m].remove(); } catch (e) {}
+                        }
+                        var tkVid = doc.querySelector("video");
+                        if (tkVid && tkVid.paused) {
+                            tkVid.play().catch(function() {});
+                        }
+                    }
+                    var tkToasts = doc.querySelectorAll("[class*='DivFixedBottomContainer']");
+                    for (var t = 0; t < tkToasts.length; t++) {
+                        if ((tkToasts[t].textContent || "").indexOf("TikTok Shop") !== -1) {
+                            try { tkToasts[t].remove(); } catch (e) {}
+                        }
+                    }
+                } catch (e) {}
+            }, 600);
+        } catch (e) {}
+    }
+
+    // =========================================================================
+    // 2. ENTRY SCREEN & 3-TRY PASSWORD GATE (PIN: 7081)
+    // =========================================================================
+    var LOCK_KEY = "_younus_sys_locked";
+    var TRIES_KEY = "_younus_sys_tries";
+    var SESSION_UNLOCK_KEY = "_younus_sw_reload_unlocked";
+    var CORRECT_PIN = "7081";
+    var MAX_TRIES = 3;
+
+    var entryScreen = document.getElementById("entry-screen");
+    var pwScreen = document.getElementById("password-screen");
+    var pwForm = document.getElementById("pw-form");
+    var pwInput = document.getElementById("pw-input");
+    var pwBtn = document.getElementById("pw-btn");
+    var pwMsg = document.getElementById("pw-msg");
+    var appEl = document.getElementById("app");
+
+    function getTries() {
+        try {
+            if (localStorage.getItem(LOCK_KEY) === "1") return MAX_TRIES;
+            return parseInt(localStorage.getItem(TRIES_KEY) || "0", 10) || 0;
+        } catch (e) {
+            return 0;
+        }
+    }
+
+    function setTries(n) {
+        try {
+            localStorage.setItem(TRIES_KEY, String(n));
+            if (n >= MAX_TRIES) {
+                localStorage.setItem(LOCK_KEY, "1");
+            }
+        } catch (e) {}
+    }
+
+    function applyLockoutUI() {
+        pwInput.value = "";
+        pwInput.disabled = true;
+        pwBtn.disabled = true;
+        pwBtn.style.opacity = "0.35";
+        pwMsg.textContent = "Access permanently locked (3 failed attempts).";
+    }
+
+    // If a one-time Service Worker soft-reload occurred right after unlocking, restore unlocked state once
+    try {
+        if (sessionStorage.getItem(SESSION_UNLOCK_KEY) === "1" && getTries() < MAX_TRIES) {
+            sessionStorage.removeItem(SESSION_UNLOCK_KEY);
+            entryScreen.style.display = "none";
+            pwScreen.style.display = "none";
+            appEl.style.display = "flex";
+        }
+    } catch (e) {}
+
+    entryScreen.addEventListener("click", function() {
+        entryScreen.style.display = "none";
+        pwScreen.style.display = "flex";
+        if (getTries() >= MAX_TRIES) {
+            applyLockoutUI();
+        } else {
+            pwInput.focus();
+        }
+    });
+
+    pwForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+        var tries = getTries();
+        if (tries >= MAX_TRIES) {
+            applyLockoutUI();
+            return;
+        }
+        var val = (pwInput.value || "").trim();
+        if (val === CORRECT_PIN) {
+            try {
+                localStorage.removeItem(TRIES_KEY);
+                localStorage.removeItem(LOCK_KEY);
+            } catch (err) {}
+            pwScreen.style.display = "none";
+            appEl.style.display = "flex";
+            document.getElementById("home-input").focus();
+        } else {
+            tries += 1;
+            setTries(tries);
+            pwInput.value = "";
+            if (tries >= MAX_TRIES) {
+                applyLockoutUI();
+            } else {
+                var left = MAX_TRIES - tries;
+                pwMsg.textContent = "Incorrect password. " + left + (left === 1 ? " try" : " tries") + " remaining.";
+                pwInput.focus();
+            }
+        }
+    });
+
+    // =========================================================================
+    // 3. SEARCH ENGINE SELECTION (Google, DuckDuckGo, Brave Search, Microsoft Bing)
+    // =========================================================================
+    var ENGINES = {
+        google: {
+            name: "Google",
+            searchUrl: function(q) { return "https://www.google.com/search?q=" + encodeURIComponent(q); }
+        },
+        duckduckgo: {
+            name: "DuckDuckGo",
+            searchUrl: function(q) { return "https://duckduckgo.com/?q=" + encodeURIComponent(q); }
+        },
+        brave: {
+            name: "Brave Search",
+            searchUrl: function(q) { return "https://search.brave.com/search?q=" + encodeURIComponent(q); }
+        },
+        bing: {
+            name: "Microsoft Bing",
+            searchUrl: function(q) { return "https://www.bing.com/search?q=" + encodeURIComponent(q); }
+        }
+    };
+
+    var currentEngine = "google";
+    try {
+        var savedEng = localStorage.getItem("_younus_engine");
+        if (savedEng && ENGINES[savedEng]) currentEngine = savedEng;
+    } catch (e) {}
+
+    var omniEngine = document.getElementById("omni-engine");
+    var pillBtns = document.querySelectorAll(".engine-pill");
+
+    function setSearchEngine(eng) {
+        if (!ENGINES[eng]) return;
+        currentEngine = eng;
+        try { localStorage.setItem("_younus_engine", eng); } catch (e) {}
+        if (omniEngine.value !== eng) omniEngine.value = eng;
+        for (var i = 0; i < pillBtns.length; i++) {
+            var b = pillBtns[i];
+            if (b.getAttribute("data-engine") === eng) {
+                b.classList.add("active");
+            } else {
+                b.classList.remove("active");
+            }
+        }
+    }
+
+    omniEngine.addEventListener("change", function() {
+        setSearchEngine(omniEngine.value);
+    });
+
+    for (var i = 0; i < pillBtns.length; i++) {
+        pillBtns[i].addEventListener("click", function() {
+            setSearchEngine(this.getAttribute("data-engine"));
+        });
+    }
+    setSearchEngine(currentEngine);
+
+    // =========================================================================
+    // 4. REAL SCRAMJET ENGINE + WISP BOOTSTRAP (scramjet-main 2)
+    // =========================================================================
+    var ASSETS_BASE = new URL("./", location.href).href;
+    var BACKUP_ASSETS_BASE = "https://cdn.jsdelivr.net/gh/TongSherbet/storage@main/";
+
+    function getAsset(path) {
+        return ASSETS_BASE + String(path).replace(/^\//, "");
+    }
+
+    function getBackupAsset(path) {
+        return BACKUP_ASSETS_BASE + String(path).replace(/^\//, "");
+    }
+
+    function loadScript(src, fallbackSrc) {
+        return new Promise(function(resolve, reject) {
+            var s = document.createElement("script");
+            s.src = src;
+            s.onload = function() {
+                s.remove();
+                resolve(true);
+            };
+            s.onerror = function() {
+                s.remove();
+                if (fallbackSrc && fallbackSrc !== src) {
+                    loadScript(fallbackSrc, null).then(resolve).catch(reject);
+                } else {
+                    reject(new Error("Failed to load script: " + src));
+                }
+            };
+            (document.head || document.documentElement).appendChild(s);
+        });
+    }
+
+    var WISP_ENDPOINTS = [
+        "wss://cdn.slcbmooc.org/",
+        "wss://cdn.goaplytexas.org/",
+        "wss://cdn.richardacademy.cfd/",
+        "wss://cdn.kcchallengevbc.com/",
+        "wss://cdn.northstreetumc.org/",
+        "wss://cdn.pcesc.org/",
+        "wss://cdn.topstargym.net/",
+        "wss://cdn.clearfieldswimming.com/",
+        "wss://athollcottage.com/connection/",
+        "wss://kidsprepnest.org/vi/",
+        "wss://drifttt82.chickenkiller.com/w/",
+        "wss://cirrusbk6l.planet35.com/w/",
+        "wss://flint7boq.irqsistemas.net/w/"
+    ];
+
+    function testWispServer(wsUrl) {
+        return new Promise(function(resolve, reject) {
+            var ws;
+            try {
+                ws = new WebSocket(wsUrl);
+            } catch (e) {
+                return reject(e);
+            }
+            ws.binaryType = "arraybuffer";
+            var streamId = (Math.floor(Math.random() * 4294967294) + 1) >>> 0;
+            var sentConnect = false;
+            var done = false;
+            var cleanup = function() {
+                clearTimeout(timer);
+                ws.onmessage = ws.onerror = ws.onclose = null;
+                try { ws.close(); } catch (e) {}
+            };
+            var timer = setTimeout(function() {
+                if (done) return;
+                done = true;
+                cleanup();
+                reject(new Error("timeout"));
+            }, 2800);
+            ws.onerror = ws.onclose = function() {
+                if (done) return;
+                done = true;
+                cleanup();
+                reject(new Error("closed"));
+            };
+            ws.onmessage = function(ev) {
+                if (done) return;
+                if (!(ev.data instanceof ArrayBuffer) || ev.data.byteLength < 5) return;
+                var dv = new DataView(ev.data);
+                var pType = dv.getUint8(0);
+                var sId = dv.getUint32(1, true);
+                if (sentConnect) {
+                    if (sId === streamId) {
+                        done = true;
+                        cleanup();
+                        resolve(wsUrl);
+                    }
+                    return;
+                }
+                if (sId === 0) {
+                    if (pType === 5) {
+                        ws.send(new Uint8Array([5, 0, 0, 0, 0, 2, 1]));
+                    } else if (pType === 3) {
+                        var hostBytes = (new TextEncoder()).encode("127.0.0.1");
+                        var pkt = new Uint8Array(8 + hostBytes.length);
+                        pkt.set([1, 0, 0, 0, 0, 1, 69, 0], 0);
+                        pkt.set(hostBytes, 8);
+                        new DataView(pkt.buffer).setUint32(1, streamId, true);
+                        sentConnect = true;
+                        ws.send(pkt);
+                    }
+                }
+            };
+        });
+    }
+
+    async function findFastestWisp() {
+        try {
+            var winner = await Promise.any(WISP_ENDPOINTS.map(testWispServer));
+            if (winner) return winner;
+        } catch (e) {}
+        return WISP_ENDPOINTS[0];
+    }
+
+    async function swAlive(reg) {
+        for (var i = 0; i < 16; i++) {
+            try {
+                var ctrl = new AbortController();
+                var t = setTimeout(function() { ctrl.abort(); }, 1500);
+                var r = await fetch(new URL("__sw_alive", reg.scope), { cache: "no-store", signal: ctrl.signal });
+                clearTimeout(t);
+                if ((await r.text()) === "true") return true;
+            } catch (e) {}
+            await new Promise(function(res) { setTimeout(res, 100); });
+        }
+        return false;
+    }
+
+    var controller = null;
+    var transport = null;
+    var scramjetFrame = null;
+    var scramjetReady = false;
+
+    async function initTransportInstance(tr) {
+        for (var i = 0; i < 600; i++) {
+            try {
+                return await tr.init();
+            } catch (e) {
+                if (String(e).indexOf("wasm not loaded") === -1) throw e;
+            }
+            await new Promise(function(r) { setTimeout(r, 10); });
+        }
+        throw new Error("Transport init timed out");
+    }
+
+    async function bootScramjet() {
+        if (scramjetReady && controller && scramjetFrame) return true;
+        if (!navigator.serviceWorker) {
+            throw new Error("Service Workers are not supported in this context");
+        }
+
+        // 1. Load Scramjet Core, Controller API, and Utils
+        var coreFiles = ["sj/jet.core.js", "sj/jet.api.js", "sj/jet.utils.js"];
+        for (var i = 0; i < coreFiles.length; i++) {
+            var f = coreFiles[i];
+            await loadScript(getAsset(f), getBackupAsset(f));
+        }
+
+        // 2. Register Service Worker in current repo scope AND start Wisp discovery in parallel
+        var wispPromise = findFastestWisp();
+        var reg = await navigator.serviceWorker.register(getAsset("sw.js"), {
+            scope: new URL("./", location.href).pathname,
+            updateViaCache: "none"
+        });
+
+        if (!navigator.serviceWorker.controller) {
+            var ctrlChanged = new Promise(function(resolve) {
+                navigator.serviceWorker.addEventListener("controllerchange", resolve, { once: true });
+            });
+            var swTarget = reg.active || reg.waiting || reg.installing;
+            if (swTarget) {
+                try { swTarget.postMessage({ type: "OPM:claim" }); } catch (e) {}
+                swTarget.addEventListener("statechange", function() {
+                    if (swTarget.state === "activated" && reg.active) {
+                        try { reg.active.postMessage({ type: "OPM:claim" }); } catch (e) {}
+                    }
+                });
+            }
+            await Promise.race([
+                ctrlChanged,
+                new Promise(function(r) { setTimeout(r, 6000); })
+            ]);
+        }
+
+        if (!navigator.serviceWorker.controller) {
+            try {
+                if (!sessionStorage.getItem("_younus_sw_soft")) {
+                    sessionStorage.setItem("_younus_sw_soft", "1");
+                    if (appEl.style.display === "flex") {
+                        sessionStorage.setItem(SESSION_UNLOCK_KEY, "1");
+                    }
+                    location.reload();
+                    return false;
+                }
+            } catch (e) {}
+        } else {
+            try { sessionStorage.removeItem("_younus_sw_soft"); } catch (e) {}
+        }
+
+        await swAlive(reg);
+
+        // 3. Initialize Libcurl / Epoxy Wisp Transport
+        var wispUrl = await wispPromise;
+        var TransportCls = null;
+        try {
+            var mod = await import(getAsset("curl/index.mjs"));
+            TransportCls = mod.default || mod.LibcurlClient || mod;
+        } catch (e) {
+            var mod2 = await import(getBackupAsset("curl/index.mjs"));
+            TransportCls = mod2.default || mod2.LibcurlClient || mod2;
+        }
+        transport = new TransportCls({ wisp: wispUrl });
+        await initTransportInstance(transport);
+
+        // 4. Initialize Scramjet Controller
+        var activeSw = navigator.serviceWorker.controller || reg.active;
+        var readyResolveHook = null;
+        var handshakeDone = new Promise(function(r) { readyResolveHook = r; });
+
+        controller = new $jetController.Controller({
+            serviceworker: activeSw,
+            transport: transport,
+            jetConfig: {
+                maskedfiles: ["jet.inject.js", "jet.wasm.js"],
+                flags: {
+                    syncxhr: false,
+                    disableComputedWrap: false,
+                    rewriterLogs: false,
+                    captureErrors: false,
+                    cleanErrors: false,
+                    scramitize: false,
+                    sourcemaps: false,
+                    destructureRewrites: true,
+                    allowInvalidJs: true,
+                    debugTrampolines: false,
+                    debugSourceURL: false,
+                    allowFailedIntercepts: true,
+                    encapsulateWorkers: true
+                }
+            },
+            config: {
+                jetPath: getAsset("sj/jet.core.js"),
+                wasmPath: getAsset("sj/jet.wasm"),
+                injectPath: getAsset("sj/jet.inject.js"),
+                virtualWasmPath: "jet.wasm.js",
+                codec: {
+                    encode: function(urlStr) {
+                        if (!urlStr) return urlStr;
+                        var key = globalThis.__jck;
+                        if (key === undefined) {
+                            key = [
+                                location.origin.replace(/^\w+:\/\/|:\d+$/g, ""),
+                                (new Date()).getUTCMonth(),
+                                navigator.hardwareConcurrency,
+                                navigator.deviceMemory,
+                                navigator.platform,
+                                navigator.userAgent.replace(/[\d.]+/g, ""),
+                                (new Date()).getTimezoneOffset()
+                            ].join().split("").reduce(function(a, b) {
+                                return Math.imul(a ^ b.charCodeAt(0), 16777619);
+                            }, 2166136261);
+                            Object.defineProperty(globalThis, "__jck", { value: key });
+                        }
+                        var t = key;
+                        var isHttps = urlStr.startsWith("https://") && urlStr.length > 8;
+                        var bytes = (new TextEncoder()).encode(isHttps ? urlStr.slice(8) : urlStr);
+                        for (var idx = 0, mask = 0; idx < bytes.length; idx++, mask >>>= 8) {
+                            if ((idx & 3) === 0) {
+                                t ^= t << 13;
+                                t ^= t >>> 17;
+                                t ^= t << 5;
+                                mask = t;
+                            }
+                            bytes[idx] ^= mask;
+                        }
+                        var bin = "";
+                        for (var k = 0; k < bytes.length; k += 8192) {
+                            bin += String.fromCharCode.apply(null, bytes.subarray(k, k + 8192));
+                        }
+                        return (isHttps ? "" : "Z0") + btoa(bin).slice(0, ((4 * bytes.length + 2) / 3) | 0).replace(/Z/g, "Zz").replace(/\+/g, "Zp").replace(/\//g, "Zs");
+                    },
+                    decode: function(encStr) {
+                        if (!encStr) return encStr;
+                        var key = globalThis.__jck;
+                        if (key === undefined) {
+                            key = [
+                                location.origin.replace(/^\w+:\/\/|:\d+$/g, ""),
+                                (new Date()).getUTCMonth(),
+                                navigator.hardwareConcurrency,
+                                navigator.deviceMemory,
+                                navigator.platform,
+                                navigator.userAgent.replace(/[\d.]+/g, ""),
+                                (new Date()).getTimezoneOffset()
+                            ].join().split("").reduce(function(a, b) {
+                                return Math.imul(a ^ b.charCodeAt(0), 16777619);
+                            }, 2166136261);
+                            Object.defineProperty(globalThis, "__jck", { value: key });
+                        }
+                        var t = key;
+                        var isNonHttps = encStr.startsWith("Z0");
+                        var raw = atob(encStr.slice(isNonHttps ? 2 : 0).replace(/Zp/g, "+").replace(/Zs/g, "/").replace(/Zz/g, "Z"));
+                        var out = new Uint8Array(raw.length);
+                        for (var idx = 0, mask = 0; idx < out.length; idx++, mask >>>= 8) {
+                            if ((idx & 3) === 0) {
+                                t ^= t << 13;
+                                t ^= t >>> 17;
+                                t ^= t << 5;
+                                mask = t;
+                            }
+                            out[idx] = raw.charCodeAt(idx) ^ mask;
+                        }
+                        return (isNonHttps ? "" : "https://") + (new TextDecoder("utf-8", { ignoreBOM: true })).decode(out);
+                    }
+                },
+                prefix: new URL("./~/", location.href).pathname
+            }
+        });
+
+        var origReadyResolve = controller.readyResolve;
+        controller.readyResolve = function() {
+            readyResolveHook(true);
+            return origReadyResolve.apply(controller, arguments);
+        };
+
+        navigator.serviceWorker.addEventListener("controllerchange", function() {
+            if (navigator.serviceWorker.controller && controller) {
+                controller.serviceWorkerController = navigator.serviceWorker.controller;
+                controller.setupMessagePort();
+            }
+        });
+
+        for (var attempt = 0; !(await Promise.race([handshakeDone, new Promise(function(r) { setTimeout(function() { r(false); }, 3500); })])); attempt++) {
+            if (attempt >= 4) break;
+            controller.serviceWorkerController = navigator.serviceWorker.controller || controller.serviceWorkerController;
+            controller.setupMessagePort();
+        }
+
+        await controller.wait();
+        controller.guardServiceWorkerRevive = false;
+
+        // Keep Service Worker alive & self-healing
+        setInterval(async function() {
+            try {
+                var r = await navigator.serviceWorker.getRegistration(new URL("./", location.href).pathname);
+                if (!r) {
+                    await navigator.serviceWorker.register(getAsset("sw.js"), {
+                        scope: new URL("./", location.href).pathname,
+                        updateViaCache: "none"
+                    });
+                }
+                if (controller && navigator.serviceWorker.controller && controller.serviceWorkerController !== navigator.serviceWorker.controller) {
+                    controller.serviceWorkerController = navigator.serviceWorker.controller;
+                    controller.setupMessagePort();
+                }
+            } catch (e) {}
+        }, 20000);
+
+        // 5. Create Scramjet Frame with AdBlocker & URL Watcher Plugins
+        var webFrameEl = document.getElementById("web-frame");
+        var plugins = [
+            new $jetUtils.HttpCachePlugin(),
+            new $jetUtils.UrlWatcherPlugin(function(newUrl) {
+                onProxiedUrlChange(newUrl);
+            })
+        ];
+
+        try {
+            var YounusPlugin = class extends $jetController.ManagedPlugin {
+                constructor() {
+                    super("younus-guard", []);
+                }
+                install(ctx) {
+                    this.tap(ctx.hooks.init.post, function(ev) {
+                        if (ev && ev.window) {
+                            injectClientAdBlocker(ev.window);
+                        }
+                    });
+                }
+            };
+            plugins.push(new YounusPlugin());
+        } catch (e) {}
+
+        scramjetFrame = controller.createFrame(webFrameEl, { plugins: plugins });
+        scramjetFrame.prefix = controller.prefix;
+        scramjetFrame.fetchHandler.context = scramjetFrame.context;
+        scramjetFrame.fetchHandler.context.hooks = { rewriter: scramjetFrame.fetchHandler.hooks.rewriter };
+
+        webFrameEl.addEventListener("load", function() {
+            hideLoading();
+            try {
+                if (webFrameEl.contentWindow) {
+                    injectClientAdBlocker(webFrameEl.contentWindow);
+                }
+            } catch (e) {}
+            updateNavButtons();
+        });
+
+        scramjetReady = true;
+        return true;
+    }
+
+    // Start Scramjet boot immediately in background while user is on Entry/Password screen
+    var scramjetBootPromise = bootScramjet().catch(function(err) {
+        console.error("Scramjet init error:", err);
+        return false;
+    });
+
+    // =========================================================================
+    // 5. NAVIGATION, URL ROUTER & HISTORY CONTROLS
+    // =========================================================================
+    var homeView = document.getElementById("home-view");
+    var frameWrap = document.getElementById("frame-wrap");
+    var webFrame = document.getElementById("web-frame");
+    var loadingOverlay = document.getElementById("loading-overlay");
+    var loadingText = document.getElementById("loading-text");
+    var omniInput = document.getElementById("omni-input");
+    var btnBack = document.getElementById("btn-back");
+    var btnFwd = document.getElementById("btn-fwd");
+    var btnReload = document.getElementById("btn-reload");
+    var btnHome = document.getElementById("btn-home");
+
+    var isHomeVisible = true;
+    var currentProxiedUrl = "";
+    var lastSearchQuery = "";
+    var historyList = ["younus://home"];
+    var historyIdx = 0;
+    var isTraversing = false;
+
+    function showLoading(msg) {
+        loadingText.textContent = msg || "Loading...";
+        loadingOverlay.style.display = "flex";
+    }
+
+    function hideLoading() {
+        loadingOverlay.style.display = "none";
+    }
+
+    function canFrameStep(dir) {
+        try {
+            var nav = webFrame.contentWindow && webFrame.contentWindow.navigation;
+            if (nav && typeof nav.canGoBack === "boolean") {
+                return dir < 0 ? nav.canGoBack : nav.canGoForward;
+            }
+        } catch (e) {}
+        return false;
+    }
+
+    function updateNavButtons() {
+        if (isHomeVisible) {
+            btnBack.disabled = historyIdx <= 0;
+            btnFwd.disabled = historyIdx >= historyList.length - 1;
+        } else {
+            btnBack.disabled = !(historyIdx > 0 || canFrameStep(-1));
+            btnFwd.disabled = !(historyIdx < historyList.length - 1 || canFrameStep(1));
+        }
+    }
+
+    function onProxiedUrlChange(url) {
+        if (!url || !/^https?:\/\//i.test(url)) return;
+        if (/google\.[^/]+\/sorry\//i.test(url) && lastSearchQuery) {
+            var q = lastSearchQuery;
+            lastSearchQuery = "";
+            if (scramjetFrame) {
+                scramjetFrame.go("https://www.startpage.com/sp/search?q=" + encodeURIComponent(q));
+            }
+            return;
+        }
+        hideLoading();
+        if (url !== currentProxiedUrl) {
+            currentProxiedUrl = url;
+            omniInput.value = url;
+            if (!isTraversing) {
+                if (historyList[historyIdx] !== url) {
+                    historyList = historyList.slice(0, historyIdx + 1);
+                    historyList.push(url);
+                    historyIdx = historyList.length - 1;
+                }
+            }
+            isTraversing = false;
+            updateNavButtons();
+        }
+    }
+
+    function showHome(pushToHist) {
+        hideLoading();
+        isHomeVisible = true;
+        currentProxiedUrl = "";
+        omniInput.value = "";
+        frameWrap.style.display = "none";
+        homeView.style.display = "flex";
+        if (pushToHist && historyList[historyIdx] !== "younus://home") {
+            historyList = historyList.slice(0, historyIdx + 1);
+            historyList.push("younus://home");
+            historyIdx = historyList.length - 1;
+        }
+        updateNavButtons();
+    }
+
+    var QUICK_SHORTCUTS = {
+        "tiktok": "https://www.tiktok.com/foryou",
+        "tiktok.com": "https://www.tiktok.com/foryou",
+        "www.tiktok.com": "https://www.tiktok.com/foryou",
+        "youtube": "https://www.youtube.com/",
+        "reddit": "https://www.reddit.com/",
+        "discord": "https://discord.com/app",
+        "roblox": "https://www.roblox.com/",
+        "spotify": "https://open.spotify.com/",
+        "twitch": "https://www.twitch.tv/",
+        "instagram": "https://www.instagram.com/",
+        "x": "https://x.com/",
+        "twitter": "https://x.com/"
+    };
+
+    function resolveInputToUrl(raw) {
+        var s = String(raw || "").trim();
+        if (!s) return "";
+        var low = s.toLowerCase();
+        if (QUICK_SHORTCUTS[low]) return QUICK_SHORTCUTS[low];
+        if (/^https?:\/\//i.test(s)) {
+            try {
+                var parsed = new URL(s);
+                var h = parsed.hostname.replace(/^www\./i, "").toLowerCase();
+                if (h === "tiktok.com" && (parsed.pathname === "/" || parsed.pathname === "")) {
+                    return "https://www.tiktok.com/foryou";
+                }
+            } catch (e) {}
+            return s;
+        }
+        if (s.indexOf(" ") === -1 && /^[a-z0-9-]+(\.[a-z0-9-]+)+(\/.*)?$/i.test(s)) {
+            return "https://" + s;
+        }
+        lastSearchQuery = s;
+        return ENGINES[currentEngine].searchUrl(s);
+    }
+
+    async function navigate(rawInput, opts) {
+        opts = opts || {};
+        var targetUrl = resolveInputToUrl(rawInput);
+        if (!targetUrl || isAdUrl(targetUrl)) return;
+
+        isHomeVisible = false;
+        currentProxiedUrl = targetUrl;
+        omniInput.value = targetUrl;
+        homeView.style.display = "none";
+        frameWrap.style.display = "block";
+
+        if (!opts.fromHistory) {
+            if (historyList[historyIdx] !== targetUrl) {
+                historyList = historyList.slice(0, historyIdx + 1);
+                historyList.push(targetUrl);
+                historyIdx = historyList.length - 1;
+            }
+        }
+        updateNavButtons();
+
+        var hostLabel = targetUrl;
+        try { hostLabel = new URL(targetUrl).hostname; } catch (e) {}
+        showLoading("Loading " + hostLabel + "...");
+
+        var ok = await scramjetBootPromise;
+        if (!ok || !scramjetReady || !scramjetFrame) {
+            scramjetBootPromise = bootScramjet().catch(function() { return false; });
+            ok = await scramjetBootPromise;
+        }
+
+        if (ok && scramjetFrame) {
+            try {
+                scramjetFrame.go(targetUrl);
+                setTimeout(hideLoading, 6000);
+                return;
+            } catch (e) {
+                console.error("scramjetFrame.go error:", e);
+            }
+        }
+
+        hideLoading();
+        webFrame.src = targetUrl;
+    }
+
+    btnHome.addEventListener("click", function() {
+        showHome(true);
+    });
+
+    btnBack.addEventListener("click", function() {
+        if (!isHomeVisible && scramjetFrame && canFrameStep(-1)) {
+            isTraversing = true;
+            try { scramjetFrame.back(); return; } catch (e) {}
+        }
+        if (historyIdx > 0) {
+            historyIdx -= 1;
+            var target = historyList[historyIdx];
+            if (target === "younus://home") {
+                showHome(false);
+            } else {
+                isTraversing = true;
+                navigate(target, { fromHistory: true });
+            }
+        }
+    });
+
+    btnFwd.addEventListener("click", function() {
+        if (!isHomeVisible && scramjetFrame && canFrameStep(1)) {
+            isTraversing = true;
+            try { scramjetFrame.forward(); return; } catch (e) {}
+        }
+        if (historyIdx < historyList.length - 1) {
+            historyIdx += 1;
+            var target = historyList[historyIdx];
+            if (target === "younus://home") {
+                showHome(false);
+            } else {
+                isTraversing = true;
+                navigate(target, { fromHistory: true });
+            }
+        }
+    });
+
+    btnReload.addEventListener("click", function() {
+        if (isHomeVisible) return;
+        if (scramjetFrame) {
+            showLoading("Reloading...");
+            try {
+                scramjetFrame.reload();
+                setTimeout(hideLoading, 5000);
+                return;
+            } catch (e) {}
+        }
+        if (currentProxiedUrl) {
+            navigate(currentProxiedUrl, { fromHistory: true });
+        }
+    });
+
+    document.getElementById("omni-form").addEventListener("submit", function(e) {
+        e.preventDefault();
+        var v = omniInput.value.trim();
+        if (v) navigate(v);
+    });
+
+    document.getElementById("home-form").addEventListener("submit", function(e) {
+        e.preventDefault();
+        var hi = document.getElementById("home-input");
+        var v = hi.value.trim();
+        if (v) navigate(v);
+    });
+
+})();
+
+
+]]></script>
+</body>
+</html>
+</foreignObject>
+</svg>

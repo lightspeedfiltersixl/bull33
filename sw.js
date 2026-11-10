@@ -154,6 +154,10 @@ self.addEventListener("fetch", (event) => {
             );
         }
 
+        if (reqUrl.origin === self.location.origin && /\.(svg|html)$/i.test(reqUrl.pathname)) {
+            return fetch(event.request, { cache: "no-cache" });
+        }
+
         return fetch(event.request);
     })());
 });
