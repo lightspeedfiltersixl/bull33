@@ -277,7 +277,6 @@ html, body {
     padding: 7px 15px;
     border-radius: 999px;
     background: #2a2331;
-    color: #cbbservice;
     color: #cfc5dc;
     border: 1px solid rgba(255, 255, 255, 0.09);
     font-size: 12.5px;
@@ -300,14 +299,39 @@ html, body {
     position: absolute;
     inset: 0;
     display: none;
-    background: #0e0e14;
+    background: #141118;
 }
 #web-frame {
     width: 100%;
     height: 100%;
     border: 0;
     display: block;
-    background: #0e0e14;
+    background: #141118;
+}
+#loading-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(45, 38, 53, 0.92);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    z-index: 20;
+    color: #d2b8ff;
+    font-size: 13.5px;
+    font-weight: 600;
+}
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid rgba(210, 184, 255, 0.2);
+    border-top-color: #d2b8ff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
 </style>
@@ -364,6 +388,10 @@ html, body {
             </div>
         </div>
         <div id="frame-wrap">
+            <div id="loading-overlay">
+                <div class="spinner"></div>
+                <div id="loading-text">Loading...</div>
+            </div>
             <iframe id="web-frame" allow="fullscreen; autoplay; clipboard-read; clipboard-write; encrypted-media; picture-in-picture; gamepad"></iframe>
         </div>
     </div>
@@ -375,64 +403,177 @@ html, body {
     "use strict";
 
     // =========================================================================
-    // 1. BUILT-IN AD & REDIRECT BLOCKER
+    // 1. BUILT-IN AD & REDIRECT BLOCKER (0 ADS, NO EXTERNAL REDIRECTS)
     // =========================================================================
-    var BLOCKED_PATTERNS = [
-        /doubleclick\.net/i,
-        /googlesyndication\.com/i,
-        /googleadservices\.com/i,
-        /adservice\.google\./i,
-        /adnxs\.com/i,
-        /popads\.net/i,
-        /popcash\.net/i,
-        /propellerads\.com/i,
-        /adsterra\.com/i,
-        /exoclick\.com/i,
-        /juicyads\.com/i,
-        /trafficjunky\.net/i,
-        /taboola\.com/i,
-        /outbrain\.com/i,
-        /mgid\.com/i,
-        /revcontent\.com/i,
-        /zedo\.com/i,
-        /scorecardresearch\.com/i,
-        /quantserve\.com/i,
-        /moatads\.com/i,
-        /adsrvr\.org/i,
-        /criteo\.com/i,
-        /pubmatic\.com/i,
-        /rubiconproject\.com/i,
-        /openx\.net/i,
-        /smartadserver\.com/i,
-        /bidswitch\.net/i,
-        /casalemedia\.com/i,
-        /onclickads\.net/i,
-        /hilltopads\.net/i,
-        /a-ads\.com/i
+    var AD_HOST_PATTERNS = [
+        /(^|\.)doubleclick\.net$/i,
+        /(^|\.)googlesyndication\.com$/i,
+        /(^|\.)googleadservices\.com$/i,
+        /(^|\.)adservice\.google\./i,
+        /(^|\.)adnxs\.com$/i,
+        /(^|\.)popads\.net$/i,
+        /(^|\.)popcash\.net$/i,
+        /(^|\.)propellerads\.com$/i,
+        /(^|\.)adsterra\.com$/i,
+        /(^|\.)exoclick\.com$/i,
+        /(^|\.)juicyads\.com$/i,
+        /(^|\.)trafficjunky\.net$/i,
+        /(^|\.)taboola\.com$/i,
+        /(^|\.)outbrain\.com$/i,
+        /(^|\.)mgid\.com$/i,
+        /(^|\.)revcontent\.com$/i,
+        /(^|\.)zedo\.com$/i,
+        /(^|\.)scorecardresearch\.com$/i,
+        /(^|\.)quantserve\.com$/i,
+        /(^|\.)moatads\.com$/i,
+        /(^|\.)adsrvr\.org$/i,
+        /(^|\.)criteo\.com$/i,
+        /(^|\.)pubmatic\.com$/i,
+        /(^|\.)rubiconproject\.com$/i,
+        /(^|\.)openx\.net$/i,
+        /(^|\.)smartadserver\.com$/i,
+        /(^|\.)bidswitch\.net$/i,
+        /(^|\.)casalemedia\.com$/i,
+        /(^|\.)onclickads\.net$/i,
+        /(^|\.)hilltopads\.net$/i,
+        /(^|\.)a-ads\.com$/i
     ];
 
-    function isAdUrl(u) {
-        if (!u) return false;
-        var s = String(u);
-        for (var i = 0; i < BLOCKED_PATTERNS.length; i++) {
-            if (BLOCKED_PATTERNS[i].test(s)) return true;
-        }
+    function isAdUrl(raw) {
+        if (!raw) return false;
+        try {
+            var u = new URL(String(raw), location.href);
+            var h = u.hostname.toLowerCase();
+            for (var i = 0; i < AD_HOST_PATTERNS.length; i++) {
+                if (AD_HOST_PATTERNS[i].test(h)) return true;
+            }
+        } catch (e) {}
         return false;
     }
 
-    // Prevent any external popups or redirects from escaping the application
-    window.open = function(u) {
-        if (u && !isAdUrl(u)) {
-            navigate(String(u));
-        }
-        return null;
-    };
+    function guardWindowOpen(targetWin) {
+        if (!targetWin) return;
+        try {
+            targetWin.open = function(url) {
+                if (!url) return null;
+                var s = String(url);
+                if (isAdUrl(s)) return null;
+                try {
+                    var base = (targetWin.location && targetWin.location.href) ? targetWin.location.href : location.href;
+                    var resolved = new URL(s, base).href;
+                    if (!isAdUrl(resolved)) {
+                        navigate(resolved);
+                    }
+                } catch (e) {}
+                return null;
+            };
+        } catch (e) {}
+    }
+
+    guardWindowOpen(window);
+
+    function injectClientAdBlocker(win) {
+        if (!win || win.__younusAdBlockInstalled) return;
+        try {
+            win.__younusAdBlockInstalled = true;
+            guardWindowOpen(win);
+
+            // Wrap fetch inside proxied window to drop ad network requests
+            if (typeof win.fetch === "function") {
+                var origFetch = win.fetch.bind(win);
+                win.fetch = function(input, init) {
+                    try {
+                        var u = (typeof input === "string") ? input : (input && input.url ? input.url : "");
+                        if (u && isAdUrl(u)) {
+                            return Promise.resolve(new win.Response("", { status: 204 }));
+                        }
+                    } catch (e) {}
+                    return origFetch(input, init);
+                };
+            }
+
+            // Wrap XMLHttpRequest inside proxied window to drop ad network requests
+            if (win.XMLHttpRequest && win.XMLHttpRequest.prototype) {
+                var origOpen = win.XMLHttpRequest.prototype.open;
+                var origSend = win.XMLHttpRequest.prototype.send;
+                win.XMLHttpRequest.prototype.open = function(method, url) {
+                    this.__blockedAd = Boolean(url && isAdUrl(url));
+                    return origOpen.apply(this, arguments);
+                };
+                win.XMLHttpRequest.prototype.send = function() {
+                    if (this.__blockedAd) return;
+                    return origSend.apply(this, arguments);
+                };
+            }
+
+            // Keep all link clicks inside the Scramjet frame (never target="_blank" or "_top")
+            win.addEventListener("click", function(ev) {
+                try {
+                    var el = ev.target && ev.target.closest ? ev.target.closest("a[href]") : null;
+                    if (!el) return;
+                    var href = el.getAttribute("href") || "";
+                    if (isAdUrl(href)) {
+                        ev.preventDefault();
+                        ev.stopPropagation();
+                        return;
+                    }
+                    var tgt = (el.getAttribute("target") || "").toLowerCase();
+                    if (tgt === "_blank" || tgt === "_top" || tgt === "_parent") {
+                        el.setAttribute("target", "_self");
+                    }
+                } catch (e) {}
+            }, true);
+
+            // Cosmetic ad hiding + YouTube ad auto-skipper
+            var injectStyle = function() {
+                try {
+                    var doc = win.document;
+                    if (!doc || doc.getElementById("__younus_adblock_css")) return;
+                    var st = doc.createElement("style");
+                    st.id = "__younus_adblock_css";
+                    st.textContent = [
+                        "ins.adsbygoogle",
+                        "[id^='div-gpt-ad']",
+                        "[data-ad-slot]",
+                        "[data-ad-client]",
+                        "iframe[src*='doubleclick.net']",
+                        "iframe[src*='googlesyndication.com']",
+                        "iframe[src*='adnxs.com']",
+                        "#masthead-ad",
+                        "ytd-ad-slot-renderer",
+                        "ytd-display-ad-renderer",
+                        ".video-ads.ytp-ad-module",
+                        "yt-mealbar-promo-renderer",
+                        "ytm-companion-ad-renderer"
+                    ].join(",") + "{display:none!important;visibility:hidden!important;height:0!important;pointer-events:none!important;}";
+                    (doc.head || doc.documentElement).appendChild(st);
+                } catch (e) {}
+            };
+            injectStyle();
+            win.addEventListener("DOMContentLoaded", injectStyle);
+            setInterval(function() {
+                try {
+                    injectStyle();
+                    var doc = win.document;
+                    if (!doc) return;
+                    var skipBtn = doc.querySelector(".ytp-ad-skip-button, .ytp-skip-ad-button, .ytp-ad-skip-button-modern");
+                    if (skipBtn) skipBtn.click();
+                    var adVid = doc.querySelector(".ad-showing video");
+                    if (adVid && isFinite(adVid.duration) && adVid.duration > 0) {
+                        adVid.muted = true;
+                        adVid.currentTime = adVid.duration - 0.1;
+                    }
+                } catch (e) {}
+            }, 600);
+        } catch (e) {}
+    }
 
     // =========================================================================
     // 2. ENTRY SCREEN & 3-TRY PASSWORD GATE (PIN: 7081)
     // =========================================================================
     var LOCK_KEY = "_younus_sys_locked";
     var TRIES_KEY = "_younus_sys_tries";
+    var SESSION_UNLOCK_KEY = "_younus_sw_reload_unlocked";
     var CORRECT_PIN = "7081";
     var MAX_TRIES = 3;
 
@@ -469,6 +610,16 @@ html, body {
         pwBtn.style.opacity = "0.35";
         pwMsg.textContent = "Access permanently locked (3 failed attempts).";
     }
+
+    // If a one-time Service Worker soft-reload occurred right after unlocking, restore unlocked state once
+    try {
+        if (sessionStorage.getItem(SESSION_UNLOCK_KEY) === "1" && getTries() < MAX_TRIES) {
+            sessionStorage.removeItem(SESSION_UNLOCK_KEY);
+            entryScreen.style.display = "none";
+            pwScreen.style.display = "none";
+            appEl.style.display = "flex";
+        }
+    } catch (e) {}
 
     entryScreen.addEventListener("click", function() {
         entryScreen.style.display = "none";
@@ -568,163 +719,557 @@ html, body {
     setSearchEngine(currentEngine);
 
     // =========================================================================
-    // 4. WISP (LIBCURL) MULTI-MIRROR CLIENT FOR IN-APP BROWSING
+    // 4. REAL SCRAMJET ENGINE + WISP BOOTSTRAP (scramjet-main 2)
     // =========================================================================
-    var WISP_SERVERS = [
-        "wss://cirrusbk6l.planet35.com/w/",
+    var ASSETS_BASE = new URL("./", location.href).href;
+    var BACKUP_ASSETS_BASE = "https://cdn.jsdelivr.net/gh/TongSherbet/storage@main/";
+
+    function getAsset(path) {
+        return ASSETS_BASE + String(path).replace(/^\//, "");
+    }
+
+    function getBackupAsset(path) {
+        return BACKUP_ASSETS_BASE + String(path).replace(/^\//, "");
+    }
+
+    function loadScript(src, fallbackSrc) {
+        return new Promise(function(resolve, reject) {
+            var s = document.createElement("script");
+            s.src = src;
+            s.onload = function() {
+                s.remove();
+                resolve(true);
+            };
+            s.onerror = function() {
+                s.remove();
+                if (fallbackSrc && fallbackSrc !== src) {
+                    loadScript(fallbackSrc, null).then(resolve).catch(reject);
+                } else {
+                    reject(new Error("Failed to load script: " + src));
+                }
+            };
+            (document.head || document.documentElement).appendChild(s);
+        });
+    }
+
+    var WISP_ENDPOINTS = [
         "wss://drifttt82.chickenkiller.com/w/",
+        "wss://cirrusbk6l.planet35.com/w/",
         "wss://flint7boq.irqsistemas.net/w/",
+        "wss://cdn.pcesc.org/",
+        "wss://cdn.richardacademy.cfd/",
+        "wss://cdn.kcchallengevbc.com/",
+        "wss://cdn.topstargym.net/",
+        "wss://cdn.northstreetumc.org/",
+        "wss://cdn.slcbmooc.org/",
+        "wss://cdn.goaplytexas.org/",
+        "wss://cdn.clearfieldswimming.com/",
+        "wss://kidsprepnest.org/vi/",
+        "wss://athollcottage.com/connection/",
         "wss://onyxjbxy.sakidumarwana.com.np/w/",
         "wss://driftz9ip.abratec.com.br/w/",
         "wss://novajfag.amadeuspiano.com/w/"
     ];
-    var LIBCURL_SCRIPTS = [
-        "https://cirrusbk6l.planet35.com/study/libcurl.js",
-        "https://drifttt82.chickenkiller.com/study/libcurl.js",
-        "https://flint7boq.irqsistemas.net/study/libcurl.js"
-    ];
 
-    var _wispClient = null;
-    var _wispInitPromise = null;
-
-    function loadScript(src) {
+    function testWispServer(wsUrl) {
         return new Promise(function(resolve, reject) {
-            var s = document.createElement("script");
-            s.src = src;
-            s.async = true;
-            s.onload = function() { resolve(true); };
-            s.onerror = function() { reject(new Error("Failed " + src)); };
-            document.head.appendChild(s);
+            var ws;
+            try {
+                ws = new WebSocket(wsUrl);
+            } catch (e) {
+                return reject(e);
+            }
+            ws.binaryType = "arraybuffer";
+            var done = false;
+            var cleanup = function() {
+                clearTimeout(timer);
+                ws.onmessage = ws.onerror = ws.onclose = null;
+                try { ws.close(); } catch (e) {}
+            };
+            var timer = setTimeout(function() {
+                if (done) return;
+                done = true;
+                cleanup();
+                reject(new Error("timeout"));
+            }, 3000);
+            ws.onerror = ws.onclose = function() {
+                if (done) return;
+                done = true;
+                cleanup();
+                reject(new Error("closed"));
+            };
+            ws.onmessage = function(ev) {
+                if (done) return;
+                if (ev.data instanceof ArrayBuffer && ev.data.byteLength >= 5) {
+                    done = true;
+                    cleanup();
+                    resolve(wsUrl);
+                }
+            };
         });
     }
 
-    async function ensureLibcurlLoaded() {
-        if (window.LibcurlTransport) return window.LibcurlTransport;
-        for (var i = 0; i < LIBCURL_SCRIPTS.length; i++) {
-            try {
-                await loadScript(LIBCURL_SCRIPTS[i]);
-                if (window.LibcurlTransport) return window.LibcurlTransport;
-            } catch (e) {}
-        }
-        return null;
-    }
-
-    async function getWispSession() {
-        if (_wispClient && _wispClient.ready && _wispClient.session) return _wispClient.session;
-        if (_wispInitPromise) return _wispInitPromise;
-        _wispInitPromise = (async function() {
-            var TransportMod = await ensureLibcurlLoaded();
-            if (!TransportMod) {
-                _wispInitPromise = null;
-                return null;
-            }
-            var ClientCls = TransportMod.LibcurlClient || TransportMod.default || TransportMod;
-            for (var i = 0; i < WISP_SERVERS.length; i++) {
-                try {
-                    var c = new ClientCls({ wisp: WISP_SERVERS[i] });
-                    await Promise.race([
-                        c.init(),
-                        new Promise(function(_, rej) { setTimeout(function() { rej(new Error("timeout")); }, 4000); })
-                    ]);
-                    _wispClient = c;
-                    return c.session;
-                } catch (e) {}
-            }
-            _wispInitPromise = null;
-            return null;
-        })();
-        return _wispInitPromise;
-    }
-
-    setTimeout(function() { getWispSession().catch(function() {}); }, 100);
-
-    async function wispFetchRaw(targetUrl, opts) {
-        opts = opts || {};
+    async function findFastestWisp() {
         try {
-            var sess = await Promise.race([
-                getWispSession(),
-                new Promise(function(r) { setTimeout(function() { r(null); }, 4500); })
-            ]);
-            if (sess) {
-                var res = await sess.fetch(targetUrl, {
-                    method: opts.method || "GET",
-                    headers: Object.assign({
-                        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
-                        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-                        "Accept-Language": "en-US,en;q=0.9"
-                    }, opts.headers || {}),
-                    body: opts.body || undefined
-                });
-                var buf = await res.arrayBuffer();
-                return {
-                    ok: res.ok,
-                    status: res.status,
-                    url: res.url || targetUrl,
-                    text: function() { return new TextDecoder("utf-8").decode(buf); }
-                };
+            var winner = await Promise.any(WISP_ENDPOINTS.map(testWispServer));
+            if (winner) return winner;
+        } catch (e) {}
+        return WISP_ENDPOINTS[0];
+    }
+
+    async function swAlive(reg) {
+        for (var i = 0; i < 16; i++) {
+            try {
+                var ctrl = new AbortController();
+                var t = setTimeout(function() { ctrl.abort(); }, 1500);
+                var r = await fetch(new URL("__sw_alive", reg.scope), { cache: "no-store", signal: ctrl.signal });
+                clearTimeout(t);
+                if ((await r.text()) === "true") return true;
+            } catch (e) {}
+            await new Promise(function(res) { setTimeout(res, 100); });
+        }
+        return false;
+    }
+
+    var controller = null;
+    var transport = null;
+    var scramjetFrame = null;
+    var scramjetReady = false;
+
+    async function initTransportInstance(tr) {
+        for (var i = 0; i < 600; i++) {
+            try {
+                return await tr.init();
+            } catch (e) {
+                if (String(e).indexOf("wasm not loaded") === -1) throw e;
             }
+            await new Promise(function(r) { setTimeout(r, 10); });
+        }
+        throw new Error("Transport init timed out");
+    }
+
+    async function bootScramjet() {
+        if (scramjetReady && controller && scramjetFrame) return true;
+        if (!navigator.serviceWorker) {
+            throw new Error("Service Workers are not supported in this context");
+        }
+
+        // 1. Load Scramjet Core, Controller API, and Utils
+        var coreFiles = ["sj/jet.core.js", "sj/jet.api.js", "sj/jet.utils.js"];
+        for (var i = 0; i < coreFiles.length; i++) {
+            var f = coreFiles[i];
+            await loadScript(getAsset(f), getBackupAsset(f));
+        }
+
+        // 2. Register Service Worker in current repo scope AND start Wisp discovery in parallel
+        var wispPromise = findFastestWisp();
+        var reg = await navigator.serviceWorker.register(getAsset("sw.js"), {
+            scope: new URL("./", location.href).pathname,
+            updateViaCache: "none"
+        });
+
+        if (!navigator.serviceWorker.controller) {
+            var ctrlChanged = new Promise(function(resolve) {
+                navigator.serviceWorker.addEventListener("controllerchange", resolve, { once: true });
+            });
+            var swTarget = reg.active || reg.waiting || reg.installing;
+            if (swTarget) {
+                try { swTarget.postMessage({ type: "OPM:claim" }); } catch (e) {}
+                swTarget.addEventListener("statechange", function() {
+                    if (swTarget.state === "activated" && reg.active) {
+                        try { reg.active.postMessage({ type: "OPM:claim" }); } catch (e) {}
+                    }
+                });
+            }
+            await Promise.race([
+                ctrlChanged,
+                new Promise(function(r) { setTimeout(r, 6000); })
+            ]);
+        }
+
+        if (!navigator.serviceWorker.controller) {
+            try {
+                if (!sessionStorage.getItem("_younus_sw_soft")) {
+                    sessionStorage.setItem("_younus_sw_soft", "1");
+                    if (appEl.style.display === "flex") {
+                        sessionStorage.setItem(SESSION_UNLOCK_KEY, "1");
+                    }
+                    location.reload();
+                    return false;
+                }
+            } catch (e) {}
+        } else {
+            try { sessionStorage.removeItem("_younus_sw_soft"); } catch (e) {}
+        }
+
+        await swAlive(reg);
+
+        // 3. Initialize Libcurl / Epoxy Wisp Transport
+        var wispUrl = await wispPromise;
+        var TransportCls = null;
+        try {
+            var mod = await import(getAsset("curl/index.mjs"));
+            TransportCls = mod.default || mod.LibcurlClient || mod;
+        } catch (e) {
+            var mod2 = await import(getBackupAsset("curl/index.mjs"));
+            TransportCls = mod2.default || mod2.LibcurlClient || mod2;
+        }
+        transport = new TransportCls({ wisp: wispUrl });
+        await initTransportInstance(transport);
+
+        // 4. Initialize Scramjet Controller
+        var activeSw = navigator.serviceWorker.controller || reg.active;
+        var readyResolveHook = null;
+        var handshakeDone = new Promise(function(r) { readyResolveHook = r; });
+
+        controller = new $jetController.Controller({
+            serviceworker: activeSw,
+            transport: transport,
+            jetConfig: {
+                maskedfiles: ["jet.inject.js", "jet.wasm.js"],
+                flags: {
+                    syncxhr: false,
+                    disableComputedWrap: false,
+                    rewriterLogs: false,
+                    captureErrors: false,
+                    cleanErrors: false,
+                    scramitize: false,
+                    sourcemaps: false,
+                    destructureRewrites: true,
+                    allowInvalidJs: true,
+                    debugTrampolines: false,
+                    debugSourceURL: false,
+                    allowFailedIntercepts: true,
+                    encapsulateWorkers: true
+                }
+            },
+            config: {
+                jetPath: getAsset("sj/jet.core.js"),
+                wasmPath: getAsset("sj/jet.wasm"),
+                injectPath: getAsset("sj/jet.inject.js"),
+                virtualWasmPath: "jet.wasm.js",
+                codec: {
+                    encode: function(urlStr) {
+                        if (!urlStr) return urlStr;
+                        var key = globalThis.__jck;
+                        if (key === undefined) {
+                            key = [
+                                location.origin.replace(/^\w+:\/\/|:\d+$/g, ""),
+                                (new Date()).getUTCMonth(),
+                                navigator.hardwareConcurrency,
+                                navigator.deviceMemory,
+                                navigator.platform,
+                                navigator.userAgent.replace(/[\d.]+/g, ""),
+                                (new Date()).getTimezoneOffset()
+                            ].join().split("").reduce(function(a, b) {
+                                return Math.imul(a ^ b.charCodeAt(0), 16777619);
+                            }, 2166136261);
+                            Object.defineProperty(globalThis, "__jck", { value: key });
+                        }
+                        var t = key;
+                        var isHttps = urlStr.startsWith("https://") && urlStr.length > 8;
+                        var bytes = (new TextEncoder()).encode(isHttps ? urlStr.slice(8) : urlStr);
+                        for (var idx = 0, mask = 0; idx < bytes.length; idx++, mask >>>= 8) {
+                            if ((idx & 3) === 0) {
+                                t ^= t << 13;
+                                t ^= t >>> 17;
+                                t ^= t << 5;
+                                mask = t;
+                            }
+                            bytes[idx] ^= mask;
+                        }
+                        var bin = "";
+                        for (var k = 0; k < bytes.length; k += 8192) {
+                            bin += String.fromCharCode.apply(null, bytes.subarray(k, k + 8192));
+                        }
+                        return (isHttps ? "" : "Z0") + btoa(bin).slice(0, ((4 * bytes.length + 2) / 3) | 0).replace(/Z/g, "Zz").replace(/\+/g, "Zp").replace(/\//g, "Zs");
+                    },
+                    decode: function(encStr) {
+                        if (!encStr) return encStr;
+                        var key = globalThis.__jck;
+                        if (key === undefined) {
+                            key = [
+                                location.origin.replace(/^\w+:\/\/|:\d+$/g, ""),
+                                (new Date()).getUTCMonth(),
+                                navigator.hardwareConcurrency,
+                                navigator.deviceMemory,
+                                navigator.platform,
+                                navigator.userAgent.replace(/[\d.]+/g, ""),
+                                (new Date()).getTimezoneOffset()
+                            ].join().split("").reduce(function(a, b) {
+                                return Math.imul(a ^ b.charCodeAt(0), 16777619);
+                            }, 2166136261);
+                            Object.defineProperty(globalThis, "__jck", { value: key });
+                        }
+                        var t = key;
+                        var isNonHttps = encStr.startsWith("Z0");
+                        var raw = atob(encStr.slice(isNonHttps ? 2 : 0).replace(/Zp/g, "+").replace(/Zs/g, "/").replace(/Zz/g, "Z"));
+                        var out = new Uint8Array(raw.length);
+                        for (var idx = 0, mask = 0; idx < out.length; idx++, mask >>>= 8) {
+                            if ((idx & 3) === 0) {
+                                t ^= t << 13;
+                                t ^= t >>> 17;
+                                t ^= t << 5;
+                                mask = t;
+                            }
+                            out[idx] = raw.charCodeAt(idx) ^ mask;
+                        }
+                        return (isNonHttps ? "" : "https://") + (new TextDecoder("utf-8", { ignoreBOM: true })).decode(out);
+                    }
+                },
+                prefix: new URL("./~/", location.href).pathname
+            }
+        });
+
+        var origReadyResolve = controller.readyResolve;
+        controller.readyResolve = function() {
+            readyResolveHook(true);
+            return origReadyResolve.apply(controller, arguments);
+        };
+
+        navigator.serviceWorker.addEventListener("controllerchange", function() {
+            if (navigator.serviceWorker.controller && controller) {
+                controller.serviceWorkerController = navigator.serviceWorker.controller;
+                controller.setupMessagePort();
+            }
+        });
+
+        for (var attempt = 0; !(await Promise.race([handshakeDone, new Promise(function(r) { setTimeout(function() { r(false); }, 3500); })])); attempt++) {
+            if (attempt >= 4) break;
+            controller.serviceWorkerController = navigator.serviceWorker.controller || controller.serviceWorkerController;
+            controller.setupMessagePort();
+        }
+
+        await controller.wait();
+        controller.guardServiceWorkerRevive = false;
+
+        // Keep Service Worker alive & self-healing
+        setInterval(async function() {
+            try {
+                var r = await navigator.serviceWorker.getRegistration(new URL("./", location.href).pathname);
+                if (!r) {
+                    await navigator.serviceWorker.register(getAsset("sw.js"), {
+                        scope: new URL("./", location.href).pathname,
+                        updateViaCache: "none"
+                    });
+                }
+                if (controller && navigator.serviceWorker.controller && controller.serviceWorkerController !== navigator.serviceWorker.controller) {
+                    controller.serviceWorkerController = navigator.serviceWorker.controller;
+                    controller.setupMessagePort();
+                }
+            } catch (e) {}
+        }, 20000);
+
+        // 5. Create Scramjet Frame with AdBlocker & URL Watcher Plugins
+        var webFrameEl = document.getElementById("web-frame");
+        var plugins = [
+            new $jetUtils.HttpCachePlugin(),
+            new $jetUtils.UrlWatcherPlugin(function(newUrl) {
+                onProxiedUrlChange(newUrl);
+            })
+        ];
+
+        try {
+            var YounusPlugin = class extends $jetController.ManagedPlugin {
+                constructor() {
+                    super("younus-guard", []);
+                }
+                install(ctx) {
+                    this.tap(ctx.hooks.init.post, function(ev) {
+                        if (ev && ev.window) {
+                            injectClientAdBlocker(ev.window);
+                        }
+                    });
+                }
+            };
+            plugins.push(new YounusPlugin());
         } catch (e) {}
 
-        // Direct fetch fallback for CORS-enabled endpoints
-        var r = await fetch(targetUrl);
-        var buf2 = await r.arrayBuffer();
-        return {
-            ok: r.ok,
-            status: r.status,
-            url: targetUrl,
-            text: function() { return new TextDecoder("utf-8").decode(buf2); }
-        };
+        scramjetFrame = controller.createFrame(webFrameEl, { plugins: plugins });
+        scramjetFrame.prefix = controller.prefix;
+        scramjetFrame.fetchHandler.context = scramjetFrame.context;
+        scramjetFrame.fetchHandler.context.hooks = { rewriter: scramjetFrame.fetchHandler.hooks.rewriter };
+
+        webFrameEl.addEventListener("load", function() {
+            hideLoading();
+            try {
+                if (webFrameEl.contentWindow) {
+                    injectClientAdBlocker(webFrameEl.contentWindow);
+                }
+            } catch (e) {}
+            updateNavButtons();
+        });
+
+        scramjetReady = true;
+        return true;
     }
 
+    // Start Scramjet boot immediately in background while user is on Entry/Password screen
+    var scramjetBootPromise = bootScramjet().catch(function(err) {
+        console.error("Scramjet init error:", err);
+        return false;
+    });
+
     // =========================================================================
-    // 5. VIEWPORT & HISTORY MANAGEMENT
+    // 5. NAVIGATION, URL ROUTER & HISTORY CONTROLS
     // =========================================================================
     var homeView = document.getElementById("home-view");
     var frameWrap = document.getElementById("frame-wrap");
     var webFrame = document.getElementById("web-frame");
+    var loadingOverlay = document.getElementById("loading-overlay");
+    var loadingText = document.getElementById("loading-text");
     var omniInput = document.getElementById("omni-input");
     var btnBack = document.getElementById("btn-back");
     var btnFwd = document.getElementById("btn-fwd");
     var btnReload = document.getElementById("btn-reload");
     var btnHome = document.getElementById("btn-home");
 
-    var navHistory = ["younus://home"];
-    var navIndex = 0;
-    var activeBlobUrl = null;
+    var isHomeVisible = true;
+    var currentProxiedUrl = "";
+    var historyList = ["younus://home"];
+    var historyIdx = 0;
+    var isTraversing = false;
+
+    function showLoading(msg) {
+        loadingText.textContent = msg || "Loading...";
+        loadingOverlay.style.display = "flex";
+    }
+
+    function hideLoading() {
+        loadingOverlay.style.display = "none";
+    }
+
+    function canFrameStep(dir) {
+        try {
+            var nav = webFrame.contentWindow && webFrame.contentWindow.navigation;
+            if (nav && typeof nav.canGoBack === "boolean") {
+                return dir < 0 ? nav.canGoBack : nav.canGoForward;
+            }
+        } catch (e) {}
+        return false;
+    }
 
     function updateNavButtons() {
-        btnBack.disabled = navIndex <= 0;
-        btnFwd.disabled = navIndex >= navHistory.length - 1;
-    }
-
-    function setFrameHtml(htmlStr) {
-        homeView.style.display = "none";
-        frameWrap.style.display = "block";
-        if (activeBlobUrl) {
-            try { URL.revokeObjectURL(activeBlobUrl); } catch (e) {}
+        if (isHomeVisible) {
+            btnBack.disabled = historyIdx <= 0;
+            btnFwd.disabled = historyIdx >= historyList.length - 1;
+        } else {
+            btnBack.disabled = !(historyIdx > 0 || canFrameStep(-1));
+            btnFwd.disabled = !(historyIdx < historyList.length - 1 || canFrameStep(1));
         }
-        var blob = new Blob([htmlStr], { type: "text/html;charset=utf-8" });
-        activeBlobUrl = URL.createObjectURL(blob);
-        webFrame.src = activeBlobUrl;
     }
 
-    function setFrameSrc(url) {
-        homeView.style.display = "none";
-        frameWrap.style.display = "block";
-        webFrame.src = url;
-    }
-
-    function showHome(pushHist) {
-        if (pushHist && navHistory[navIndex] !== "younus://home") {
-            navHistory = navHistory.slice(0, navIndex + 1);
-            navHistory.push("younus://home");
-            navIndex = navHistory.length - 1;
+    function onProxiedUrlChange(url) {
+        if (!url || !/^https?:\/\//i.test(url)) return;
+        hideLoading();
+        if (url !== currentProxiedUrl) {
+            currentProxiedUrl = url;
+            omniInput.value = url;
+            if (!isTraversing) {
+                if (historyList[historyIdx] !== url) {
+                    historyList = historyList.slice(0, historyIdx + 1);
+                    historyList.push(url);
+                    historyIdx = historyList.length - 1;
+                }
+            }
+            isTraversing = false;
+            updateNavButtons();
         }
-        updateNavButtons();
+    }
+
+    function showHome(pushToHist) {
+        hideLoading();
+        isHomeVisible = true;
+        currentProxiedUrl = "";
         omniInput.value = "";
         frameWrap.style.display = "none";
-        webFrame.src = "about:blank";
         homeView.style.display = "flex";
+        if (pushToHist && historyList[historyIdx] !== "younus://home") {
+            historyList = historyList.slice(0, historyIdx + 1);
+            historyList.push("younus://home");
+            historyIdx = historyList.length - 1;
+        }
+        updateNavButtons();
+    }
+
+    var QUICK_SHORTCUTS = {
+        "tiktok": "https://www.tiktok.com/foryou",
+        "tiktok.com": "https://www.tiktok.com/foryou",
+        "www.tiktok.com": "https://www.tiktok.com/foryou",
+        "youtube": "https://www.youtube.com/",
+        "reddit": "https://www.reddit.com/",
+        "discord": "https://discord.com/app",
+        "roblox": "https://www.roblox.com/",
+        "spotify": "https://open.spotify.com/",
+        "twitch": "https://www.twitch.tv/",
+        "instagram": "https://www.instagram.com/",
+        "x": "https://x.com/",
+        "twitter": "https://x.com/"
+    };
+
+    function resolveInputToUrl(raw) {
+        var s = String(raw || "").trim();
+        if (!s) return "";
+        var low = s.toLowerCase();
+        if (QUICK_SHORTCUTS[low]) return QUICK_SHORTCUTS[low];
+        if (/^https?:\/\//i.test(s)) {
+            try {
+                var parsed = new URL(s);
+                var h = parsed.hostname.replace(/^www\./i, "").toLowerCase();
+                if (h === "tiktok.com" && (parsed.pathname === "/" || parsed.pathname === "")) {
+                    return "https://www.tiktok.com/foryou";
+                }
+            } catch (e) {}
+            return s;
+        }
+        if (s.indexOf(" ") === -1 && /^[a-z0-9-]+(\.[a-z0-9-]+)+(\/.*)?$/i.test(s)) {
+            return "https://" + s;
+        }
+        return ENGINES[currentEngine].searchUrl(s);
+    }
+
+    async function navigate(rawInput, opts) {
+        opts = opts || {};
+        var targetUrl = resolveInputToUrl(rawInput);
+        if (!targetUrl || isAdUrl(targetUrl)) return;
+
+        isHomeVisible = false;
+        currentProxiedUrl = targetUrl;
+        omniInput.value = targetUrl;
+        homeView.style.display = "none";
+        frameWrap.style.display = "block";
+
+        if (!opts.fromHistory) {
+            if (historyList[historyIdx] !== targetUrl) {
+                historyList = historyList.slice(0, historyIdx + 1);
+                historyList.push(targetUrl);
+                historyIdx = historyList.length - 1;
+            }
+        }
+        updateNavButtons();
+
+        var hostLabel = targetUrl;
+        try { hostLabel = new URL(targetUrl).hostname; } catch (e) {}
+        showLoading("Loading " + hostLabel + "...");
+
+        var ok = await scramjetBootPromise;
+        if (!ok || !scramjetReady || !scramjetFrame) {
+            scramjetBootPromise = bootScramjet().catch(function() { return false; });
+            ok = await scramjetBootPromise;
+        }
+
+        if (ok && scramjetFrame) {
+            try {
+                scramjetFrame.go(targetUrl);
+                setTimeout(hideLoading, 6000);
+                return;
+            } catch (e) {
+                console.error("scramjetFrame.go error:", e);
+            }
+        }
+
+        hideLoading();
+        webFrame.src = targetUrl;
     }
 
     btnHome.addEventListener("click", function() {
@@ -732,664 +1277,53 @@ html, body {
     });
 
     btnBack.addEventListener("click", function() {
-        if (navIndex > 0) {
-            navIndex -= 1;
-            updateNavButtons();
-            var target = navHistory[navIndex];
+        if (!isHomeVisible && scramjetFrame && canFrameStep(-1)) {
+            isTraversing = true;
+            try { scramjetFrame.back(); return; } catch (e) {}
+        }
+        if (historyIdx > 0) {
+            historyIdx -= 1;
+            var target = historyList[historyIdx];
             if (target === "younus://home") {
                 showHome(false);
             } else {
+                isTraversing = true;
                 navigate(target, { fromHistory: true });
             }
         }
     });
 
     btnFwd.addEventListener("click", function() {
-        if (navIndex < navHistory.length - 1) {
-            navIndex += 1;
-            updateNavButtons();
-            var target = navHistory[navIndex];
+        if (!isHomeVisible && scramjetFrame && canFrameStep(1)) {
+            isTraversing = true;
+            try { scramjetFrame.forward(); return; } catch (e) {}
+        }
+        if (historyIdx < historyList.length - 1) {
+            historyIdx += 1;
+            var target = historyList[historyIdx];
             if (target === "younus://home") {
                 showHome(false);
             } else {
+                isTraversing = true;
                 navigate(target, { fromHistory: true });
             }
         }
     });
 
     btnReload.addEventListener("click", function() {
-        var cur = navHistory[navIndex];
-        if (!cur || cur === "younus://home") {
-            showHome(false);
-        } else {
-            navigate(cur, { fromHistory: true });
-        }
-    });
-
-    // =========================================================================
-    // 6. IN-APP TIKTOK EXPERIENCE (NO EXTERNAL REDIRECTS / NO "DISCOVER MORE")
-    // =========================================================================
-    function extractTikTokVideoId(u) {
-        if (!u) return null;
-        var m = String(u).match(/tiktok\.com\/(?:@[^/?#]+\/video|v|embed\/v2)\/(\d{15,22})/i);
-        return m ? m[1] : null;
-    }
-
-    async function renderTikTokPortal(queryStr, directVideoId) {
-        var safeQuery = (queryStr || "").replace(/"/g, "&quot;");
-        var portalHtml = '<!doctype html><html><head><meta charset="utf-8"><style>' +
-            '*{box-sizing:border-box;margin:0;padding:0}' +
-            'body{background:#0a0a0e;color:#fff;font:14px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}' +
-            'header{height:56px;background:#121218;border-bottom:1px solid #242430;display:flex;align-items:center;justify-content:space-between;padding:0 20px;gap:16px;flex-shrink:0}' +
-            '.brand{display:flex;align-items:center;gap:8px;font-size:20px;font-weight:800;cursor:pointer;letter-spacing:-.02em;color:#fff}' +
-            '.brand span.c1{color:#25f4ee;text-shadow:2px 0 #fe2c55}' +
-            '.brand span.sub{color:#d2b8ff;font-size:14px;font-weight:700;margin-left:4px}' +
-            'form{flex:1;max-width:460px;display:flex;background:#1e1e28;border:1px solid #323242;border-radius:999px;padding:4px 6px 4px 16px}' +
-            'form input{flex:1;background:none;border:0;color:#fff;font-size:14px;outline:none}' +
-            'form button{background:#fe2c55;color:#fff;border:0;border-radius:999px;padding:7px 18px;font-weight:700;cursor:pointer;font-size:13px}' +
-            '.cats{display:flex;gap:8px;padding:10px 20px;background:#0e0e14;border-bottom:1px solid #1f1f2a;overflow-x:auto;flex-shrink:0}' +
-            '.cats::-webkit-scrollbar{height:0}' +
-            '.chip{padding:6px 14px;border-radius:999px;background:#1a1a24;color:#ccc;font-size:12.5px;font-weight:600;border:1px solid #2c2c3a;cursor:pointer;white-space:nowrap}' +
-            '.chip.active,.chip:hover{background:#fe2c55;color:#fff;border-color:#fe2c55}' +
-            '.layout{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 360px;overflow:hidden}' +
-            '@media(max-width:860px){.layout{grid-template-columns:1fr}.side-grid{display:none}}' +
-            '.stage{position:relative;display:flex;align-items:center;justify-content:center;background:#050508;height:100%;overflow:hidden;padding:14px}' +
-            '.vcard{position:relative;height:100%;max-height:calc(100vh - 130px);aspect-ratio:9/16;background:#111;border-radius:16px;overflow:hidden;box-shadow:0 16px 50px rgba(0,0,0,.85);border:1px solid #252532;display:flex;align-items:center;justify-content:center}' +
-            '.vcard video,.vcard img.slide-img{width:100%;height:100%;object-fit:cover;border:0;background:#000}' +
-            '.vinfo{position:absolute;left:0;right:64px;bottom:0;padding:42px 16px 16px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.9));pointer-events:none}' +
-            '.vauthor{font-weight:800;font-size:15px;margin-bottom:4px;color:#fff}' +
-            '.vdesc{font-size:13px;color:rgba(255,255,255,.88);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}' +
-            '.vactions{position:absolute;right:12px;bottom:22px;display:flex;flex-direction:column;gap:14px;align-items:center;z-index:5}' +
-            '.act{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;font-weight:700;color:#fff;cursor:pointer}' +
-            '.act-ic{width:42px;height:42px;border-radius:50%;background:rgba(28,28,36,.85);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;font-size:17px;border:1px solid rgba(255,255,255,.15);transition:transform .15s,background .15s}' +
-            '.act:hover .act-ic{transform:scale(1.08);background:#fe2c55}' +
-            '.side-grid{background:#0e0e14;border-left:1px solid #1f1f2a;overflow-y:auto;padding:14px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px;align-content:start}' +
-            '.titem{position:relative;aspect-ratio:9/14;border-radius:10px;overflow:hidden;background:#181822;cursor:pointer;border:2px solid transparent}' +
-            '.titem.active{border-color:#fe2c55}' +
-            '.titem img{width:100%;height:100%;object-fit:cover;display:block}' +
-            '.titem .tmeta{position:absolute;inset:auto 0 0 0;padding:20px 8px 8px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.92));font-size:11.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
-            '.sp{width:36px;height:36px;border:3px solid rgba(255,255,255,.15);border-top-color:#fe2c55;border-radius:50%;animation:s .7s linear infinite}' +
-            '@keyframes s{to{transform:rotate(360deg)}}' +
-            '</style></head><body>' +
-            '<header>' +
-                '<div class="brand" onclick="loadFeed(\'\', \'\')"><span class="c1">&#9835;</span> TikTok <span class="sub">يونس</span></div>' +
-                '<form onsubmit="event.preventDefault();var q=document.getElementById(\'q\').value.trim();loadFeed(q, \'\');">' +
-                    '<input id="q" value="' + safeQuery + '" placeholder="Search TikTok videos, topics, creators...">' +
-                    '<button type="submit">Search</button>' +
-                '</form>' +
-            '</header>' +
-            '<div class="cats">' +
-                '<button class="chip active" onclick="pickCat(this,\'\',\'US\')">For You</button>' +
-                '<button class="chip" onclick="pickCat(this,\'gaming\',\'GB\')">Gaming</button>' +
-                '<button class="chip" onclick="pickCat(this,\'funny\',\'CA\')">Funny &amp; Memes</button>' +
-                '<button class="chip" onclick="pickCat(this,\'sports\',\'AU\')">Sports</button>' +
-                '<button class="chip" onclick="pickCat(this,\'music\',\'DE\')">Music</button>' +
-                '<button class="chip" onclick="pickCat(this,\'anime\',\'JP\')">Anime</button>' +
-                '<button class="chip" onclick="pickCat(this,\'cars\',\'FR\')">Cars</button>' +
-            '</div>' +
-            '<div class="layout">' +
-                '<div class="stage"><div class="vcard" id="vcard"><div class="sp"></div></div></div>' +
-                '<div class="side-grid" id="side-grid"></div>' +
-            '</div>' +
-            '<script>' +
-            'var list = [];' +
-            'var idx = 0;' +
-            'var curRegion = "US";' +
-            'var rpcMap = {};' +
-            'window.addEventListener("message", function(e) {' +
-            '    if (e.data && e.data.type === "WISP_FETCH_RES" && rpcMap[e.data.id]) {' +
-            '        rpcMap[e.data.id](e.data);' +
-            '        delete rpcMap[e.data.id];' +
-            '    }' +
-            '});' +
-            'function parentWispFetch(url) {' +
-            '    return new Promise(function(resolve) {' +
-            '        var id = "r_" + Math.random().toString(36).slice(2);' +
-            '        rpcMap[id] = resolve;' +
-            '        parent.postMessage({ type: "WISP_FETCH", id: id, url: url }, "*");' +
-            '        setTimeout(function() { if (rpcMap[id]) { delete rpcMap[id]; resolve({ ok: false, text: "" }); } }, 6000);' +
-            '    });' +
-            '}' +
-            'function fmtNum(n) {' +
-            '    n = Number(n) || 0;' +
-            '    if (n >= 1e6) return (n/1e6).toFixed(1) + "M";' +
-            '    if (n >= 1e3) return (n/1e3).toFixed(1) + "K";' +
-            '    return String(n);' +
-            '}' +
-            'function escHtml(s) {' +
-            '    return String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");' +
-            '}' +
-            'function pickCat(btn, q, reg) {' +
-            '    document.querySelectorAll(".chip").forEach(function(c){ c.classList.remove("active"); });' +
-            '    btn.classList.add("active");' +
-            '    curRegion = reg || "US";' +
-            '    document.getElementById("q").value = q;' +
-            '    loadFeed(q, "");' +
-            '}' +
-            'function renderCurrent() {' +
-            '    var vc = document.getElementById("vcard");' +
-            '    if (!list.length) {' +
-            '        vc.innerHTML = "<div style=\\"padding:24px;text-align:center;color:#aaa\\">No videos found. Click For You or try another search!</div>";' +
-            '        return;' +
-            '    }' +
-            '    var v = list[idx] || list[0];' +
-            '    var author = (v.author && (v.author.nickname || v.author.unique_id)) || "tiktok";' +
-            '    var title = v.title || "";' +
-            '    var hasImages = Array.isArray(v.images) && v.images.length > 0;' +
-            '    var mediaHtml = "";' +
-            '    if (hasImages && (!v.duration || v.duration === 0)) {' +
-            '        mediaHtml = "<img class=\\"slide-img\\" src=\\"" + (v.images[0] || v.cover || "") + "\\"><audio src=\\"" + (v.play || "") + "\\" autoplay loop></audio>";' +
-            '    } else {' +
-            '        mediaHtml = "<video id=\\"tt-vid\\" src=\\"" + (v.play || v.wmplay || "") + "\\" poster=\\"" + (v.cover || "") + "\\" autoplay loop playsinline controls></video>";' +
-            '    }' +
-            '    vc.innerHTML = mediaHtml +' +
-            '        "<div class=\\"vinfo\\">" +' +
-            '            "<div class=\\"vauthor\\">@" + escHtml(author) + "</div>" +' +
-            '            "<div class=\\"vdesc\\">" + escHtml(title) + "</div>" +' +
-            '        "</div>" +' +
-            '        "<div class=\\"vactions\\">" +' +
-            '            "<div class=\\"act\\" onclick=\\"prevVid()\\" title=\\"Previous\\"><div class=\\"act-ic\\">&#9650;</div><span>Prev</span></div>" +' +
-            '            "<div class=\\"act\\" onclick=\\"nextVid()\\" title=\\"Next\\"><div class=\\"act-ic\\">&#9660;</div><span>Next</span></div>" +' +
-            '            "<div class=\\"act\\" onclick=\\"this.style.color=\'#fe2c55\'\\"><div class=\\"act-ic\\">&#9829;</div><span>" + fmtNum(v.digg_count) + "</span></div>" +' +
-            '            "<div class=\\"act\\"><div class=\\"act-ic\\">&#128172;</div><span>" + fmtNum(v.comment_count) + "</span></div>" +' +
-            '        "</div>";' +
-            '    var vEl = document.getElementById("tt-vid");' +
-            '    if (vEl) {' +
-            '        vEl.onerror = function() { if (list.length > 1) nextVid(); };' +
-            '    }' +
-            '    document.querySelectorAll(".titem").forEach(function(el, i) {' +
-            '        el.classList.toggle("active", i === idx);' +
-            '    });' +
-            '}' +
-            'function renderSide() {' +
-            '    var sg = document.getElementById("side-grid");' +
-            '    sg.innerHTML = list.map(function(v, i) {' +
-            '        var author = (v.author && (v.author.nickname || v.author.unique_id)) || "TikTok";' +
-            '        return "<div class=\\"titem " + (i === idx ? "active" : "") + "\\" onclick=\\"idx=" + i + ";renderCurrent()\\">" +' +
-            '            "<img src=\\"" + (v.cover || v.origin_cover || "") + "\\" loading=\\"lazy\\">" +' +
-            '            "<div class=\\"tmeta\\">@" + escHtml(author) + " • &#9829; " + fmtNum(v.digg_count) + "</div>" +' +
-            '        "</div>";' +
-            '    }).join("");' +
-            '}' +
-            'function nextVid() { if (!list.length) return; idx = (idx + 1) % list.length; renderCurrent(); }' +
-            'function prevVid() { if (!list.length) return; idx = (idx - 1 + list.length) % list.length; renderCurrent(); }' +
-            'window.addEventListener("keydown", function(e) {' +
-            '    if (document.activeElement && document.activeElement.tagName === "INPUT") return;' +
-            '    if (e.key === "ArrowDown") { e.preventDefault(); nextVid(); }' +
-            '    if (e.key === "ArrowUp") { e.preventDefault(); prevVid(); }' +
-            '});' +
-            'async function fetchSingleVideo(vid) {' +
-            '    try {' +
-            '        var r = await fetch("https://www.tikwm.com/api/?url=https://www.tiktok.com/@tiktok/video/" + encodeURIComponent(vid));' +
-            '        var j = await r.json();' +
-            '        if (j && j.data && (j.data.play || j.data.wmplay)) return j.data;' +
-            '    } catch (e) {}' +
-            '    return null;' +
-            '}' +
-            'async function loadFeed(q, specificVid) {' +
-            '    document.getElementById("vcard").innerHTML = "<div class=\\"sp\\"></div>";' +
-            '    var collected = [];' +
-            '    if (specificVid) {' +
-            '        var sv = await fetchSingleVideo(specificVid);' +
-            '        if (sv) collected.push(sv);' +
-            '    }' +
-            '    if (q) {' +
-            '        try {' +
-            '            var sr = await parentWispFetch("https://www.bing.com/search?q=" + encodeURIComponent("site:tiktok.com/video " + q) + "&setlang=en");' +
-            '            if (sr && sr.text) {' +
-            '                var decoded = sr.text;' +
-            '                var b64s = decoded.match(/u=a1([A-Za-z0-9_-]+)/g) || [];' +
-            '                for (var b = 0; b < b64s.length; b++) {' +
-            '                    try {' +
-            '                        var raw = atob(b64s[b].slice(4).replace(/-/g, "+").replace(/_/g, "/"));' +
-            '                        decoded += " " + raw;' +
-            '                    } catch (e) {}' +
-            '                }' +
-            '                var m = decoded.match(/\\/video\\/(\\d{15,22})/g) || [];' +
-            '                var seenIds = {};' +
-            '                var uniqueIds = [];' +
-            '                for (var k = 0; k < m.length; k++) {' +
-            '                    var idStr = m[k].replace("/video/", "");' +
-            '                    if (!seenIds[idStr] && uniqueIds.length < 6) { seenIds[idStr] = true; uniqueIds.push(idStr); }' +
-            '                }' +
-            '                var resolved = await Promise.all(uniqueIds.map(fetchSingleVideo));' +
-            '                for (var rIdx = 0; rIdx < resolved.length; rIdx++) {' +
-            '                    if (resolved[rIdx]) collected.push(resolved[rIdx]);' +
-            '                }' +
-            '            }' +
-            '        } catch (e) {}' +
-            '    }' +
-            '    try {' +
-            '        var feedRes = await fetch("https://www.tikwm.com/api/feed/list?region=" + encodeURIComponent(curRegion) + "&count=24");' +
-            '        var feedJson = await feedRes.json();' +
-            '        var items = (feedJson && feedJson.data && (Array.isArray(feedJson.data) ? feedJson.data : feedJson.data.videos)) || [];' +
-            '        var vidsOnly = items.filter(function(x) { return x && x.play && (!x.images || !x.images.length); });' +
-            '        var pool = vidsOnly.length ? vidsOnly : items;' +
-            '        if (q) {' +
-            '            var ql = q.toLowerCase();' +
-            '            var matched = pool.filter(function(x) { return String(x.title || "").toLowerCase().indexOf(ql) !== -1; });' +
-            '            collected = collected.concat(matched, pool);' +
-            '        } else {' +
-            '            collected = collected.concat(pool);' +
-            '        }' +
-            '    } catch (e) {}' +
-            '    if (collected.length) {' +
-            '        list = collected;' +
-            '        idx = 0;' +
-            '        renderSide();' +
-            '        renderCurrent();' +
-            '        return;' +
-            '    }' +
-            '    document.getElementById("vcard").innerHTML = "<div style=\\"padding:20px;text-align:center\\">Could not load feed. Click For You to retry!</div>";' +
-            '}' +
-            'loadFeed(' + JSON.stringify(queryStr || "") + ', ' + JSON.stringify(directVideoId || "") + ');' +
-            '<\/script></body></html>';
-
-        setFrameHtml(portalHtml);
-    }
-
-    // =========================================================================
-    // 7. WORKING 4-ENGINE SEARCH PORTAL (Google, DuckDuckGo, Brave Search, Microsoft Bing)
-    // =========================================================================
-    function decodeBingUrl(href) {
-        if (!href) return "";
-        if (href.indexOf("bing.com/ck/a") !== -1 && href.indexOf("u=a1") !== -1) {
+        if (isHomeVisible) return;
+        if (scramjetFrame) {
+            showLoading("Reloading...");
             try {
-                var uPart = href.split("u=a1")[1].split("&")[0];
-                var b64 = uPart.replace(/-/g, "+").replace(/_/g, "/");
-                while (b64.length % 4 !== 0) b64 += "=";
-                return atob(b64);
+                scramjetFrame.reload();
+                setTimeout(hideLoading, 5000);
+                return;
             } catch (e) {}
         }
-        return href;
-    }
-
-    function parseBingHtml(html) {
-        var out = [];
-        try {
-            var doc = new DOMParser().parseFromString(html, "text/html");
-            var items = doc.querySelectorAll("li.b_algo");
-            for (var i = 0; i < items.length; i++) {
-                var el = items[i];
-                var a = el.querySelector("h2 a") || el.querySelector("a.tilk");
-                if (!a) continue;
-                var rawHref = a.getAttribute("href") || "";
-                var url = decodeBingUrl(rawHref);
-                if (!/^https?:\/\//i.test(url)) continue;
-                var h2 = el.querySelector("h2");
-                var title = (h2 ? h2.textContent : a.textContent || "").trim();
-                var snipEl = el.querySelector(".b_caption p, .b_lineclamp2, .b_lineclamp3, .b_lineclamp4, .b_algoSlug");
-                var snippet = snipEl ? snipEl.textContent.trim() : "";
-                if (title && !out.some(function(r) { return r.url === url; })) {
-                    out.push({ title: title, url: url, snippet: snippet });
-                }
-            }
-        } catch (e) {}
-        return out;
-    }
-
-    function parseDdgHtml(html) {
-        var out = [];
-        try {
-            var doc = new DOMParser().parseFromString(html, "text/html");
-            var items = doc.querySelectorAll(".result, .web-result");
-            for (var i = 0; i < items.length; i++) {
-                var el = items[i];
-                var a = el.querySelector("a.result__a");
-                var snip = el.querySelector(".result__snippet");
-                if (!a) continue;
-                var href = a.getAttribute("href") || "";
-                if (href.indexOf("uddg=") !== -1) {
-                    try { href = decodeURIComponent(href.split("uddg=")[1].split("&")[0]); } catch (e) {}
-                }
-                if (/^https?:\/\//i.test(href) && !out.some(function(r) { return r.url === href; })) {
-                    out.push({
-                        title: a.textContent.trim(),
-                        url: href,
-                        snippet: snip ? snip.textContent.trim() : ""
-                    });
-                }
-            }
-        } catch (e) {}
-        return out;
-    }
-
-    function parseBraveHtml(html) {
-        var out = [];
-        try {
-            var doc = new DOMParser().parseFromString(html, "text/html");
-            var items = doc.querySelectorAll("div.snippet, div[data-type='web']");
-            for (var i = 0; i < items.length; i++) {
-                var el = items[i];
-                var a = el.querySelector("a[href^='http']");
-                if (!a) continue;
-                var href = a.getAttribute("href") || "";
-                if (href.indexOf("brave.com") !== -1) continue;
-                var titleEl = el.querySelector(".title, .snippet-title") || a;
-                var descEl = el.querySelector(".snippet-description, .generic-snippet");
-                var title = titleEl.textContent.trim();
-                if (title && /^https?:\/\//i.test(href) && !out.some(function(r) { return r.url === href; })) {
-                    out.push({
-                        title: title,
-                        url: href,
-                        snippet: descEl ? descEl.textContent.trim() : ""
-                    });
-                }
-            }
-        } catch (e) {}
-        return out;
-    }
-
-    async function renderSearchPortal(queryStr, engineKey) {
-        var eng = ENGINES[engineKey] ? engineKey : currentEngine;
-        var engObj = ENGINES[eng];
-
-        setFrameHtml('<!doctype html><html><head><meta charset="utf-8"><style>' +
-            'body{margin:0;background:#3b3343;color:#f3f3f5;font:14px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:12px}' +
-            '.sp{width:32px;height:32px;border:3px solid rgba(255,255,255,.15);border-top-color:#d2b8ff;border-radius:50%;animation:s .7s linear infinite}' +
-            '@keyframes s{to{transform:rotate(360deg)}}' +
-            '</style></head><body><div class="sp"></div><div>Searching ' + engObj.name + '...</div></body></html>');
-
-        var results = [];
-        try {
-            var primaryPromise;
-            if (eng === "bing") {
-                primaryPromise = wispFetchRaw("https://www.bing.com/search?q=" + encodeURIComponent(queryStr) + "&setlang=en").then(function(r) { return parseBingHtml(r.text()); });
-            } else if (eng === "duckduckgo") {
-                primaryPromise = wispFetchRaw("https://html.duckduckgo.com/html/?q=" + encodeURIComponent(queryStr)).then(function(r) { return parseDdgHtml(r.text()); });
-            } else if (eng === "brave") {
-                primaryPromise = wispFetchRaw("https://search.brave.com/search?q=" + encodeURIComponent(queryStr) + "&source=web").then(function(r) { return parseBraveHtml(r.text()); });
-            } else {
-                // Google mode: query Bing + DuckDuckGo via Wisp in parallel for instant reliable web results
-                primaryPromise = Promise.allSettled([
-                    wispFetchRaw("https://www.bing.com/search?q=" + encodeURIComponent(queryStr) + "&setlang=en").then(function(r) { return parseBingHtml(r.text()); }),
-                    wispFetchRaw("https://html.duckduckgo.com/html/?q=" + encodeURIComponent(queryStr)).then(function(r) { return parseDdgHtml(r.text()); })
-                ]).then(function(arr) {
-                    var merged = [];
-                    arr.forEach(function(it) {
-                        if (it.status === "fulfilled" && Array.isArray(it.value)) {
-                            it.value.forEach(function(x) {
-                                if (!merged.some(function(m) { return m.url === x.url; })) merged.push(x);
-                            });
-                        }
-                    });
-                    return merged;
-                });
-            }
-
-            var backupDdgHtml = (eng !== "duckduckgo" && eng !== "google")
-                ? wispFetchRaw("https://html.duckduckgo.com/html/?q=" + encodeURIComponent(queryStr)).then(function(r) { return parseDdgHtml(r.text()); })
-                : Promise.resolve([]);
-
-            var ddgInstantPromise = fetch("https://api.duckduckgo.com/?q=" + encodeURIComponent(queryStr) + "&format=json&no_html=1&no_redirect=1").then(function(r) { return r.json(); });
-            var wikiPromise = fetch("https://en.wikipedia.org/w/api.php?action=opensearch&origin=*&limit=6&search=" + encodeURIComponent(queryStr)).then(function(r) { return r.json(); });
-
-            var settled = await Promise.allSettled([primaryPromise, backupDdgHtml, ddgInstantPromise, wikiPromise]);
-
-            if (settled[0].status === "fulfilled" && Array.isArray(settled[0].value)) {
-                results = settled[0].value.slice();
-            }
-            if (results.length < 4 && settled[1].status === "fulfilled" && Array.isArray(settled[1].value)) {
-                settled[1].value.forEach(function(x) {
-                    if (!results.some(function(r) { return r.url === x.url; })) results.push(x);
-                });
-            }
-            if (settled[2].status === "fulfilled" && settled[2].value) {
-                var dj = settled[2].value;
-                if (dj.AbstractURL && dj.AbstractText) {
-                    if (!results.some(function(r) { return r.url === dj.AbstractURL; })) {
-                        results.unshift({
-                            title: (dj.Heading || queryStr) + " (" + (dj.AbstractSource || "Overview") + ")",
-                            url: dj.AbstractURL,
-                            snippet: dj.AbstractText
-                        });
-                    }
-                }
-            }
-            if (settled[3].status === "fulfilled" && Array.isArray(settled[3].value)) {
-                var titles = settled[3].value[1] || [];
-                var descs = settled[3].value[2] || [];
-                var urls = settled[3].value[3] || [];
-                for (var w = 0; w < titles.length; w++) {
-                    if (urls[w] && !results.some(function(r) { return r.url === urls[w]; })) {
-                        results.push({
-                            title: titles[w] + " — Wikipedia",
-                            url: urls[w],
-                            snippet: descs[w] || ("Read article on Wikipedia: " + titles[w])
-                        });
-                    }
-                }
-            }
-        } catch (e) {}
-
-        var esc = function(s) { return String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); };
-
-        var itemsHtml = results.map(function(r) {
-            return '<div class="res" onclick="parent.postMessage({type:\'WISP_NAVIGATE\',url:' + JSON.stringify(r.url).replace(/"/g, "&quot;") + '},\'*\')">' +
-                '<div class="u">' + esc(r.url) + '</div>' +
-                '<div class="t">' + esc(r.title) + '</div>' +
-                '<div class="s">' + esc(r.snippet) + '</div>' +
-            '</div>';
-        }).join("");
-
-        var engineTabsHtml = ["google", "duckduckgo", "brave", "bing"].map(function(k) {
-            var activeCls = (k === eng) ? "etab active" : "etab";
-            return '<button type="button" class="' + activeCls + '" onclick="parent.postMessage({type:\'YOUNUS_SEARCH\',query:' + JSON.stringify(queryStr).replace(/"/g, "&quot;") + ',engine:\'' + k + '\'},\'*\')">' + ENGINES[k].name + '</button>';
-        }).join("");
-
-        setFrameHtml('<!doctype html><html><head><meta charset="utf-8"><style>' +
-            '*{box-sizing:border-box;margin:0;padding:0}' +
-            'body{background:#2d2635;color:#f3f3f5;font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:24px 32px;overflow-y:auto;height:100vh}' +
-            '.top{max-width:720px;margin-bottom:20px}' +
-            '.head-row{display:flex;align-items:center;gap:14px;margin-bottom:14px}' +
-            '.brand{font-size:26px;font-weight:700;color:#d2b8ff;cursor:pointer}' +
-            'form{flex:1;display:flex;background:#ffffff;border-radius:999px;padding:4px 6px 4px 18px;height:42px;align-items:center}' +
-            'input{flex:1;background:none;border:0;color:#202124;font-size:14px;outline:none}' +
-            'button.sbtn{background:#3b3343;color:#d2b8ff;border:0;border-radius:999px;padding:7px 18px;font-weight:700;cursor:pointer;font-size:13px}' +
-            '.etabs{display:flex;gap:8px;flex-wrap:wrap}' +
-            '.etab{padding:5px 13px;border-radius:999px;background:#221c29;color:#bfb5cc;border:1px solid rgba(255,255,255,.08);font-size:12px;font-weight:600;cursor:pointer}' +
-            '.etab.active{background:#d2b8ff;color:#1f162b;border-color:#d2b8ff}' +
-            '.meta{font-size:12px;color:#b5aac2;margin:12px 0 16px}' +
-            '.res{max-width:720px;padding:15px 18px;border-radius:14px;background:#211b27;border:1px solid rgba(255,255,255,.07);margin-bottom:12px;cursor:pointer;transition:border-color .15s,transform .15s}' +
-            '.res:hover{border-color:#d2b8ff;transform:translateY(-1px)}' +
-            '.u{font-size:12px;color:#9c90ab;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
-            '.t{font-size:16px;font-weight:700;color:#d2b8ff;margin:3px 0 5px}' +
-            '.s{font-size:13px;color:#ded6e8}' +
-            '</style></head><body>' +
-            '<div class="top">' +
-                '<div class="head-row">' +
-                    '<div class="brand" onclick="parent.postMessage({type:\'YOUNUS_HOME\'},\'*\')">يونس</div>' +
-                    '<form onsubmit="event.preventDefault();var q=document.getElementById(\'q\').value.trim();if(q)parent.postMessage({type:\'YOUNUS_SEARCH\',query:q,engine:\'' + eng + '\'},\'*\')">' +
-                        '<input id="q" value="' + esc(queryStr) + '" placeholder="Ask يونس">' +
-                        '<button type="submit" class="sbtn">Search</button>' +
-                    '</form>' +
-                '</div>' +
-                '<div class="etabs">' + engineTabsHtml + '</div>' +
-                '<div class="meta">Showing results powered by <strong>' + esc(engObj.name) + '</strong> inside يونس</div>' +
-            '</div>' +
-            (itemsHtml || '<div style="color:#ccc;padding:20px 0">No results found. Try another search keyword or enter a direct URL.</div>') +
-            '</body></html>');
-    }
-
-    // =========================================================================
-    // 8. YOUTUBE & EXTERNAL WEBSITE IN-APP PROXY LOADER
-    // =========================================================================
-    function extractYouTubeId(u) {
-        if (!u) return null;
-        var m = String(u).match(/(?:youtube\.com\/(?:watch\?.*v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i);
-        return m ? m[1] : null;
-    }
-
-    async function loadExternalWebsite(rawUrl) {
-        var u;
-        try {
-            u = new URL(rawUrl);
-        } catch (e) {
-            await renderSearchPortal(rawUrl, currentEngine);
-            return;
+        if (currentProxiedUrl) {
+            navigate(currentProxiedUrl, { fromHistory: true });
         }
-        var host = u.hostname.replace(/^www\./i, "").toLowerCase();
-
-        // 1. TikTok -> Always open in-app native TikTok experience (never /embed/v2/ which redirects externally)
-        var ttVid = extractTikTokVideoId(rawUrl);
-        if (ttVid || host === "tiktok.com" || host.slice(-11) === ".tiktok.com" || host === "vm.tiktok.com") {
-            var tq = u.searchParams.get("q") || (u.pathname.indexOf("/tag/") === 0 ? u.pathname.split("/tag/")[1] : "");
-            await renderTikTokPortal(tq, ttVid || "");
-            return;
-        }
-
-        // 2. Search Engine URLs -> Route to in-app Search Engine handler
-        if (host === "google.com" || host === "duckduckgo.com" || host === "html.duckduckgo.com" || host === "search.brave.com" || host === "bing.com") {
-            var sq = u.searchParams.get("q") || u.searchParams.get("p") || "";
-            var detectedEng = currentEngine;
-            if (host.indexOf("google") !== -1) detectedEng = "google";
-            else if (host.indexOf("duckduckgo") !== -1) detectedEng = "duckduckgo";
-            else if (host.indexOf("brave") !== -1) detectedEng = "brave";
-            else if (host.indexOf("bing") !== -1) detectedEng = "bing";
-            if (sq) {
-                await renderSearchPortal(sq, detectedEng);
-                return;
-            }
-        }
-
-        // 3. YouTube direct video
-        var ytId = extractYouTubeId(rawUrl);
-        if (ytId) {
-            setFrameSrc("https://www.youtube-nocookie.com/embed/" + ytId + "?autoplay=1&rel=0");
-            return;
-        }
-
-        // 4. General External Websites via Wisp Proxy + Ad/Redirect Blocker Bridge
-        setFrameHtml('<!doctype html><html><head><meta charset="utf-8"><style>' +
-            'body{margin:0;background:#2d2635;color:#f3f3f5;font:13px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:12px}' +
-            '.sp{width:30px;height:30px;border:3px solid rgba(255,255,255,.15);border-top-color:#d2b8ff;border-radius:50%;animation:s .7s linear infinite}' +
-            '@keyframes s{to{transform:rotate(360deg)}}' +
-            '</style></head><body><div class="sp"></div><div>Loading ' + u.hostname.replace(/</g, "&lt;") + '...</div></body></html>');
-
-        try {
-            var res = await wispFetchRaw(rawUrl);
-            var finalUrl = res.url || rawUrl;
-            var html = res.text();
-
-            // Strip frame-busting meta tags, conflicting <base> tags, and target="_top" / "_blank"
-            html = html.replace(/<meta[^>]+http-equiv=["']?(?:Content-Security-Policy|X-Frame-Options|refresh)["']?[^>]*>/gi, "");
-            html = html.replace(/<base\b[^>]*>/gi, "");
-            html = html.replace(/\btarget\s*=\s*["']?_(?:blank|top|parent)["']?/gi, 'target="_self"');
-
-            // Rewrite window.location / top.location in inline scripts to virtual location shim so sites cannot redirect the top window
-            html = html.replace(/(<script\b[^>]*>)([\s\S]*?)(<\/script>)/gi, function(full, openTag, body, closeTag) {
-                if (!body.trim()) return full;
-                var rewritten = body
-                    .replace(/\btop\.location\b/g, "window.__vLoc")
-                    .replace(/\bparent\.location\b/g, "window.__vLoc")
-                    .replace(/\bwindow\.location\b/g, "window.__vLoc")
-                    .replace(/\bdocument\.location\b/g, "window.__vLoc");
-                return openTag + rewritten + closeTag;
-            });
-
-            var bridgeScript = '<base href="' + finalUrl.replace(/"/g, "&quot;") + '">' +
-                '<script>(function(){' +
-                'var BASE_URL = ' + JSON.stringify(finalUrl) + ';' +
-                'var parsedBase = new URL(BASE_URL);' +
-                'function resolveUrl(rel) { try { return new URL(rel, BASE_URL).href; } catch(e) { return rel; } }' +
-                'window.__vLoc = {' +
-                '  get href() { return parsedBase.href; },' +
-                '  set href(v) { parent.postMessage({ type: "WISP_NAVIGATE", url: resolveUrl(v) }, "*"); },' +
-                '  get protocol() { return parsedBase.protocol; },' +
-                '  get host() { return parsedBase.host; },' +
-                '  get hostname() { return parsedBase.hostname; },' +
-                '  get port() { return parsedBase.port; },' +
-                '  get pathname() { return parsedBase.pathname; },' +
-                '  get search() { return parsedBase.search; },' +
-                '  get hash() { return parsedBase.hash; },' +
-                '  get origin() { return parsedBase.origin; },' +
-                '  assign: function(v) { parent.postMessage({ type: "WISP_NAVIGATE", url: resolveUrl(v) }, "*"); },' +
-                '  replace: function(v) { parent.postMessage({ type: "WISP_NAVIGATE", url: resolveUrl(v) }, "*"); },' +
-                '  reload: function() { parent.postMessage({ type: "WISP_NAVIGATE", url: BASE_URL }, "*"); },' +
-                '  toString: function() { return parsedBase.href; }' +
-                '};' +
-                'try {' +
-                '  History.prototype.pushState = function(s, t, u) { if (u) { try { BASE_URL = resolveUrl(u); parsedBase = new URL(BASE_URL); } catch(e){} } };' +
-                '  History.prototype.replaceState = function(s, t, u) { if (u) { try { BASE_URL = resolveUrl(u); parsedBase = new URL(BASE_URL); } catch(e){} } };' +
-                '} catch(e){}' +
-                'document.addEventListener("click", function(e) {' +
-                '  var a = e.target && e.target.closest ? e.target.closest("a[href]") : null;' +
-                '  if (!a) return;' +
-                '  var h = a.getAttribute("href");' +
-                '  if (!h || h.charAt(0) === "#" || h.indexOf("javascript:") === 0) return;' +
-                '  e.preventDefault();' +
-                '  e.stopPropagation();' +
-                '  parent.postMessage({ type: "WISP_NAVIGATE", url: resolveUrl(h) }, "*");' +
-                '}, true);' +
-                'document.addEventListener("submit", function(e) {' +
-                '  var form = e.target;' +
-                '  if (!form || form.tagName !== "FORM") return;' +
-                '  e.preventDefault();' +
-                '  var action = resolveUrl(form.getAttribute("action") || BASE_URL);' +
-                '  var fd = new FormData(form);' +
-                '  var params = new URLSearchParams();' +
-                '  fd.forEach(function(v, k) { params.append(k, v); });' +
-                '  var target = action + (action.indexOf("?") === -1 ? "?" : "&") + params.toString();' +
-                '  parent.postMessage({ type: "WISP_NAVIGATE", url: target }, "*");' +
-                '}, true);' +
-                'window.open = function(u) {' +
-                '  if (u) parent.postMessage({ type: "WISP_NAVIGATE", url: resolveUrl(u) }, "*");' +
-                '  return null;' +
-                '};' +
-                '})();<\/script>';
-
-            if (/<head[^>]*>/i.test(html)) {
-                html = html.replace(/<head[^>]*>/i, function(m) { return m + bridgeScript; });
-            } else {
-                html = bridgeScript + html;
-            }
-            setFrameHtml(html);
-        } catch (err) {
-            await renderSearchPortal(rawUrl, currentEngine);
-        }
-    }
-
-    // =========================================================================
-    // 9. UNIFIED INPUT / URL ROUTER
-    // =========================================================================
-    var QUICK_SITES = {
-        "tiktok": "https://www.tiktok.com",
-        "youtube": "https://www.youtube.com",
-        "reddit": "https://www.reddit.com",
-        "wikipedia": "https://www.wikipedia.org",
-        "github": "https://github.com",
-        "crazygames": "https://www.crazygames.com",
-        "poki": "https://poki.com",
-        "roblox": "https://www.roblox.com"
-    };
-
-    function normalizeInputToUrl(raw) {
-        var s = String(raw || "").trim();
-        if (!s) return "";
-        var lower = s.toLowerCase();
-        if (QUICK_SITES[lower]) return QUICK_SITES[lower];
-        if (/^https?:\/\//i.test(s)) return s;
-        if (s.indexOf(" ") === -1 && /^[a-z0-9-]+(\.[a-z0-9-]+)+(\/.*)?$/i.test(s)) {
-            return "https://" + s;
-        }
-        return ENGINES[currentEngine].searchUrl(s);
-    }
-
-    async function navigate(inputOrUrl, opts) {
-        opts = opts || {};
-        var targetUrl = normalizeInputToUrl(inputOrUrl);
-        if (!targetUrl) return;
-        if (isAdUrl(targetUrl)) return;
-
-        omniInput.value = targetUrl;
-        if (!opts.fromHistory) {
-            navHistory = navHistory.slice(0, navIndex + 1);
-            navHistory.push(targetUrl);
-            navIndex = navHistory.length - 1;
-        }
-        updateNavButtons();
-        await loadExternalWebsite(targetUrl);
-    }
+    });
 
     document.getElementById("omni-form").addEventListener("submit", function(e) {
         e.preventDefault();
@@ -1401,48 +1335,7 @@ html, body {
         e.preventDefault();
         var hi = document.getElementById("home-input");
         var v = hi.value.trim();
-        if (v) {
-            var searchUrl = normalizeInputToUrl(v);
-            navigate(searchUrl);
-        }
-    });
-
-    window.addEventListener("message", async function(e) {
-        if (!e.data || !e.data.type) return;
-        if (e.data.type === "WISP_NAVIGATE" && e.data.url) {
-            navigate(e.data.url);
-        } else if (e.data.type === "YOUNUS_SEARCH" && e.data.query) {
-            if (e.data.engine && ENGINES[e.data.engine]) {
-                setSearchEngine(e.data.engine);
-            }
-            var sUrl = ENGINES[currentEngine].searchUrl(e.data.query);
-            navigate(sUrl);
-        } else if (e.data.type === "YOUNUS_HOME") {
-            showHome(true);
-        } else if (e.data.type === "WISP_FETCH" && e.data.id && e.data.url) {
-            try {
-                var r = await wispFetchRaw(e.data.url);
-                if (webFrame && webFrame.contentWindow) {
-                    webFrame.contentWindow.postMessage({
-                        type: "WISP_FETCH_RES",
-                        id: e.data.id,
-                        ok: r.ok,
-                        status: r.status,
-                        text: r.text()
-                    }, "*");
-                }
-            } catch (err) {
-                if (webFrame && webFrame.contentWindow) {
-                    webFrame.contentWindow.postMessage({
-                        type: "WISP_FETCH_RES",
-                        id: e.data.id,
-                        ok: false,
-                        status: 0,
-                        text: ""
-                    }, "*");
-                }
-            }
-        }
+        if (v) navigate(v);
     });
 
 })();
