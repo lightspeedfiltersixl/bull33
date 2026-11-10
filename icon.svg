@@ -1,0 +1,1296 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+    <style>
+        :root {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: block;
+        }
+        foreignObject {
+            width: 100vw;
+            height: 100vh;
+            overflow: visible;
+        }
+    </style>
+    <foreignObject width="100%" height="100%">
+        <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+            <head>
+                <script><![CDATA[
+                (function(){
+                    const XHTML_NS="http://www.w3.org/1999/xhtml";
+                    const root=document.querySelector("foreignObject").firstElementChild;
+                    const originalCreateElement=document.createElement.bind(document);
+                    const originalCreateElementNS=document.createElementNS.bind(document);
+                    Object.defineProperty(document,"head",{get(){return root.querySelector("head")},configurable:true});
+                    Object.defineProperty(document,"body",{get(){return root.querySelector("body")},configurable:true});
+                    Object.defineProperty(document,"documentElement",{get(){return root},configurable:true});
+                    document.createElement=function(tagName,options){
+                        if(typeof tagName==="string"){return originalCreateElementNS(XHTML_NS,tagName,options)}
+                        return originalCreateElement(tagName,options)
+                    };
+                    document.createElementNS=function(namespaceURI,qualifiedName,options){
+                        if(namespaceURI==null||namespaceURI===XHTML_NS){return originalCreateElementNS(XHTML_NS,qualifiedName,options)}
+                        return originalCreateElementNS(namespaceURI,qualifiedName,options)
+                    };
+                })();
+                ]]></script>
+                <style><![CDATA[
+                html,body{margin:0;width:100%;height:100%;overflow:hidden}
+                foreignObject{overflow:visible}
+
+:root {
+    --bg-dark: #090a0f;
+    --surface-1: rgba(18, 20, 29, 0.85);
+    --surface-2: rgba(26, 30, 44, 0.92);
+    --surface-glass: rgba(22, 27, 40, 0.72);
+    --border-light: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.16);
+    --accent: #58a6ff;
+    --accent-glow: rgba(88, 166, 255, 0.35);
+    --accent-cyan: #39d353;
+    --text-primary: #f0f6fc;
+    --text-secondary: #8b949e;
+    --danger: #f85149;
+    --danger-glow: rgba(248, 81, 73, 0.35);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* APStudy Academic Cloak */
+#cloak-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 36px 20px 80px;
+    cursor: pointer;
+}
+.cloak-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+}
+.cloak-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+.cloak-badge {
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg, #1f6feb, #58a6ff);
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    color: #fff;
+    font-size: 17px;
+    box-shadow: 0 4px 12px rgba(31, 111, 235, 0.35);
+}
+.cloak-btn {
+    background: #238636;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+.cloak-btn:hover { background: #2ea043; }
+.cloak-hero {
+    background: var(--surface-1);
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    padding: 26px;
+    margin-bottom: 26px;
+}
+.cloak-hero h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--accent);
+}
+.cloak-hero p {
+    font-size: 15px;
+    color: var(--text-secondary);
+}
+.cloak-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+.cloak-card {
+    background: var(--surface-1);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 22px;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+}
+.cloak-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-strong);
+}
+.cloak-card h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 10px;
+}
+.cloak-card p {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+.cloak-hint {
+    text-align: center;
+    padding: 18px;
+    color: #58a6ff;
+    font-size: 14px;
+    font-weight: 500;
+    animation: pulseHint 2.4s infinite ease-in-out;
+}
+@keyframes pulseHint {
+    0%, 100% { opacity: 0.45; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.02); }
+}
+
+/* Security Auth Modal */
+#auth-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 6, 12, 0.88);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: 2147483640;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+#auth-overlay.active { display: flex; }
+#auth-card {
+    background: var(--surface-2);
+    border: 1px solid var(--border-strong);
+    border-radius: 18px;
+    padding: 34px 28px;
+    max-width: 360px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(88, 166, 255, 0.1);
+    cursor: default;
+    animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes modalPop {
+    from { opacity: 0; transform: scale(0.92) translateY(12px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.auth-brand-logo {
+    font-size: 32px;
+    font-weight: 800;
+    color: #58a6ff;
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+}
+.auth-title {
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+.auth-desc {
+    font-size: 13.5px;
+    color: var(--text-secondary);
+    margin-bottom: 22px;
+}
+.pin-dots {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+.pin-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid var(--border-strong);
+    background: transparent;
+    transition: all 0.2s ease;
+}
+.pin-dot.filled {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 14px var(--accent-glow);
+    transform: scale(1.15);
+}
+.pin-dot.error {
+    background: var(--danger);
+    border-color: var(--danger);
+    box-shadow: 0 0 14px var(--danger-glow);
+}
+
+/* Keypad */
+.keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+.key-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-light);
+    color: var(--text-primary);
+    font-size: 19px;
+    font-weight: 600;
+    padding: 13px 0;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.12s ease;
+}
+.key-btn:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: var(--border-strong);
+    transform: scale(1.03);
+}
+.key-btn:active {
+    transform: scale(0.97);
+    background: rgba(88, 166, 255, 0.25);
+}
+.key-btn.action {
+    font-size: 15px;
+    font-weight: 700;
+}
+.key-btn.submit {
+    background: #238636;
+    border-color: #2ea043;
+    color: #fff;
+}
+.key-btn.submit:hover {
+    background: #2ea043;
+}
+
+.attempts-badge {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+    display: inline-block;
+    transition: all 0.2s ease;
+}
+.attempts-badge.warn {
+    color: #e3b341;
+    background: rgba(227, 179, 65, 0.15);
+}
+.attempts-badge.danger {
+    color: #ff7b72;
+    background: rgba(248, 81, 73, 0.18);
+    animation: pulseWarn 1s infinite;
+}
+@keyframes pulseWarn {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.lockout-box {
+    background: rgba(248, 81, 73, 0.14);
+    border: 1px solid rgba(248, 81, 73, 0.35);
+    border-radius: 12px;
+    padding: 22px 18px;
+    color: #ff7b72;
+    font-size: 14.5px;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+/* Portal Main App Container */
+#portal-view {
+    position: fixed;
+    inset: 0;
+    background: #090a10;
+    z-index: 2147483642;
+    display: none;
+    flex-direction: column;
+}
+#portal-view.active { display: flex; }
+
+/* Top Navigation Bar */
+.portal-navbar {
+    height: 52px;
+    background: rgba(14, 17, 24, 0.95);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    gap: 12px;
+    z-index: 100;
+    flex-shrink: 0;
+}
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.portal-brand {
+    font-size: 18px;
+    font-weight: 800;
+    color: #58a6ff;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+.nav-tabs {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.04);
+    padding: 3px;
+    border-radius: 9px;
+    border: 1px solid var(--border-light);
+}
+.nav-tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+.nav-tab-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.08);
+}
+.nav-tab-btn.active {
+    color: #fff;
+    background: #1f6feb;
+    box-shadow: 0 2px 8px rgba(31, 111, 235, 0.4);
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.pill-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-light);
+    color: var(--text-primary);
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+.pill-btn:hover {
+    background: rgba(255, 255, 255, 0.16);
+    border-color: var(--border-strong);
+}
+.pill-btn.panic {
+    background: rgba(248, 81, 73, 0.16);
+    border-color: rgba(248, 81, 73, 0.4);
+    color: #ff7b72;
+}
+.pill-btn.panic:hover {
+    background: rgba(248, 81, 73, 0.35);
+    color: #fff;
+}
+.node-status-dot {
+    width: 8px;
+    height: 8px;
+    background: #39d353;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 8px #39d353;
+}
+
+/* App Viewport & Iframes */
+.portal-viewport {
+    flex: 1;
+    position: relative;
+    background: #000;
+    overflow: hidden;
+}
+.app-frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: #090a0f;
+    display: none;
+}
+.app-frame.active {
+    display: block;
+}
+
+/* Home / Dashboard View */
+#view-home {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    padding: 30px 24px;
+    background: radial-gradient(circle at 50% 10%, rgba(31, 111, 235, 0.12), transparent 60%), #090a10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.home-hero {
+    text-align: center;
+    max-width: 680px;
+    margin-bottom: 34px;
+}
+.home-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #58a6ff;
+    background: rgba(88, 166, 255, 0.1);
+    border: 1px solid rgba(88, 166, 255, 0.25);
+    padding: 5px 14px;
+    border-radius: 999px;
+    margin-bottom: 14px;
+}
+.home-title {
+    font-size: 36px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+}
+.home-title span { color: #58a6ff; }
+.home-desc {
+    font-size: 15px;
+    color: var(--text-secondary);
+}
+
+/* Quick Search Bar */
+.search-box-wrap {
+    width: 100%;
+    max-width: 640px;
+    display: flex;
+    align-items: center;
+    background: var(--surface-1);
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    padding: 6px 10px 6px 16px;
+    gap: 10px;
+    margin-bottom: 36px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+    transition: border-color 0.15s ease;
+}
+.search-box-wrap:focus-within {
+    border-color: #58a6ff;
+    box-shadow: 0 12px 35px rgba(31, 111, 235, 0.25);
+}
+.search-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 15px;
+    outline: none;
+}
+.search-btn {
+    background: #1f6feb;
+    border: none;
+    color: #fff;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13.5px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+.search-btn:hover { background: #388bfd; }
+
+/* App Tiles Grid */
+.app-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+    width: 100%;
+    max-width: 880px;
+    margin-bottom: 30px;
+}
+.app-card {
+    background: var(--surface-1);
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.app-card:hover {
+    background: var(--surface-2);
+    border-color: var(--border-strong);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.5);
+}
+.app-card-icon {
+    font-size: 32px;
+    margin-bottom: 4px;
+}
+.app-card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+}
+.app-card-sub {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+}
+
+/* Lo-Fi Music Widget */
+.lofi-widget {
+    background: var(--surface-1);
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    padding: 18px 24px;
+    width: 100%;
+    max-width: 640px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 30px;
+}
+.lofi-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.lofi-icon { font-size: 28px; }
+.lofi-name { font-size: 14px; font-weight: 700; color: #fff; }
+.lofi-sub { font-size: 12px; color: var(--text-secondary); }
+.lofi-controls { display: flex; align-items: center; gap: 10px; }
+.lofi-btn {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid var(--border-light);
+    color: #fff;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.15s ease;
+}
+.lofi-btn:hover {
+    background: #1f6feb;
+    border-color: #58a6ff;
+    transform: scale(1.08);
+}
+
+/* Connecting Splash */
+#connect-splash {
+    position: fixed;
+    inset: 0;
+    background: #090a10;
+    color: #fff;
+    z-index: 2147483646;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+}
+.loader-ring {
+    width: 44px;
+    height: 44px;
+    border: 3px solid rgba(255, 255, 255, 0.12);
+    border-top-color: #58a6ff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+                ]]></style>
+                <meta charset="UTF-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                <title>APStudy | Math and Language Arts Tutoring</title>
+            </head>
+            <body>
+
+    <!-- Cloaked APStudy Page -->
+    <div id="cloak-page">
+        <nav class="cloak-nav">
+            <div class="cloak-logo">
+                <div class="cloak-badge">AP</div>
+                <span>APStudy Prep &amp; Tutoring</span>
+            </div>
+            <button class="cloak-btn" id="open-portal-btn">Student Workspace</button>
+        </nav>
+
+        <section class="cloak-hero">
+            <h1>Advanced Placement Master Curriculum</h1>
+            <p>Welcome to APStudy. We provide rigorous prep across mathematics, sciences, essay writing, and analytical reasoning to help secondary students achieve top scores on AP and college-entrance examinations.</p>
+        </section>
+
+        <div class="cloak-grid">
+            <div class="cloak-card">
+                <h2>Mathematics &amp; Calculus</h2>
+                <p>Comprehensive reviews covering single-variable calculus, differential equations, Taylor series, integrals, geometry proofs, and discrete statistics.</p>
+            </div>
+            <div class="cloak-card">
+                <h2>Sciences &amp; Physics</h2>
+                <p>Guided lab modules in mechanics, thermodynamics, electromagnetism, cellular biology, and chemical kinetics with interactive problem sets.</p>
+            </div>
+            <div class="cloak-card">
+                <h2>English &amp; Literature</h2>
+                <p>In-depth synthesis essays, thesis composition, rhetorical analysis, literary devices, and grammar mechanics for persuasive composition.</p>
+            </div>
+        </div>
+
+        <div class="cloak-hint">
+            ⚡ Click anywhere on screen to enter portal
+        </div>
+    </div>
+
+    <!-- Security Auth Modal (PIN: 7081, 3 Attempts) -->
+    <div id="auth-overlay">
+        <div id="auth-card">
+            <div class="auth-brand-logo">يونس</div>
+            <h3 class="auth-title">Security Gate</h3>
+            <p class="auth-desc">Enter authorization PIN to unlock workspace.</p>
+
+            <div id="auth-active-box">
+                <div class="pin-dots">
+                    <div class="pin-dot" id="dot-0"></div>
+                    <div class="pin-dot" id="dot-1"></div>
+                    <div class="pin-dot" id="dot-2"></div>
+                    <div class="pin-dot" id="dot-3"></div>
+                </div>
+
+                <div class="keypad">
+                    <button class="key-btn" data-key="1">1</button>
+                    <button class="key-btn" data-key="2">2</button>
+                    <button class="key-btn" data-key="3">3</button>
+                    <button class="key-btn" data-key="4">4</button>
+                    <button class="key-btn" data-key="5">5</button>
+                    <button class="key-btn" data-key="6">6</button>
+                    <button class="key-btn" data-key="7">7</button>
+                    <button class="key-btn" data-key="8">8</button>
+                    <button class="key-btn" data-key="9">9</button>
+                    <button class="key-btn action" id="key-del">⌫</button>
+                    <button class="key-btn" data-key="0">0</button>
+                    <button class="key-btn action submit" id="key-enter">↵</button>
+                </div>
+
+                <div id="attempts-badge" class="attempts-badge">3 Attempts Remaining</div>
+            </div>
+
+            <div id="auth-locked-box" style="display:none;">
+                <div class="lockout-box">
+                    ❌ ACCESS DENIED<br />
+                    Maximum failed attempts exceeded.<br />
+                    Terminal is permanently locked.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Connecting Splash Screen -->
+    <div id="connect-splash">
+        <div class="loader-ring"></div>
+        <div id="splash-label" style="font-size: 15px; font-weight: 500; color: #c9d1d9;">Connecting to fastest يونس node...</div>
+    </div>
+
+    <!-- Unblocked Workspace Portal -->
+    <div id="portal-view">
+        <header class="portal-navbar">
+            <div class="nav-left">
+                <div class="portal-brand" id="brand-logo-btn">
+                    <span>⚡</span> <span>يونس</span>
+                </div>
+                <div class="nav-tabs">
+                    <button class="nav-tab-btn active" id="tab-home">🏠 Home</button>
+                    <button class="nav-tab-btn" id="tab-browser">🌐 Browser</button>
+                    <button class="nav-tab-btn" id="tab-games">🎮 Games</button>
+                    <button class="nav-tab-btn" id="tab-movies">🎬 Movies</button>
+                    <button class="nav-tab-btn" id="tab-youtube">📺 YouTube</button>
+                </div>
+            </div>
+
+            <div class="nav-right">
+                <button class="pill-btn" id="btn-node-cycle" title="Cycle to next live mirror">
+                    <span class="node-status-dot"></span>
+                    <span id="node-name-label">Cirrus (Live)</span>
+                </button>
+                <button class="pill-btn" id="btn-tab-cloak" title="Disguise tab as Google Classroom">
+                    🎭 Disguise
+                </button>
+                <button class="pill-btn panic" id="btn-panic-cloak" title="Instant Panic (Esc)">
+                    🛡️ Cloak (Esc)
+                </button>
+            </div>
+        </header>
+
+        <main class="portal-viewport">
+            <!-- Home Hub View -->
+            <div id="view-home">
+                <div class="home-hero">
+                    <div class="home-badge">🛡️ Built-in AdBlocker • Zero Redirects • High-Speed Proxy</div>
+                    <h1 class="home-title">Welcome to <span>يونس OS</span></h1>
+                    <p class="home-desc">Fast, encrypted, and completely unblocked browsing, games, movies, and YouTube.</p>
+                </div>
+
+                <div class="search-box-wrap">
+                    <input type="text" class="search-input" id="quick-url-input" placeholder="Search with Google or type a website address..." autocomplete="off" />
+                    <button class="search-btn" id="btn-quick-search">Browse</button>
+                </div>
+
+                <div class="app-cards-grid">
+                    <div class="app-card" onclick="openModule('browser')">
+                        <div class="app-card-icon">🌐</div>
+                        <div class="app-card-title">يونس Browser</div>
+                        <div class="app-card-sub">Unblocked web proxy with adblocker and tab controls.</div>
+                    </div>
+                    <div class="app-card" onclick="openModule('games')">
+                        <div class="app-card-icon">🎮</div>
+                        <div class="app-card-title">Games Hub</div>
+                        <div class="app-card-sub">500+ unblocked WebGL, Retro, and Action games.</div>
+                    </div>
+                    <div class="app-card" onclick="openModule('movies')">
+                        <div class="app-card-icon">🎬</div>
+                        <div class="app-card-title">Cinema &amp; TV</div>
+                        <div class="app-card-sub">Stream thousands of movies and TV shows for free.</div>
+                    </div>
+                    <div class="app-card" onclick="openModule('youtube')">
+                        <div class="app-card-icon">📺</div>
+                        <div class="app-card-title">YouTube Unblocked</div>
+                        <div class="app-card-sub">Watch 1080p60 videos without ads or restrictions.</div>
+                    </div>
+                </div>
+
+                <!-- Lo-Fi Music Widget -->
+                <div class="lofi-widget">
+                    <div class="lofi-info">
+                        <div class="lofi-icon">🎧</div>
+                        <div>
+                            <div class="lofi-name">Lo-Fi Study Beats Radio</div>
+                            <div class="lofi-sub" id="lofi-status-text">Ready to stream chill background beats</div>
+                        </div>
+                    </div>
+                    <div class="lofi-controls">
+                        <button class="lofi-btn" id="lofi-play-btn" title="Play / Pause Lo-Fi Stream">▶</button>
+                    </div>
+                    <audio id="lofi-audio" preload="none" src="https://stream.zeno.fm/f3wvbbqmdg8uv"></audio>
+                </div>
+            </div>
+
+            <!-- Embedded Module Iframes -->
+            <iframe id="frame-browser" class="app-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups-to-escape-sandbox allow-downloads allow-presentation" allow="fullscreen; clipboard-read; clipboard-write; autoplay; camera; microphone; payment; web-share"></iframe>
+            <iframe id="frame-games" class="app-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups-to-escape-sandbox allow-downloads allow-presentation" allow="fullscreen; clipboard-read; clipboard-write; autoplay; camera; microphone; payment; web-share"></iframe>
+            <iframe id="frame-movies" class="app-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups-to-escape-sandbox allow-downloads allow-presentation" allow="fullscreen; clipboard-read; clipboard-write; autoplay; camera; microphone; payment; web-share"></iframe>
+            <iframe id="frame-youtube" class="app-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups-to-escape-sandbox allow-downloads allow-presentation" allow="fullscreen; clipboard-read; clipboard-write; autoplay; camera; microphone; payment; web-share"></iframe>
+        </main>
+    </div>
+
+                <script><![CDATA[
+
+(function() {
+    // 1. Super AdBlocker & Anti-Redirect Interceptor
+    const adPatterns = [
+        'adcash', 'popcash', 'smartpop', 'syndication', 'doubleclick',
+        'googleadservices', 'adnxs', 'trafficjunky', 'propeller',
+        'onclick', 'adsterra', 'exoclick', 'zergnet', 'revcontent',
+        'taboola', 'outbrain', 'bet365', '1xbet', 'vortex', 'hilltopads'
+    ];
+    const _origOpen = window.open;
+    window.open = function(url, target, features) {
+        if (!url) return null;
+        const sUrl = String(url).toLowerCase();
+        for (let i = 0; i < adPatterns.length; i++) {
+            if (sUrl.indexOf(adPatterns[i]) !== -1) {
+                console.log('[يونس AdBlocker] Blocked popup:', url);
+                return null;
+            }
+        }
+        if (sUrl === 'about:blank' || sUrl.startsWith('javascript:')) {
+            return null;
+        }
+        return _origOpen.call(window, url, target, features);
+    };
+
+    // 2. Synthesized Audio Feedback (Web Audio API)
+    let audioCtx = null;
+    function playBeep(freq, type, duration) {
+        try {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type || 'sine';
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        } catch(e) {}
+    }
+
+    // 3. Authentication & 3-Try Lockout Engine
+    const AUTH_PIN = '7081';
+    const MAX_TRIES = 3;
+    let currentInput = '';
+    let isUnlocked = false;
+    let failedCount = 0;
+
+    try {
+        if (localStorage.getItem('_younus_sys_locked') === 'true') {
+            failedCount = MAX_TRIES;
+        } else {
+            failedCount = parseInt(localStorage.getItem('_younus_attempts_spent') || '0', 10);
+            if (isNaN(failedCount)) failedCount = 0;
+            if (failedCount >= MAX_TRIES) {
+                localStorage.setItem('_younus_sys_locked', 'true');
+            }
+        }
+    } catch(e) {}
+
+    const authOverlay = document.getElementById('auth-overlay');
+    const authActiveBox = document.getElementById('auth-active-box');
+    const authLockedBox = document.getElementById('auth-locked-box');
+    const attemptsBadge = document.getElementById('attempts-badge');
+    const pinDots = [
+        document.getElementById('dot-0'),
+        document.getElementById('dot-1'),
+        document.getElementById('dot-2'),
+        document.getElementById('dot-3')
+    ];
+
+    function updateDots() {
+        for (let i = 0; i < 4; i++) {
+            if (i < currentInput.length) {
+                pinDots[i].classList.add('filled');
+            } else {
+                pinDots[i].classList.remove('filled');
+                pinDots[i].classList.remove('error');
+            }
+        }
+    }
+
+    function updateAttemptsUI() {
+        const remaining = Math.max(0, MAX_TRIES - failedCount);
+        if (remaining <= 0) {
+            authActiveBox.style.display = 'none';
+            authLockedBox.style.display = 'block';
+        } else {
+            attemptsBadge.textContent = remaining + ' Attempt' + (remaining === 1 ? '' : 's') + ' Remaining';
+            if (remaining === 1) {
+                attemptsBadge.className = 'attempts-badge danger';
+            } else if (remaining === 2) {
+                attemptsBadge.className = 'attempts-badge warn';
+            } else {
+                attemptsBadge.className = 'attempts-badge';
+            }
+        }
+    }
+
+    function openAuthModal() {
+        if (isUnlocked) return;
+        currentInput = '';
+        updateDots();
+        updateAttemptsUI();
+        authOverlay.classList.add('active');
+    }
+
+    function closeAuthModal() {
+        authOverlay.classList.remove('active');
+        currentInput = '';
+        updateDots();
+    }
+
+    function appendDigit(digit) {
+        if (failedCount >= MAX_TRIES) return;
+        if (currentInput.length < 4) {
+            currentInput += digit;
+            playBeep(480 + (currentInput.length * 60), 'sine', 0.08);
+            updateDots();
+            if (currentInput.length === 4) {
+                setTimeout(submitPin, 180);
+            }
+        }
+    }
+
+    function deleteDigit() {
+        if (currentInput.length > 0) {
+            currentInput = currentInput.slice(0, -1);
+            playBeep(340, 'triangle', 0.08);
+            updateDots();
+        }
+    }
+
+    function submitPin() {
+        if (failedCount >= MAX_TRIES) return;
+        if (currentInput === AUTH_PIN) {
+            // Success
+            isUnlocked = true;
+            playBeep(523, 'triangle', 0.1);
+            setTimeout(function() { playBeep(659, 'triangle', 0.12); }, 100);
+            setTimeout(function() { playBeep(784, 'triangle', 0.2); }, 200);
+
+            try {
+                localStorage.removeItem('_younus_attempts_spent');
+            } catch(e) {}
+            closeAuthModal();
+            launchPortal();
+        } else {
+            // Failed Attempt
+            failedCount++;
+            playBeep(180, 'sawtooth', 0.25);
+            try {
+                localStorage.setItem('_younus_attempts_spent', String(failedCount));
+            } catch(e) {}
+
+            for (let i = 0; i < 4; i++) {
+                pinDots[i].classList.add('error');
+            }
+
+            setTimeout(function() {
+                currentInput = '';
+                updateDots();
+                if (failedCount >= MAX_TRIES) {
+                    try {
+                        localStorage.setItem('_younus_sys_locked', 'true');
+                    } catch(e) {}
+                    updateAttemptsUI();
+                } else {
+                    updateAttemptsUI();
+                }
+            }, 400);
+        }
+    }
+
+    // Keypad listeners
+    document.querySelectorAll('.key-btn[data-key]').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            appendDigit(btn.getAttribute('data-key'));
+        });
+    });
+
+    const keyDel = document.getElementById('key-del');
+    const keyEnter = document.getElementById('key-enter');
+    if (keyDel) {
+        keyDel.addEventListener('click', function(e) {
+            e.stopPropagation();
+            deleteDigit();
+        });
+    }
+    if (keyEnter) {
+        keyEnter.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (currentInput.length > 0) submitPin();
+        });
+    }
+
+    // Physical keyboard listener
+    window.addEventListener('keydown', function(e) {
+        if (authOverlay.classList.contains('active')) {
+            if (e.key >= '0' && e.key <= '9') {
+                appendDigit(e.key);
+            } else if (e.key === 'Backspace') {
+                deleteDigit();
+            } else if (e.key === 'Enter') {
+                submitPin();
+            } else if (e.key === 'Escape') {
+                closeAuthModal();
+            }
+        } else if (e.key === 'Escape') {
+            if (isUnlocked) panicCloak();
+        }
+    });
+
+    // Click anywhere on screen to trigger PIN entry
+    document.addEventListener('click', function(e) {
+        if (isUnlocked) return;
+        if (authOverlay.classList.contains('active')) {
+            if (e.target === authOverlay) closeAuthModal();
+            return;
+        }
+        openAuthModal();
+    });
+
+    const openPortalBtn = document.getElementById('open-portal-btn');
+    if (openPortalBtn) {
+        openPortalBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            openAuthModal();
+        });
+    }
+
+    // 4. Live Proxy Mirrors & Portal Engine
+    const LIVE_MIRRORS = [
+        'https://cirrusbk6l.planet35.com',
+        'https://drifttt82.chickenkiller.com',
+        'https://flint7boq.irqsistemas.net',
+        'https://onyxjbxy.sakidumarwana.com.np',
+        'https://driftz9ip.abratec.com.br',
+        'https://novajfag.amadeuspiano.com'
+    ];
+
+    let activeMirror = LIVE_MIRRORS[0];
+    let mirrorIdx = 0;
+    let activeTabName = 'home';
+
+    const splash = document.getElementById('connect-splash');
+    const portalView = document.getElementById('portal-view');
+    const nodeNameLabel = document.getElementById('node-name-label');
+
+    const viewHome = document.getElementById('view-home');
+    const frameBrowser = document.getElementById('frame-browser');
+    const frameGames = document.getElementById('frame-games');
+    const frameMovies = document.getElementById('frame-movies');
+    const frameYoutube = document.getElementById('frame-youtube');
+
+    async function pingMirror(url) {
+        const ctrl = new AbortController();
+        const timer = setTimeout(function() { ctrl.abort(); }, 2500);
+        try {
+            const res = await fetch(url + '/modules/browser/index.html', {
+                method: 'GET',
+                mode: 'no-cors',
+                signal: ctrl.signal
+            });
+            clearTimeout(timer);
+            return url;
+        } catch (err) {
+            clearTimeout(timer);
+            throw err;
+        }
+    }
+
+    async function findFastestMirror() {
+        try {
+            const fastest = await Promise.any(LIVE_MIRRORS.map(function(m) { return pingMirror(m); }));
+            return fastest;
+        } catch (e) {
+            return LIVE_MIRRORS[0];
+        }
+    }
+
+    async function launchPortal() {
+        splash.style.display = 'flex';
+        try {
+            activeMirror = await findFastestMirror();
+            mirrorIdx = LIVE_MIRRORS.indexOf(activeMirror);
+            if (mirrorIdx === -1) mirrorIdx = 0;
+
+            const host = new URL(activeMirror).hostname.split('.')[0];
+            if (nodeNameLabel) nodeNameLabel.textContent = host + ' (Live)';
+
+            portalView.classList.add('active');
+            switchTab('home');
+
+            setTimeout(function() {
+                splash.style.display = 'none';
+            }, 300);
+        } catch (err) {
+            splash.style.display = 'none';
+            portalView.classList.add('active');
+            switchTab('home');
+        }
+    }
+
+    function switchTab(tab) {
+        activeTabName = tab;
+        ['home', 'browser', 'games', 'movies', 'youtube'].forEach(function(t) {
+            const tabBtn = document.getElementById('tab-' + t);
+            if (tabBtn) tabBtn.classList.toggle('active', t === tab);
+        });
+
+        // Hide all views first
+        viewHome.style.display = 'none';
+        frameBrowser.classList.remove('active');
+        frameGames.classList.remove('active');
+        frameMovies.classList.remove('active');
+        frameYoutube.classList.remove('active');
+
+        if (tab === 'home') {
+            viewHome.style.display = 'flex';
+        } else if (tab === 'browser') {
+            if (!frameBrowser.src || frameBrowser.src === 'about:blank') {
+                frameBrowser.src = activeMirror + '/modules/browser/index.html';
+            }
+            frameBrowser.classList.add('active');
+        } else if (tab === 'games') {
+            if (!frameGames.src || frameGames.src === 'about:blank') {
+                frameGames.src = activeMirror + '/modules/lib/index.html';
+            }
+            frameGames.classList.add('active');
+        } else if (tab === 'movies') {
+            if (!frameMovies.src || frameMovies.src === 'about:blank') {
+                frameMovies.src = activeMirror + '/modules/movies/index.html';
+            }
+            frameMovies.classList.add('active');
+        } else if (tab === 'youtube') {
+            if (!frameYoutube.src || frameYoutube.src === 'about:blank') {
+                frameYoutube.src = activeMirror + '/modules/youtube/index.html';
+            }
+            frameYoutube.classList.add('active');
+        }
+    }
+
+    window.openModule = function(mod) {
+        switchTab(mod);
+    };
+
+    document.getElementById('tab-home').addEventListener('click', function() { switchTab('home'); });
+    document.getElementById('tab-browser').addEventListener('click', function() { switchTab('browser'); });
+    document.getElementById('tab-games').addEventListener('click', function() { switchTab('games'); });
+    document.getElementById('tab-movies').addEventListener('click', function() { switchTab('movies'); });
+    document.getElementById('tab-youtube').addEventListener('click', function() { switchTab('youtube'); });
+    document.getElementById('brand-logo-btn').addEventListener('click', function() { switchTab('home'); });
+
+    // Quick Search Input
+    const quickInput = document.getElementById('quick-url-input');
+    const quickSearchBtn = document.getElementById('btn-quick-search');
+    function executeQuickSearch() {
+        const val = (quickInput.value || '').trim();
+        if (!val) {
+            switchTab('browser');
+            return;
+        }
+        let targetUrl = val;
+        if (!val.startsWith('http://') && !val.startsWith('https://')) {
+            if (val.indexOf('.') !== -1 && val.indexOf(' ') === -1) {
+                targetUrl = 'https://' + val;
+            } else {
+                targetUrl = 'https://www.google.com/search?q=' + encodeURIComponent(val);
+            }
+        }
+        switchTab('browser');
+        frameBrowser.src = activeMirror + '/modules/browser/index.html#' + encodeURIComponent(targetUrl);
+    }
+    if (quickSearchBtn) quickSearchBtn.addEventListener('click', executeQuickSearch);
+    if (quickInput) {
+        quickInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') executeQuickSearch();
+        });
+    }
+
+    // Node Switcher
+    const btnNodeCycle = document.getElementById('btn-node-cycle');
+    if (btnNodeCycle) {
+        btnNodeCycle.addEventListener('click', function() {
+            mirrorIdx = (mirrorIdx + 1) % LIVE_MIRRORS.length;
+            activeMirror = LIVE_MIRRORS[mirrorIdx];
+            const host = new URL(activeMirror).hostname.split('.')[0];
+            if (nodeNameLabel) nodeNameLabel.textContent = host + ' (Live)';
+            
+            // Reload active frame with new node
+            if (activeTabName === 'browser') frameBrowser.src = activeMirror + '/modules/browser/index.html';
+            else if (activeTabName === 'games') frameGames.src = activeMirror + '/modules/lib/index.html';
+            else if (activeTabName === 'movies') frameMovies.src = activeMirror + '/modules/movies/index.html';
+            else if (activeTabName === 'youtube') frameYoutube.src = activeMirror + '/modules/youtube/index.html';
+        });
+    }
+
+    // Tab Cloaker (Google Classroom disguise)
+    let isCloaked = false;
+    const btnTabCloak = document.getElementById('btn-tab-cloak');
+    if (btnTabCloak) {
+        btnTabCloak.addEventListener('click', function() {
+            isCloaked = !isCloaked;
+            if (isCloaked) {
+                document.title = 'Classes - Google Classroom';
+                const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+                link.type = 'image/x-icon';
+                link.rel = 'shortcut icon';
+                link.href = 'https://ssl.gstatic.com/classroom/favicon.png';
+                document.getElementsByTagName('head')[0].appendChild(link);
+                btnTabCloak.textContent = '🎭 Uncloak';
+            } else {
+                document.title = 'APStudy | Math and Language Arts Tutoring';
+                btnTabCloak.textContent = '🎭 Disguise';
+            }
+        });
+    }
+
+    // Panic Button (Esc)
+    function panicCloak() {
+        portalView.classList.remove('active');
+        frameBrowser.src = 'about:blank';
+        frameGames.src = 'about:blank';
+        frameMovies.src = 'about:blank';
+        frameYoutube.src = 'about:blank';
+        isUnlocked = false;
+        closeAuthModal();
+        if (lofiAudio && !lofiAudio.paused) {
+            lofiAudio.pause();
+            lofiPlayBtn.textContent = '▶';
+        }
+    }
+    const btnPanic = document.getElementById('btn-panic-cloak');
+    if (btnPanic) btnPanic.addEventListener('click', panicCloak);
+
+    // Lo-Fi Audio Player
+    const lofiAudio = document.getElementById('lofi-audio');
+    const lofiPlayBtn = document.getElementById('lofi-play-btn');
+    const lofiStatusText = document.getElementById('lofi-status-text');
+    if (lofiPlayBtn && lofiAudio) {
+        lofiPlayBtn.addEventListener('click', function() {
+            if (lofiAudio.paused) {
+                lofiAudio.play().then(function() {
+                    lofiPlayBtn.textContent = '⏸';
+                    lofiStatusText.textContent = 'Streaming live chill Lo-Fi beats...';
+                }).catch(function() {
+                    lofiStatusText.textContent = 'Click again to permit audio stream';
+                });
+            } else {
+                lofiAudio.pause();
+                lofiPlayBtn.textContent = '▶';
+                lofiStatusText.textContent = 'Paused';
+            }
+        });
+    }
+})();
+
+                ]]></script>
+            </body>
+        </html>
+    </foreignObject>
+</svg>
