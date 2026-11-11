@@ -589,10 +589,100 @@ html, body {
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-bottom-left-radius: 4px;
 }
-.ai-footer {
-    padding: 8px 10px;
+.ai-footer-wrap {
+    display: flex;
+    flex-direction: column;
     background: #241d2b;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.ai-footer-tools {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px 0 10px;
+}
+.ai-tool-btn {
+    height: 24px;
+    padding: 0 9px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #c9bfd4;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    user-select: none;
+}
+.ai-tool-btn:hover {
+    background: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+}
+.ai-tool-btn.active {
+    background: #d2b8ff;
+    color: #1f162b;
+    border-color: #d2b8ff;
+}
+.ai-tool-header-btn {
+    height: 24px;
+    padding: 0 8px;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #000000;
+    font-size: 11px;
+    font-weight: 700;
+    border: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.ai-tool-header-btn:hover {
+    opacity: 0.9;
+}
+.ai-attachment-preview {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: #18121e;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.ai-preview-thumb {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.ai-preview-name {
+    flex: 1;
+    font-size: 12px;
+    color: #d2b8ff;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.ai-preview-remove {
+    width: 20px;
+    height: 20px;
+    border: 0;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.ai-preview-remove:hover {
+    background: rgba(255, 80, 80, 0.4);
+}
+.ai-footer {
+    padding: 6px 10px 8px 10px;
     display: flex;
     gap: 8px;
     align-items: center;
@@ -621,6 +711,233 @@ html, body {
     font-size: 12px;
     font-weight: 700;
     cursor: pointer;
+}
+
+/* =========================================================================
+   SCREEN SOLVER FLOATING HUD (Matching User's Screenshot)
+   ========================================================================= */
+#solver-overlay {
+    position: fixed;
+    top: 50px;
+    right: 20px;
+    width: 440px;
+    max-width: calc(100vw - 32px);
+    max-height: calc(100vh - 70px);
+    background: #050507;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.88);
+    display: none;
+    flex-direction: column;
+    z-index: 10002;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #ffffff;
+}
+.solver-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: #0a0a0e;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    user-select: none;
+}
+.solver-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #e5e5ea;
+}
+.solver-x {
+    width: 26px;
+    height: 26px;
+    border: 0;
+    background: transparent;
+    color: #a09fa8;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.solver-x:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+}
+.solver-body {
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    max-height: calc(100vh - 140px);
+}
+.solver-input {
+    width: 100%;
+    height: 42px;
+    background: #121216;
+    border: 1px solid #282832;
+    border-radius: 10px;
+    color: #ffffff;
+    font-size: 14px;
+    padding: 0 14px;
+    box-sizing: border-box;
+    outline: none;
+}
+.solver-input:focus {
+    border-color: #d2b8ff;
+}
+.solver-input::placeholder {
+    color: #6e6d78;
+}
+.solver-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.solver-btn-solve {
+    background: #ffffff;
+    color: #000000;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 0;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.15s;
+}
+.solver-btn-solve:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+}
+.solver-btn-solve:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+.solver-btn-close {
+    background: #181820;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 1px solid #282835;
+    cursor: pointer;
+}
+.solver-btn-close:hover {
+    background: #242430;
+}
+.solver-btn-secondary {
+    background: transparent;
+    color: #9a94a6;
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    margin-left: auto;
+}
+.solver-btn-secondary:hover {
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.25);
+}
+.solver-screen-box {
+    position: relative;
+    width: 100%;
+    min-height: 180px;
+    max-height: 240px;
+    background: #000000;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#solver-video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #000000;
+}
+.solver-no-stream {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+}
+.solver-btn-start {
+    background: #ffffff;
+    color: #000000;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 0;
+    cursor: pointer;
+}
+.solver-btn-start:hover {
+    opacity: 0.9;
+}
+.solver-result-panel {
+    background: #111018;
+    border: 1px solid rgba(210, 184, 255, 0.35);
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.solver-answer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.solver-badge {
+    font-size: 12px;
+    font-weight: 700;
+    color: #a7f3d0;
+    background: rgba(16, 185, 129, 0.15);
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+.solver-copy-btn {
+    font-size: 11.5px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #e5e5ea;
+    border: 0;
+    border-radius: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+}
+.solver-copy-btn:hover {
+    background: rgba(255, 255, 255, 0.16);
+}
+.solver-answer-box {
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: #f3f3f5;
+    max-height: 220px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+.solver-highlight-ans {
+    font-size: 15.5px;
+    font-weight: 800;
+    color: #34d399;
+    background: rgba(16, 185, 129, 0.14);
+    border-left: 3px solid #10b981;
+    padding: 7px 10px;
+    border-radius: 6px;
+    margin-bottom: 4px;
 }
 
 </style>
@@ -666,6 +983,14 @@ html, body {
             </select>
             <button type="submit" class="omni-go" id="omni-submit">Search</button>
         </form>
+        <button type="button" class="nav-btn" id="btn-solver-toggle" title="Screen Solver (Screenshare to solve i-Ready &amp; tests)" style="width:auto;height:30px;padding:0 12px;border-radius:999px;background:#ffffff;color:#000000;font-weight:700;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px;border:0;flex-shrink:0">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" />
+                <line x1="8" y1="21" x2="16" y2="21" />
+                <line x1="12" y1="17" x2="12" y2="21" />
+            </svg>
+            Solve Screen
+        </button>
         <button type="button" class="nav-btn" id="btn-ai-toggle" title="AI Assistant" style="width:auto;height:30px;padding:0 12px;border-radius:999px;background:#d2b8ff;color:#1f162b;font-weight:700;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:4px;border:0;flex-shrink:0">&#x2728; AI</button>
     </div>
 
@@ -711,15 +1036,72 @@ html, body {
     <div id="ai-modal">
         <div class="ai-header">
             <div class="ai-title">&#x2728; younis AI Assistant (Unlimited)</div>
-            <button type="button" class="ai-close" id="ai-close" title="Close">&#x2715;</button>
+            <div style="display:flex;align-items:center;gap:6px">
+                <button type="button" id="ai-header-solver-btn" class="ai-tool-header-btn" title="Open Screen Solver">&#x1F5B5; Solve Screen</button>
+                <button type="button" class="ai-close" id="ai-close" title="Close">&#x2715;</button>
+            </div>
         </div>
         <div class="ai-messages" id="ai-messages">
-            <div class="ai-msg bot">Hello! I am your unlimited younis AI assistant. Ask me anything!</div>
+            <div class="ai-msg bot">Hello! I am your unlimited younis AI assistant. I can analyze images, search the web, and solve tests or questions. Ask me anything or paste an image!</div>
         </div>
-        <form class="ai-footer" id="ai-form">
-            <input type="text" class="ai-input" id="ai-input" placeholder="Type a message..." autocomplete="off" />
-            <button type="submit" class="ai-send" id="ai-send">Send</button>
+        <div id="ai-attachment-preview" class="ai-attachment-preview" style="display:none">
+            <img id="ai-preview-thumb" class="ai-preview-thumb" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="preview" />
+            <div id="ai-preview-name" class="ai-preview-name"></div>
+            <button type="button" id="ai-preview-remove" class="ai-preview-remove" title="Remove attachment">&#x2715;</button>
+        </div>
+        <form class="ai-footer-wrap" id="ai-form">
+            <div class="ai-footer-tools">
+                <button type="button" id="ai-btn-web" class="ai-tool-btn" title="Toggle Real-Time Web Search">&#x1F310; Web Search</button>
+                <label for="ai-file-input" class="ai-tool-btn" title="Upload Photo or File">&#x1F4CE; Photo/File</label>
+                <input type="file" id="ai-file-input" style="display:none" accept="image/*,.txt,.pdf,.doc,.docx,.json,.js,.py,.html" />
+            </div>
+            <div class="ai-footer">
+                <input type="text" class="ai-input" id="ai-input" placeholder="Type a message or paste image..." autocomplete="off" />
+                <button type="submit" class="ai-send" id="ai-send">Send</button>
+            </div>
         </form>
+    </div>
+
+    <!-- Screen Solver Floating HUD (Exact match to User's Screenshot) -->
+    <div id="solver-overlay">
+        <div class="solver-bar" id="solver-bar">
+            <div class="solver-brand">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#d2b8ff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+                <span id="solver-host-label">cdn.jsdelivr.net</span>
+            </div>
+            <button type="button" class="solver-x" id="solver-btn-x" title="Close">&#x2715;</button>
+        </div>
+
+        <div class="solver-body">
+            <input type="text" id="solver-input" class="solver-input" placeholder="Ask about what's on your screen..." autocomplete="off" />
+
+            <div class="solver-actions">
+                <button type="button" id="solver-btn-solve" class="solver-btn-solve">Solve question</button>
+                <button type="button" id="solver-btn-close" class="solver-btn-close">Close</button>
+                <button type="button" id="solver-btn-switch-tab" class="solver-btn-secondary" title="Change shared tab/screen">&#x1F504; Change Tab</button>
+            </div>
+
+            <div class="solver-screen-box" id="solver-screen-box">
+                <video id="solver-video" autoplay="autoplay" playsinline="playsinline" muted="muted"></video>
+                <div id="solver-no-stream" class="solver-no-stream">
+                    <div style="font-size:32px;margin-bottom:6px">&#x1F5B5;</div>
+                    <div style="font-weight:700;font-size:13.5px;margin-bottom:4px">No Screen Shared Yet</div>
+                    <div style="font-size:11.5px;color:#a89eb4;margin-bottom:12px">Select your i-Ready tab or test window to begin solving</div>
+                    <button type="button" id="solver-btn-start-stream" class="solver-btn-start">Share Tab / Screen</button>
+                </div>
+            </div>
+
+            <div id="solver-result-panel" class="solver-result-panel" style="display:none">
+                <div class="solver-answer-header">
+                    <span id="solver-status-badge" class="solver-badge">&#x26A1; Solved</span>
+                    <button type="button" id="solver-btn-copy" class="solver-copy-btn">Copy Answer</button>
+                </div>
+                <div id="solver-answer-box" class="solver-answer-box"></div>
+            </div>
+        </div>
     </div>
 
 </div>
@@ -1630,7 +2012,8 @@ html, body {
         { name: "IMDb", url: "https://www.imdb.com/", cat: "Utilities & Life", badge: "IM" },
         { name: "Letterboxd", url: "https://letterboxd.com/", cat: "Utilities & Life", badge: "LB" },
         { name: "Toggle Fullscreen", url: "#fullscreen", cat: "Utilities & Life", badge: "⛶" },
-        { name: "AI Assistant", url: "#ai", cat: "AI & Cloud", badge: "✨" }
+        { name: "AI Assistant", url: "#ai", cat: "AI & Cloud", badge: "✨" },
+        { name: "Screen Solver (i-Ready)", url: "#screensolver", cat: "AI & Cloud", badge: "🖥️" }
     ];
 
     var CATEGORIES = ["All", "Social", "Video", "Gaming", "AI & Cloud", "Education", "Developer", "News & Sports", "Music", "Utilities & Life"];
@@ -1649,6 +2032,8 @@ html, body {
                 item.host = "F11 / Alt+F";
             } else if (item.url === "#ai") {
                 item.host = "Unlimited AI";
+            } else if (item.url === "#screensolver") {
+                item.host = "Screenshare & Solve";
             } else {
                 item.host = new URL(item.url).hostname.replace(/^www\./i, "");
             }
@@ -1701,6 +2086,10 @@ html, body {
         }
         if (targetUrl === "#ai") {
             toggleAi();
+            return;
+        }
+        if (targetUrl === "#screensolver") {
+            toggleScreenSolver();
             return;
         }
         if (targetUrl) navigate(targetUrl);
@@ -2482,14 +2871,61 @@ html, body {
         }
     });
 
-    // AI Assistant Client
+    // AI Assistant & Screen Solver Client
     var aiModal = document.getElementById("ai-modal");
     var btnAiToggle = document.getElementById("btn-ai-toggle");
     var aiClose = document.getElementById("ai-close");
     var aiInput = document.getElementById("ai-input");
     var aiForm = document.getElementById("ai-form");
     var aiMsgs = document.getElementById("ai-messages");
+    var btnAiWeb = document.getElementById("ai-btn-web");
+    var aiFileInput = document.getElementById("ai-file-input");
+    var aiAttachmentPreview = document.getElementById("ai-attachment-preview");
+    var aiPreviewThumb = document.getElementById("ai-preview-thumb");
+    var aiPreviewName = document.getElementById("ai-preview-name");
+    var aiPreviewRemove = document.getElementById("ai-preview-remove");
+    var aiHeaderSolverBtn = document.getElementById("ai-header-solver-btn");
 
+    // Screen Solver Elements
+    var solverOverlay = document.getElementById("solver-overlay");
+    var solverBar = document.getElementById("solver-bar");
+    var solverInput = document.getElementById("solver-input");
+    var solverBtnSolve = document.getElementById("solver-btn-solve");
+    var solverBtnClose = document.getElementById("solver-btn-close");
+    var solverBtnX = document.getElementById("solver-btn-x");
+    var solverBtnSwitch = document.getElementById("solver-btn-switch-tab");
+    var solverBtnStart = document.getElementById("solver-btn-start-stream");
+    var solverVideo = document.getElementById("solver-video");
+    var solverNoStream = document.getElementById("solver-no-stream");
+    var solverResultPanel = document.getElementById("solver-result-panel");
+    var solverStatusBadge = document.getElementById("solver-status-badge");
+    var solverAnswerBox = document.getElementById("solver-answer-box");
+    var solverBtnCopy = document.getElementById("solver-btn-copy");
+    var btnSolverToggle = document.getElementById("btn-solver-toggle");
+
+    var AI_KEY = atob("c2stb3ItdjEtZmUwMTZlNDlmNmZlMWY2ZjVlNzE2YTdlOWExYWQ1YWMzNzdmNDZmZWYyOTAxNzkzMzY3N2YwYThlYjU2MThjZA==");
+    var AI_HISTORY = [];
+
+    var VISION_MODELS = [
+        "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+        "google/gemma-4-31b-it:free",
+        "google/gemma-4-26b-a4b-it:free",
+        "nvidia/nemotron-3.5-super-vl:free",
+        "dots-studio/dots-3-note-preview:free"
+    ];
+
+    var TEXT_MODELS = [
+        "nvidia/nemotron-3.5-lightning:free",
+        "liquid/lfm-2.5-2.6b:free",
+        "cohere/north-mini-code:free",
+        "nvidia/nemotron-3-ultra-550b-a55b:free"
+    ];
+
+    var isWebSearchEnabled = false;
+    var activeAttachment = null; // { type: 'image'|'text', data: string, name: string }
+    var solverStream = null;
+
+    // Toggle AI Modal
     function toggleAi() {
         if (aiModal) {
             if (aiModal.style.display === "flex") {
@@ -2504,36 +2940,221 @@ html, body {
     if (btnAiToggle) btnAiToggle.addEventListener("click", toggleAi);
     if (aiClose) aiClose.addEventListener("click", toggleAi);
 
-    var AI_KEY = atob("c2stb3ItdjEtZmUwMTZlNDlmNmZlMWY2ZjVlNzE2YTdlOWExYWQ1YWMzNzdmNDZmZWYyOTAxNzkzMzY3N2YwYThlYjU2MThjZA==");
-    var AI_HISTORY = [];
+    // Toggle Web Search
+    if (btnAiWeb) {
+        btnAiWeb.addEventListener("click", function() {
+            isWebSearchEnabled = !isWebSearchEnabled;
+            if (isWebSearchEnabled) {
+                btnAiWeb.classList.add("active");
+                btnAiWeb.innerHTML = "&#x1F310; Web Search (ON)";
+            } else {
+                btnAiWeb.classList.remove("active");
+                btnAiWeb.innerHTML = "&#x1F310; Web Search";
+            }
+        });
+    }
 
+    // Attachment Handlers
+    function handleAttachmentFile(file) {
+        if (!file) return;
+        var r = new FileReader();
+        if (file.type.startsWith("image/")) {
+            r.onload = function(e) {
+                activeAttachment = {
+                    type: "image",
+                    data: e.target.result,
+                    name: file.name
+                };
+                if (aiPreviewThumb) {
+                    aiPreviewThumb.src = e.target.result;
+                    aiPreviewThumb.style.display = "block";
+                }
+                if (aiPreviewName) aiPreviewName.textContent = file.name;
+                if (aiAttachmentPreview) aiAttachmentPreview.style.display = "flex";
+            };
+            r.readAsDataURL(file);
+        } else {
+            r.onload = function(e) {
+                activeAttachment = {
+                    type: "text",
+                    data: e.target.result,
+                    name: file.name
+                };
+                if (aiPreviewThumb) aiPreviewThumb.style.display = "none";
+                if (aiPreviewName) aiPreviewName.textContent = "📄 " + file.name;
+                if (aiAttachmentPreview) aiAttachmentPreview.style.display = "flex";
+            };
+            r.readAsText(file);
+        }
+    }
+
+    function clearAttachment() {
+        activeAttachment = null;
+        if (aiFileInput) aiFileInput.value = "";
+        if (aiAttachmentPreview) aiAttachmentPreview.style.display = "none";
+        if (aiPreviewThumb) aiPreviewThumb.src = "";
+    }
+    if (aiPreviewRemove) aiPreviewRemove.addEventListener("click", clearAttachment);
+
+    if (aiFileInput) {
+        aiFileInput.addEventListener("change", function(e) {
+            if (e.target.files && e.target.files[0]) {
+                handleAttachmentFile(e.target.files[0]);
+            }
+        });
+    }
+
+    // Clipboard Paste Listener (Ctrl+V / Cmd+V screenshot paste)
+    window.addEventListener("paste", function(e) {
+        var isAiOpen = aiModal && aiModal.style.display === "flex";
+        var isSolverOpen = solverOverlay && solverOverlay.style.display === "flex";
+        if (!isAiOpen && !isSolverOpen) return;
+
+        var items = (e.clipboardData || (e.originalEvent && e.originalEvent.clipboardData) || {}).items;
+        if (!items) return;
+        for (var i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf("image") !== -1) {
+                var blob = items[i].getAsFile();
+                if (blob) {
+                    if (isAiOpen) {
+                        handleAttachmentFile(blob);
+                    } else if (isSolverOpen) {
+                        var reader = new FileReader();
+                        reader.onload = function(ev) {
+                            solveImageDirect(ev.target.result, "Pasted Screenshot");
+                        };
+                        reader.readAsDataURL(blob);
+                    }
+                    break;
+                }
+            }
+        }
+    });
+
+    // Drag & Drop onto AI Modal
+    if (aiModal) {
+        aiModal.addEventListener("dragover", function(e) {
+            e.preventDefault();
+            aiModal.style.borderColor = "#d2b8ff";
+        });
+        aiModal.addEventListener("dragleave", function(e) {
+            e.preventDefault();
+            aiModal.style.borderColor = "rgba(210, 184, 255, 0.3)";
+        });
+        aiModal.addEventListener("drop", function(e) {
+            e.preventDefault();
+            aiModal.style.borderColor = "rgba(210, 184, 255, 0.3)";
+            if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                handleAttachmentFile(e.dataTransfer.files[0]);
+            }
+        });
+    }
+
+    // Web Search Functionality
+    async function performWebSearch(query) {
+        var snippets = [];
+        try {
+            var cleanQ = query.replace(/[^\w\s]/g, " ").trim();
+            var wikiUrl = "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=" + encodeURIComponent(cleanQ) + "&format=json&origin=*";
+            var wr = await fetch(wikiUrl);
+            if (wr.ok) {
+                var wj = await wr.json();
+                var sItems = (wj.query && wj.query.search) || [];
+                for (var si = 0; si < Math.min(3, sItems.length); si++) {
+                    var it = sItems[si];
+                    var cleaned = it.snippet.replace(/<[^>]+>/g, "");
+                    snippets.push(it.title + ": " + cleaned);
+                }
+            }
+        } catch (e) {}
+
+        try {
+            var ddgUrl = "https://api.duckduckgo.com/?q=" + encodeURIComponent(query) + "&format=json&origin=*";
+            var dr = await fetch(ddgUrl);
+            if (dr.ok) {
+                var dj = await dr.json();
+                if (dj.AbstractText) {
+                    snippets.push("Summary: " + dj.AbstractText);
+                } else if (dj.Answer) {
+                    snippets.push("Answer: " + dj.Answer);
+                }
+            }
+        } catch (e) {}
+
+        return snippets;
+    }
+
+    // Send AI Message (Chat)
     async function sendAiMessage(prompt) {
-        if (!prompt || !prompt.trim()) return;
+        var text = (prompt || "").trim();
+        var attach = activeAttachment;
+        if (!text && !attach) return;
+
         var userDiv = document.createElement("div");
         userDiv.className = "ai-msg user";
-        userDiv.textContent = prompt;
+        if (attach && attach.type === "image") {
+            var imgEl = document.createElement("img");
+            imgEl.src = attach.data;
+            imgEl.style.maxWidth = "200px";
+            imgEl.style.maxHeight = "160px";
+            imgEl.style.borderRadius = "8px";
+            imgEl.style.display = "block";
+            imgEl.style.marginBottom = "6px";
+            userDiv.appendChild(imgEl);
+        }
+        var spanEl = document.createElement("span");
+        spanEl.textContent = text || (attach ? ("Attached: " + attach.name) : "");
+        userDiv.appendChild(spanEl);
         aiMsgs.appendChild(userDiv);
         aiInput.value = "";
         aiMsgs.scrollTop = aiMsgs.scrollHeight;
-
-        AI_HISTORY.push({ role: "user", content: prompt });
+        clearAttachment();
 
         var botDiv = document.createElement("div");
         botDiv.className = "ai-msg bot";
-        botDiv.textContent = "...";
+        botDiv.textContent = isWebSearchEnabled ? "Searching web & thinking..." : "...";
         aiMsgs.appendChild(botDiv);
         aiMsgs.scrollTop = aiMsgs.scrollHeight;
 
-        var models = [
-            "nvidia/nemotron-3.5-lightning:free",
-            "liquid/lfm-2.5-2.6b:free",
-            "cohere/north-mini-code:free",
-            "nvidia/nemotron-3-ultra-550b-a55b:free"
-        ];
+        var msgsToSend = [];
+        if (isWebSearchEnabled && text) {
+            var webSnippets = await performWebSearch(text);
+            if (webSnippets.length > 0) {
+                msgsToSend.push({
+                    role: "system",
+                    content: "Real-time web search findings for user question:\n" + webSnippets.join("\n") + "\nUse these up-to-date facts to formulate your answer accurately."
+                });
+            }
+        }
 
+        // Build history
+        for (var hIdx = 0; hIdx < AI_HISTORY.length; hIdx++) {
+            msgsToSend.push(AI_HISTORY[hIdx]);
+        }
+
+        // Add current user turn
+        if (attach && attach.type === "image") {
+            msgsToSend.push({
+                role: "user",
+                content: [
+                    { type: "text", text: text || "Carefully examine this image and provide a thorough, accurate solution or explanation." },
+                    { type: "image_url", image_url: { url: attach.data } }
+                ]
+            });
+        } else if (attach && attach.type === "text") {
+            msgsToSend.push({
+                role: "user",
+                content: "[File: " + attach.name + "]\n" + attach.data + "\n\n" + (text || "Please analyze this file.")
+            });
+        } else {
+            msgsToSend.push({ role: "user", content: text });
+        }
+
+        var modelsToUse = (attach && attach.type === "image") ? VISION_MODELS : TEXT_MODELS;
         var fullResp = "";
-        for (var mIdx = 0; mIdx < models.length; mIdx++) {
-            var model = models[mIdx];
+
+        for (var mIdx = 0; mIdx < modelsToUse.length; mIdx++) {
+            var model = modelsToUse[mIdx];
             try {
                 var resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                     method: "POST",
@@ -2545,7 +3166,7 @@ html, body {
                     },
                     body: JSON.stringify({
                         model: model,
-                        messages: AI_HISTORY,
+                        messages: msgsToSend,
                         stream: true
                     })
                 });
@@ -2581,15 +3202,16 @@ html, body {
                     }
                 }
                 if (fullResp) {
+                    AI_HISTORY.push({ role: "user", content: text || "Attached image/file" });
                     AI_HISTORY.push({ role: "assistant", content: fullResp });
                     return;
                 }
             } catch (err) {
-                console.warn("AI Model error:", err);
+                console.warn("AI Chat Model error:", err);
             }
         }
         if (!fullResp) {
-            botDiv.textContent = "AI model is currently busy. Please try asking again!";
+            botDiv.textContent = "AI model is busy or rate limited. Please try asking again!";
         }
     }
 
@@ -2597,6 +3219,268 @@ html, body {
         aiForm.addEventListener("submit", function(e) {
             e.preventDefault();
             sendAiMessage(aiInput.value);
+        });
+    }
+
+    // =========================================================================
+    // SCREEN SOLVER (Screenshare + i-Ready 100% Accuracy Engine)
+    // =========================================================================
+    async function startScreenShare() {
+        try {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+                alert("Screenshare is not supported on this browser or context.");
+                return false;
+            }
+            var stream = await navigator.mediaDevices.getDisplayMedia({
+                video: {
+                    cursor: "always",
+                    displaySurface: "browser"
+                },
+                audio: false
+            });
+            solverStream = stream;
+            solverVideo.srcObject = stream;
+            solverVideo.play();
+            solverNoStream.style.display = "none";
+            solverVideo.style.display = "block";
+
+            var track = stream.getVideoTracks()[0];
+            track.onended = function() {
+                stopScreenShare();
+            };
+            return true;
+        } catch (err) {
+            console.warn("Screenshare cancelled or error:", err);
+            return false;
+        }
+    }
+
+    function stopScreenShare() {
+        if (solverStream) {
+            try {
+                solverStream.getTracks().forEach(function(t) { t.stop(); });
+            } catch (e) {}
+            solverStream = null;
+        }
+        solverVideo.srcObject = null;
+        solverVideo.style.display = "none";
+        solverNoStream.style.display = "flex";
+    }
+
+    function toggleScreenSolver() {
+        if (!solverOverlay) return;
+        if (solverOverlay.style.display === "flex") {
+            solverOverlay.style.display = "none";
+        } else {
+            solverOverlay.style.display = "flex";
+            if (!solverStream) {
+                startScreenShare();
+            }
+        }
+    }
+    window.toggleScreenSolver = toggleScreenSolver;
+    window.solveScreenQuestion = solveScreenQuestion;
+    window.solveImageDirect = solveImageDirect;
+    if (btnSolverToggle) btnSolverToggle.addEventListener("click", toggleScreenSolver);
+    if (aiHeaderSolverBtn) aiHeaderSolverBtn.addEventListener("click", function() {
+        if (aiModal) aiModal.style.display = "none";
+        toggleScreenSolver();
+    });
+    if (solverBtnClose) solverBtnClose.addEventListener("click", function() {
+        solverOverlay.style.display = "none";
+    });
+    if (solverBtnX) solverBtnX.addEventListener("click", function() {
+        solverOverlay.style.display = "none";
+    });
+    if (solverBtnSwitch) solverBtnSwitch.addEventListener("click", startScreenShare);
+    if (solverBtnStart) solverBtnStart.addEventListener("click", startScreenShare);
+
+    // Draggable Solver Window Handle
+    if (solverBar && solverOverlay) {
+        var isDragging = false, startX, startY, origX, origY;
+        solverBar.style.cursor = "grab";
+        solverBar.addEventListener("pointerdown", function(e) {
+            if (e.target.tagName === "BUTTON" || e.target.closest("button")) return;
+            isDragging = true;
+            solverBar.style.cursor = "grabbing";
+            startX = e.clientX;
+            startY = e.clientY;
+            var rect = solverOverlay.getBoundingClientRect();
+            origX = rect.left;
+            origY = rect.top;
+            solverOverlay.style.left = origX + "px";
+            solverOverlay.style.top = origY + "px";
+            solverOverlay.style.right = "auto";
+            solverOverlay.style.bottom = "auto";
+            try { solverBar.setPointerCapture(e.pointerId); } catch(err){}
+        });
+        solverBar.addEventListener("pointermove", function(e) {
+            if (!isDragging) return;
+            var dx = e.clientX - startX;
+            var dy = e.clientY - startY;
+            var newL = Math.max(8, Math.min(window.innerWidth - solverOverlay.offsetWidth - 8, origX + dx));
+            var newT = Math.max(8, Math.min(window.innerHeight - solverOverlay.offsetHeight - 8, origY + dy));
+            solverOverlay.style.left = newL + "px";
+            solverOverlay.style.top = newT + "px";
+        });
+        var endDrag = function(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            solverBar.style.cursor = "grab";
+            try { solverBar.releasePointerCapture(e.pointerId); } catch(err){}
+        };
+        solverBar.addEventListener("pointerup", endDrag);
+        solverBar.addEventListener("pointercancel", endDrag);
+    }
+
+    // Solve Screen Question
+    async function solveScreenQuestion() {
+        if (!solverStream) {
+            var ok = await startScreenShare();
+            if (!ok) return;
+            await new Promise(function(r) { setTimeout(r, 600); });
+        }
+
+        var vw = solverVideo.videoWidth || 1920;
+        var vh = solverVideo.videoHeight || 1080;
+        if (vw < 10 || vh < 10) {
+            alert("Video frame not ready. Please wait a second and press Solve question again.");
+            return;
+        }
+
+        var cv = document.createElement("canvas");
+        cv.width = vw;
+        cv.height = vh;
+        var ctx = cv.getContext("2d");
+        ctx.drawImage(solverVideo, 0, 0, vw, vh);
+        var frameDataUrl = cv.toDataURL("image/jpeg", 0.90);
+
+        var customQ = (solverInput.value || "").trim();
+        await solveImageDirect(frameDataUrl, customQ);
+    }
+    window.solveScreenQuestion = solveScreenQuestion;
+
+    async function solveImageDirect(dataUrl, promptText) {
+        window.solveImageDirect = solveImageDirect;
+        solverBtnSolve.disabled = true;
+        solverBtnSolve.textContent = "⚡ Analyzing...";
+        solverResultPanel.style.display = "flex";
+        solverAnswerBox.innerHTML = '<div style="color:#d2b8ff">⚡ Scanning all pixels &amp; calculating exact answer...</div>';
+        solverStatusBadge.textContent = "⚡ Solving...";
+
+        var t0 = performance.now();
+        var sysPrompt = 
+            "You are an elite visual question solver specialized for i-Ready, standardized tests, math, reading, and school exams.\n" +
+            "Examine every pixel of the screenshot with 100% precision.\n" +
+            "Rules:\n" +
+            "1. Output the final correct answer in bold at the very top: '**ANSWER: [Option Letter or Value]**'. For example: '**ANSWER: B**' or '**ANSWER: 42**'.\n" +
+            "2. Below, give a concise 1-2 sentence step-by-step verification proving why it is correct.\n" +
+            "3. Double check all calculations and diagrams to guarantee 100% accuracy.";
+
+        var userContent = [
+            { type: "text", text: promptText ? ("User instruction: " + promptText + "\nSolve the question accurately.") : "Solve the question shown on screen with 100% precision." },
+            { type: "image_url", image_url: { url: dataUrl } }
+        ];
+
+        var fullSolution = "";
+        for (var i = 0; i < VISION_MODELS.length; i++) {
+            var model = VISION_MODELS[i];
+            try {
+                var resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": "Bearer " + AI_KEY,
+                        "Content-Type": "application/json",
+                        "HTTP-Referer": location.origin || "http://localhost",
+                        "X-Title": "younis"
+                    },
+                    body: JSON.stringify({
+                        model: model,
+                        messages: [
+                            { role: "system", content: sysPrompt },
+                            { role: "user", content: userContent }
+                        ],
+                        stream: true
+                    })
+                });
+
+                if (!resp.ok || !resp.body) continue;
+
+                var reader = resp.body.getReader();
+                var decoder = new TextDecoder();
+                var buf = "";
+                solverAnswerBox.innerHTML = "";
+
+                while (true) {
+                    var chunk = await reader.read();
+                    if (chunk.done) break;
+                    buf += decoder.decode(chunk.value, { stream: true });
+                    var lines = buf.split(/\r?\n/);
+                    buf = lines.pop() || "";
+                    for (var li = 0; li < lines.length; li++) {
+                        var l = lines[li].trim();
+                        if (!l.startsWith("data:")) continue;
+                        var dStr = l.slice(5).trim();
+                        if (dStr === "[DONE]") break;
+                        try {
+                            var p = JSON.parse(dStr);
+                            var delta = p.choices && p.choices[0] && p.choices[0].delta;
+                            var c = (delta && delta.content) || (p.choices && p.choices[0] && p.choices[0].message && p.choices[0].message.content);
+                            if (c) {
+                                fullSolution += c;
+                                renderFormattedSolution(fullSolution);
+                            }
+                        } catch (err) {}
+                    }
+                }
+
+                if (fullSolution) {
+                    var dt = ((performance.now() - t0) / 1000).toFixed(1);
+                    solverStatusBadge.textContent = "⚡ Solved in " + dt + "s";
+                    solverBtnSolve.disabled = false;
+                    solverBtnSolve.textContent = "Solve question";
+                    return;
+                }
+            } catch (err) {
+                console.warn("Vision solver error on", model, err);
+            }
+        }
+
+        solverStatusBadge.textContent = "⚠️ Error";
+        solverAnswerBox.innerHTML = '<div style="color:#ff6b6b">Could not solve question. Please verify connection and try again.</div>';
+        solverBtnSolve.disabled = false;
+        solverBtnSolve.textContent = "Solve question";
+    }
+
+    function renderFormattedSolution(text) {
+        var clean = text.trim();
+        var match = clean.match(/\*\*ANSWER:\s*([^\*]+)\*\*/i) || clean.match(/^ANSWER:\s*([^\n]+)/i);
+        if (match) {
+            var ans = match[1].trim();
+            var rest = clean.replace(match[0], "").trim();
+            solverAnswerBox.innerHTML = 
+                '<div class="solver-highlight-ans">&#x2714; Correct Answer: ' + escapeHtml(ans) + '</div>' +
+                '<div style="margin-top:6px;line-height:1.45">' + escapeHtml(rest) + '</div>';
+        } else {
+            solverAnswerBox.textContent = clean;
+        }
+    }
+
+    function escapeHtml(str) {
+        return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    if (solverBtnSolve) solverBtnSolve.addEventListener("click", solveScreenQuestion);
+
+    if (solverBtnCopy) {
+        solverBtnCopy.addEventListener("click", function() {
+            var txt = solverAnswerBox.innerText || solverAnswerBox.textContent;
+            if (txt && navigator.clipboard) {
+                navigator.clipboard.writeText(txt);
+                var orig = solverBtnCopy.textContent;
+                solverBtnCopy.textContent = "Copied!";
+                setTimeout(function() { solverBtnCopy.textContent = orig; }, 1500);
+            }
         });
     }
 
