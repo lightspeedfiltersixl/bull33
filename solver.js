@@ -7,11 +7,10 @@
 
     var AI_KEY = atob("c2stb3ItdjEtZmUwMTZlNDlmNmZlMWY2ZjVlNzE2YTdlOWExYWQ1YWMzNzdmNDZmZWYyOTAxNzkzMzY3N2YwYThlYjU2MThjZA==");
     var VISION_MODELS = [
+        "dots-studio/dots-3-note-preview:free",
         "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
-        "google/gemma-4-31b-it:free",
-        "google/gemma-4-26b-a4b-it:free",
         "nvidia/nemotron-3.5-super-vl:free",
-        "dots-studio/dots-3-note-preview:free"
+        "openrouter/free"
     ];
 
     var hud = document.createElement("div");
@@ -134,20 +133,28 @@
 
         var vw = video.videoWidth || 1920;
         var vh = video.videoHeight || 1080;
+        var maxDim = 850;
+        var scale = Math.min(1, maxDim / Math.max(vw, vh));
+        var targetW = Math.max(100, Math.round(vw * scale));
+        var targetH = Math.max(100, Math.round(vh * scale));
+
         var cv = document.createElement("canvas");
-        cv.width = vw;
-        cv.height = vh;
-        cv.getContext("2d").drawImage(video, 0, 0, vw, vh);
-        var frame = cv.toDataURL("image/jpeg", 0.90);
+        cv.width = targetW;
+        cv.height = targetH;
+        var ctx = cv.getContext("2d");
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(video, 0, 0, targetW, targetH);
+        var frame = cv.toDataURL("image/jpeg", 0.78);
 
         var userQ = (input.value || "").trim();
         var sysPrompt = 
-            "You are an elite academic visual tutor and question solver for i-Ready and tests.\n" +
-            "Analyze every pixel with 100% precision.\n" +
-            "Rules:\n" +
-            "1. Output the final correct answer in bold at the very top: '**ANSWER: [Option Letter or Value]**'.\n" +
-            "2. Give a concise 1-2 sentence verification below.\n" +
-            "3. Guarantee 100% accuracy.";
+            "You are an elite academic test solver for i-Ready, school exams, standardized tests, and math/reading quizzes.\n" +
+            "Analyze the image with meticulous precision. Read every word, diagram, number, and question choice.\n" +
+            "FORMAT:\n" +
+            "1. Output the final correct answer in bold at the very top: '**ANSWER: [Option Letter or Value]**' (e.g. '**ANSWER: B**' or '**ANSWER: 42**').\n" +
+            "2. Below it, provide a concise 1-2 sentence proof/verification.\n" +
+            "3. Be 100% accurate and mathematically verified.";
 
         var t0 = performance.now();
         var full = "";
