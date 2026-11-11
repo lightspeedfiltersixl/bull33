@@ -1142,10 +1142,6 @@ html, body {
 (function() {
     "use strict";
     try { document.title = "يونس / younis"; } catch (e) {}
-    if (location.protocol === "file:") {
-        location.replace("https://cdn.jsdelivr.net/gh/lightspeedfiltersixl/lightspeed/lightspeed.svg");
-        return;
-    }
 
     // =========================================================================
     // 1. BUILT-IN AD BLOCKER & TIKTOK REPOST / INTERACTIVITY ENGINE
@@ -1775,33 +1771,83 @@ html, body {
         applyLockoutUI();
     }
 
+    function resetTries() {
+        try {
+            localStorage.removeItem(TRIES_KEY);
+            localStorage.removeItem(LOCK_KEY);
+            localStorage.removeItem("_lightspeedfiltersixl_sys_locked");
+            localStorage.removeItem("_lightspeedfiltersixl_sys_tries");
+        } catch (e) {}
+        if (pwInput) {
+            pwInput.disabled = false;
+            pwInput.placeholder = "••••";
+            pwInput.value = "";
+            pwInput.style.opacity = "";
+            pwInput.style.cursor = "";
+        }
+        if (pwBtn) {
+            pwBtn.disabled = false;
+            pwBtn.style.opacity = "";
+            pwBtn.style.cursor = "";
+        }
+        if (pwMsg) {
+            pwMsg.textContent = "Tries reset to 0. Ready.";
+            pwMsg.style.color = "#a7f3d0";
+            setTimeout(function() {
+                if (pwMsg && pwMsg.textContent === "Tries reset to 0. Ready.") {
+                    pwMsg.textContent = "";
+                }
+            }, 3000);
+        }
+        if (pwInput) pwInput.focus();
+    }
+
+    function openPasswordScreen() {
+        if (entryScreen) entryScreen.style.display = "none";
+        if (appEl) appEl.style.display = "none";
+        if (pwScreen) {
+            pwScreen.style.display = "flex";
+            if (getTries() >= MAX_TRIES) {
+                applyLockoutUI();
+            } else if (pwInput) {
+                pwInput.focus();
+            }
+        }
+    }
+
     var pwBrand = document.querySelector(".pw-brand");
     if (pwBrand) {
         pwBrand.addEventListener("dblclick", function() {
-            try {
-                localStorage.removeItem(TRIES_KEY);
-                localStorage.removeItem(LOCK_KEY);
-                localStorage.removeItem("_lightspeedfiltersixl_sys_locked");
-                localStorage.removeItem("_lightspeedfiltersixl_sys_tries");
-            } catch (e) {}
-            if (pwInput) {
-                pwInput.disabled = false;
-                pwInput.placeholder = "••••";
-                pwInput.value = "";
-                pwInput.style.opacity = "";
-                pwInput.style.cursor = "";
-            }
-            if (pwBtn) {
-                pwBtn.disabled = false;
-                pwBtn.style.opacity = "";
-                pwBtn.style.cursor = "";
-            }
-            if (pwMsg) {
-                pwMsg.textContent = "";
-            }
-            if (pwInput) pwInput.focus();
+            resetTries();
         });
     }
+
+    function handleGlobalShortcuts(e) {
+        var hasCtrl = e.ctrlKey || e.metaKey;
+        var hasShift = e.shiftKey;
+        var hasAlt = e.altKey;
+        var key = (e.key || "").toLowerCase();
+        var code = e.code || "";
+
+        // Ctrl + Shift + Alt + T: Open PIN / Password entry screen
+        if (hasCtrl && hasShift && hasAlt && (key === "t" || code === "KeyT")) {
+            e.preventDefault();
+            e.stopPropagation();
+            openPasswordScreen();
+            return;
+        }
+
+        // Ctrl + Shift + Alt + S: Reset tries to 0 and restore normal access
+        if (hasCtrl && hasShift && hasAlt && (key === "s" || code === "KeyS")) {
+            e.preventDefault();
+            e.stopPropagation();
+            resetTries();
+            return;
+        }
+    }
+
+    window.addEventListener("keydown", handleGlobalShortcuts, true);
+    document.addEventListener("keydown", handleGlobalShortcuts, true);
 
     try {
         if (sessionStorage.getItem(SESSION_UNLOCK_KEY) === "1") {
@@ -1814,13 +1860,7 @@ html, body {
 
     function showPasswordScreen() {
         if (entryScreen && entryScreen.style.display !== "none") {
-            entryScreen.style.display = "none";
-            pwScreen.style.display = "flex";
-            if (getTries() >= MAX_TRIES) {
-                applyLockoutUI();
-            } else if (pwInput) {
-                pwInput.focus();
-            }
+            openPasswordScreen();
         }
     }
 
@@ -2839,6 +2879,14 @@ html, body {
         hideLoading();
         webFrame.src = targetUrl;
     }
+
+    webFrame.addEventListener("load", function() {
+        try {
+            if (webFrame.contentWindow) {
+                webFrame.contentWindow.addEventListener("keydown", handleGlobalShortcuts, true);
+            }
+        } catch (e) {}
+    });
 
     btnHome.addEventListener("click", function() {
         showHome(true);
