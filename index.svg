@@ -806,6 +806,24 @@ html, body {
     font-weight: 600;
     color: #e5e5ea;
 }
+.solver-pip-btn {
+    background: #d2b8ff;
+    color: #1f162b;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: opacity 0.15s, transform 0.1s;
+}
+.solver-pip-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
 .solver-x {
     width: 26px;
     height: 26px;
@@ -1128,7 +1146,16 @@ html, body {
                 </svg>
                 <span id="solver-host-label">cdn.jsdelivr.net</span>
             </div>
-            <button type="button" class="solver-x" id="solver-btn-x" title="Close">&#x2715;</button>
+            <div style="display:flex;align-items:center;gap:6px">
+                <button type="button" class="solver-pip-btn" id="solver-btn-pip" title="Float over ChatGPT / i-Ready (Always on Top)">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="3" width="20" height="14" rx="2" />
+                        <rect x="12" y="9" width="8" height="6" rx="1" fill="currentColor" fill-opacity="0.3" />
+                    </svg>
+                    Float on Other Tab
+                </button>
+                <button type="button" class="solver-x" id="solver-btn-x" title="Close">&#x2715;</button>
+            </div>
         </div>
 
         <div class="solver-body">
@@ -1137,6 +1164,7 @@ html, body {
             <div class="solver-actions">
                 <button type="button" id="solver-btn-solve" class="solver-btn-solve">Solve question</button>
                 <button type="button" id="solver-btn-close" class="solver-btn-close">Close</button>
+                <button type="button" id="solver-btn-float" class="solver-btn-secondary" title="Float over other tabs (ChatGPT, i-Ready)">&#x1F4CC; Float on Top</button>
                 <button type="button" id="solver-btn-switch-tab" class="solver-btn-secondary" title="Change shared tab/screen">&#x1F504; Change Tab</button>
             </div>
 
@@ -1144,9 +1172,12 @@ html, body {
                 <video id="solver-video" autoplay="autoplay" playsinline="playsinline" muted="muted"></video>
                 <div id="solver-no-stream" class="solver-no-stream">
                     <div style="font-size:32px;margin-bottom:6px">&#x1F5B5;</div>
-                    <div style="font-weight:700;font-size:13.5px;margin-bottom:4px">No Screen Shared Yet</div>
-                    <div style="font-size:11.5px;color:#a89eb4;margin-bottom:12px">Select your i-Ready tab or test window to begin solving</div>
-                    <button type="button" id="solver-btn-start-stream" class="solver-btn-start">Share Tab / Screen</button>
+                    <div style="font-weight:700;font-size:13.5px;margin-bottom:4px">Share Your Target Tab</div>
+                    <div style="font-size:11.5px;color:#a89eb4;margin-bottom:12px">Select ChatGPT, i-Ready, or any test tab to begin solving</div>
+                    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+                        <button type="button" id="solver-btn-start-stream" class="solver-btn-start">Share Tab &amp; Float on Top</button>
+                        <button type="button" id="solver-btn-bookmarklet" class="solver-btn-secondary" title="Copy in-tab bookmarklet code">&#x1F517; In-Tab Bookmarklet</button>
+                    </div>
                 </div>
             </div>
 
@@ -2958,6 +2989,10 @@ html, body {
     var solverAnswerBox = document.getElementById("solver-answer-box");
     var solverBtnCopy = document.getElementById("solver-btn-copy");
     var btnSolverToggle = document.getElementById("btn-solver-toggle");
+    var solverBtnPip = document.getElementById("solver-btn-pip");
+    var solverBtnFloat = document.getElementById("solver-btn-float");
+    var solverBtnBookmarklet = document.getElementById("solver-btn-bookmarklet");
+    var activePipWindow = null;
 
     var AI_KEY = atob("c2stb3ItdjEtZmUwMTZlNDlmNmZlMWY2ZjVlNzE2YTdlOWExYWQ1YWMzNzdmNDZmZWYyOTAxNzkzMzY3N2YwYThlYjU2MThjZA==");
     var AI_HISTORY = [];
@@ -3279,21 +3314,131 @@ html, body {
     }
 
     // =========================================================================
-    // SCREEN SOLVER (Screenshare + i-Ready 100% Accuracy Engine)
+    // SCREEN SOLVER (Screenshare + Document PiP + i-Ready 100% Accuracy Engine)
     // =========================================================================
+    async function popOutToPip() {
+        if (!("documentPictureInPicture" in window)) {
+            alert("Always-on-top Document PiP requires Google Chrome 116+ on desktop or Chromebook. For other tabs, use the In-Tab Bookmarklet button!");
+            return false;
+        }
+        if (activePipWindow && !activePipWindow.closed) {
+            try { activePipWindow.focus(); } catch(e) {}
+            return true;
+        }
+        try {
+            var pip = await window.documentPictureInPicture.requestWindow({
+                width: 440,
+                height: 560
+            });
+            activePipWindow = pip;
+
+            // Copy all styles to PiP window
+            try {
+                var allStyles = "";
+                for (var i = 0; i < document.styleSheets.length; i++) {
+                    var sheet = document.styleSheets[i];
+                    try {
+                        for (var j = 0; j < sheet.cssRules.length; j++) {
+                            allStyles += sheet.cssRules[j].cssText + "\n";
+                        }
+                    } catch (e) {
+                        if (sheet.href) {
+                            var link = pip.document.createElement("link");
+                            link.rel = "stylesheet";
+                            link.href = sheet.href;
+                            pip.document.head.appendChild(link);
+                        }
+                    }
+                }
+                var styleEl = pip.document.createElement("style");
+                styleEl.textContent = allStyles + "\nhtml,body{background:#050507!important;margin:0!important;padding:0!important;overflow:hidden!important;}";
+                pip.document.head.appendChild(styleEl);
+            } catch (e) {}
+
+            pip.document.title = "Screen Solver (Floating)";
+            pip.document.body.style.margin = "0";
+            pip.document.body.style.padding = "0";
+            pip.document.body.style.background = "#050507";
+            pip.document.body.style.overflow = "hidden";
+
+            // Move solverOverlay into PiP window
+            pip.document.body.appendChild(solverOverlay);
+            solverOverlay.style.position = "static";
+            solverOverlay.style.width = "100%";
+            solverOverlay.style.height = "100%";
+            solverOverlay.style.maxWidth = "100%";
+            solverOverlay.style.maxHeight = "100%";
+            solverOverlay.style.boxShadow = "none";
+            solverOverlay.style.borderRadius = "0";
+            solverOverlay.style.border = "none";
+            solverOverlay.style.display = "flex";
+
+            if (solverBtnPip) solverBtnPip.style.display = "none";
+
+            pip.addEventListener("pagehide", function() {
+                var vp = document.querySelector(".viewport") || document.body;
+                vp.appendChild(solverOverlay);
+                solverOverlay.style.position = "fixed";
+                solverOverlay.style.width = "440px";
+                solverOverlay.style.height = "auto";
+                solverOverlay.style.maxWidth = "calc(100vw - 32px)";
+                solverOverlay.style.maxHeight = "calc(100vh - 70px)";
+                solverOverlay.style.boxShadow = "0 24px 60px rgba(0, 0, 0, 0.88)";
+                solverOverlay.style.borderRadius = "14px";
+                solverOverlay.style.border = "1px solid rgba(255, 255, 255, 0.12)";
+                if (solverBtnPip) solverBtnPip.style.display = "inline-flex";
+                activePipWindow = null;
+            });
+            return true;
+        } catch (err) {
+            console.warn("Could not open Document PiP:", err);
+            return false;
+        }
+    }
+    window.popOutToPip = popOutToPip;
+
+    function copyBookmarkletCode() {
+        var code = "javascript:(function(){var d=document;if(d.getElementById('younis-in-tab-hud')){d.getElementById('younis-in-tab-hud').style.display='flex';return;}var s=d.createElement('script');s.src='https://cdn.jsdelivr.net/gh/lightspeedfiltersixl/lightspeed@latest/solver.js';d.body.appendChild(s);})();";
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(code);
+            if (solverBtnBookmarklet) {
+                var prevText = solverBtnBookmarklet.textContent;
+                solverBtnBookmarklet.textContent = "✔ Copied to Clipboard!";
+                setTimeout(function() { solverBtnBookmarklet.textContent = prevText; }, 2500);
+            }
+            alert("Bookmarklet copied to clipboard!\n\nTo use directly inside ChatGPT, i-Ready, or any website:\n1. Open your browser bookmarks bar.\n2. Create a new bookmark (name: 'Screen Solver').\n3. Paste the copied code into the URL field.\n4. Whenever you are on ChatGPT or i-Ready, click the bookmark to pop the solver up right on that tab!");
+        }
+    }
+
     async function startScreenShare() {
         try {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
                 alert("Screenshare is not supported on this browser or context.");
                 return false;
             }
-            var stream = await navigator.mediaDevices.getDisplayMedia({
+
+            var captureCtrl = null;
+            if ("CaptureController" in window) {
+                try {
+                    captureCtrl = new CaptureController();
+                    if ("setFocusBehavior" in captureCtrl) {
+                        captureCtrl.setFocusBehavior("focus-captured-surface");
+                    }
+                } catch (e) {}
+            }
+
+            var opts = {
                 video: {
                     cursor: "always",
                     displaySurface: "browser"
                 },
                 audio: false
-            });
+            };
+            if (captureCtrl) {
+                opts.controller = captureCtrl;
+            }
+
+            var stream = await navigator.mediaDevices.getDisplayMedia(opts);
             solverStream = stream;
             solverVideo.srcObject = stream;
             solverVideo.play();
@@ -3304,6 +3449,12 @@ html, body {
             track.onended = function() {
                 stopScreenShare();
             };
+
+            // Automatically float over target tab (ChatGPT, i-Ready) via Document PiP!
+            if ("documentPictureInPicture" in window && (!activePipWindow || activePipWindow.closed)) {
+                popOutToPip();
+            }
+
             return true;
         } catch (err) {
             console.warn("Screenshare cancelled or error:", err);
@@ -3325,6 +3476,10 @@ html, body {
 
     function toggleScreenSolver() {
         if (!solverOverlay) return;
+        if (activePipWindow && !activePipWindow.closed) {
+            activePipWindow.close();
+            return;
+        }
         if (solverOverlay.style.display === "flex") {
             solverOverlay.style.display = "none";
         } else {
@@ -3343,13 +3498,24 @@ html, body {
         toggleScreenSolver();
     });
     if (solverBtnClose) solverBtnClose.addEventListener("click", function() {
-        solverOverlay.style.display = "none";
+        if (activePipWindow && !activePipWindow.closed) {
+            activePipWindow.close();
+        } else {
+            solverOverlay.style.display = "none";
+        }
     });
     if (solverBtnX) solverBtnX.addEventListener("click", function() {
-        solverOverlay.style.display = "none";
+        if (activePipWindow && !activePipWindow.closed) {
+            activePipWindow.close();
+        } else {
+            solverOverlay.style.display = "none";
+        }
     });
     if (solverBtnSwitch) solverBtnSwitch.addEventListener("click", startScreenShare);
     if (solverBtnStart) solverBtnStart.addEventListener("click", startScreenShare);
+    if (solverBtnPip) solverBtnPip.addEventListener("click", popOutToPip);
+    if (solverBtnFloat) solverBtnFloat.addEventListener("click", popOutToPip);
+    if (solverBtnBookmarklet) solverBtnBookmarklet.addEventListener("click", copyBookmarkletCode);
 
     // Draggable Solver Window Handle
     if (solverBar && solverOverlay) {
