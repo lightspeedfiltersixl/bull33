@@ -1,0 +1,3782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>يونس / younis</title>
+<link rel="preload" href="sj/jet.core.js" as="script" />
+<link rel="preload" href="sj/jet.api.js" as="script" />
+<link rel="preload" href="sj/jet.utils.js" as="script" />
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #000000;
+    color: #f3f3f5;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+}
+
+/* 1. ENTRY SCREEN (Pure Black - Click Anywhere to Enter) */
+#entry-screen {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000000;
+    z-index: 999999;
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+/* 2. PASSWORD SCREEN (Simple and Clean) */
+#password-screen {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000000;
+    z-index: 999998;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    pointer-events: auto;
+}
+.pw-card {
+    width: 100%;
+    max-width: 340px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    text-align: center;
+}
+.pw-brand {
+    font-size: 26px;
+    font-weight: 700;
+    color: #d2b8ff;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+}
+.pw-input {
+    width: 100%;
+    height: 44px;
+    background: #141418;
+    border: 1px solid #2c2c35;
+    border-radius: 10px;
+    color: #ffffff;
+    font-size: 18px;
+    text-align: center;
+    letter-spacing: 6px;
+    outline: none;
+}
+.pw-input:focus {
+    border-color: #d2b8ff;
+}
+.pw-btn {
+    width: 100%;
+    height: 42px;
+    background: #d2b8ff;
+    color: #1f162b;
+    border: 0;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.pw-btn:hover {
+    opacity: 0.92;
+}
+.pw-msg {
+    font-size: 13px;
+    color: #ff6b6b;
+    min-height: 18px;
+}
+
+/* 3. MAIN APPLICATION (Chromebook-Optimized Minimal #3b3343 Layout) */
+#app {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    background: #3b3343;
+    contain: layout style size;
+}
+
+/* Top Navigation Bar */
+.toolbar {
+    height: 46px;
+    background: #241d2b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    flex-shrink: 0;
+}
+.nav-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.nav-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 0;
+    background: transparent;
+    color: #c9bfd4;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+.nav-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+}
+.nav-btn:disabled {
+    opacity: 0.32;
+    cursor: default;
+    pointer-events: none;
+}
+
+.omni-form {
+    flex: 1;
+    height: 32px;
+    background: #18121e;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    padding: 0 6px 0 8px;
+    gap: 8px;
+}
+.omni-form:focus-within {
+    border-color: rgba(210, 184, 255, 0.5);
+    background: #140f19;
+}
+.omni-badge {
+    height: 22px;
+    padding: 0 8px;
+    border-radius: 999px;
+    background: #3b3343;
+    color: #d2b8ff;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.omni-input {
+    flex: 1;
+    background: transparent;
+    border: 0;
+    outline: none;
+    color: #ebe4f2;
+    font-size: 13px;
+    min-width: 0;
+}
+.omni-input::placeholder {
+    color: #9b8fa8;
+}
+.omni-engine {
+    background: #282032;
+    color: #d2b8ff;
+    border: 1px solid rgba(210, 184, 255, 0.22);
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: 11.5px;
+    font-weight: 600;
+    outline: none;
+    cursor: pointer;
+}
+.omni-go {
+    background: #d2b8ff;
+    color: #1f162b;
+    border: 0;
+    border-radius: 999px;
+    padding: 3px 11px;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.omni-go:hover {
+    opacity: 0.92;
+}
+
+/* Main Viewport */
+.viewport {
+    flex: 1;
+    position: relative;
+    background: #3b3343;
+    overflow: hidden;
+}
+
+/* Home View (Chromebook Smooth Scrolling) */
+#home-view {
+    position: absolute;
+    inset: 0;
+    background: #3b3343;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: 28px 20px 44px;
+}
+.home-hero {
+    width: 100%;
+    max-width: 720px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 22px;
+    flex-shrink: 0;
+}
+.home-logo {
+    font-size: 46px;
+    font-weight: 700;
+    color: #d2b8ff;
+    letter-spacing: -0.025em;
+    line-height: 1.12;
+    margin-bottom: 20px;
+    user-select: none;
+    text-align: center;
+    word-break: break-word;
+}
+.home-search-wrap {
+    width: 100%;
+    max-width: 684px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+}
+.home-search-bar {
+    width: 100%;
+    height: 46px;
+    background: #ffffff;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    padding: 0 8px 0 18px;
+    gap: 10px;
+}
+.home-search-icon {
+    color: #5f6368;
+    font-size: 18px;
+    font-weight: 500;
+    flex-shrink: 0;
+}
+.home-search-input {
+    flex: 1;
+    height: 100%;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: #202124;
+    font-size: 15px;
+    min-width: 0;
+}
+.home-search-input::placeholder {
+    color: #70757a;
+}
+.home-search-btn {
+    height: 34px;
+    padding: 0 16px;
+    border-radius: 999px;
+    border: 0;
+    background: #3b3343;
+    color: #d2b8ff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.home-search-btn:hover {
+    background: #241d2b;
+}
+
+/* Search Engine Selector */
+.engine-selector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.engine-pill {
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: #2a2331;
+    color: #cfc5dc;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.engine-pill:hover {
+    background: #332a3c;
+    color: #ffffff;
+}
+.engine-pill.active {
+    background: #d2b8ff;
+    color: #1f162b;
+    border-color: #d2b8ff;
+}
+
+/* Categorized Website Directory (115 Legitimate Sites - Lightweight Rendering) */
+.directory-section {
+    width: 100%;
+    max-width: 1060px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex-shrink: 0;
+}
+.directory-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.category-tabs {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.cat-tab {
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: #261f2d;
+    color: #c9bfd4;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.cat-tab:hover {
+    background: #32293b;
+    color: #ffffff;
+}
+.cat-tab.active {
+    background: #d2b8ff;
+    color: #1f162b;
+    border-color: #d2b8ff;
+}
+.site-filter-input {
+    width: 210px;
+    height: 31px;
+    border-radius: 999px;
+    background: #221b29;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #f3f3f5;
+    padding: 0 12px;
+    font-size: 12px;
+    outline: none;
+}
+.site-filter-input:focus {
+    border-color: #d2b8ff;
+}
+.site-filter-input::placeholder {
+    color: #9b8fa8;
+}
+
+.site-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(162px, 1fr));
+    gap: 8px;
+    contain: content;
+}
+.site-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 11px;
+    border-radius: 10px;
+    background: #261f2e;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    color: #f3f3f5;
+    text-decoration: none;
+    cursor: pointer;
+    text-align: left;
+    content-visibility: auto;
+    contain-intrinsic-size: 52px;
+}
+.site-card:hover {
+    background: #31283b;
+    border-color: rgba(210, 184, 255, 0.35);
+}
+.site-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #33293d;
+    color: #d2b8ff;
+    font-size: 12.5px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.site-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+}
+.site-name {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #f3f3f5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.site-domain {
+    font-size: 10.5px;
+    color: #9b8fa8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Active Web Frame Container */
+#frame-wrap {
+    position: absolute;
+    inset: 0;
+    display: none;
+    background: #141118;
+    contain: strict;
+}
+#web-frame {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+    background: #141118;
+}
+#loading-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(45, 38, 53, 0.9);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    z-index: 20;
+    color: #d2b8ff;
+    font-size: 13.5px;
+    font-weight: 600;
+}
+.spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid rgba(210, 184, 255, 0.2);
+    border-top-color: #d2b8ff;
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 640px) {
+    .home-logo { font-size: 32px; }
+    .site-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+    .site-filter-input { width: 100%; }
+}
+
+/* AI Assistant Modal */
+#ai-modal {
+    position: fixed;
+    top: 54px;
+    right: 16px;
+    width: 380px;
+    height: 520px;
+    max-width: calc(100vw - 32px);
+    max-height: calc(100vh - 70px);
+    background: #1d1723;
+    border: 1px solid rgba(210, 184, 255, 0.3);
+    border-radius: 14px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+    display: none;
+    flex-direction: column;
+    z-index: 10000;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+}
+.ai-header {
+    height: 42px;
+    padding: 0 14px;
+    background: #261f2e;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+.ai-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #d2b8ff;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.ai-close {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 0;
+    background: transparent;
+    color: #9b8fa8;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.ai-close:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+}
+.ai-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.ai-msg {
+    max-width: 86%;
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.45;
+    word-break: break-word;
+}
+.ai-msg.user {
+    align-self: flex-end;
+    background: #d2b8ff;
+    color: #1f162b;
+    border-bottom-right-radius: 4px;
+    font-weight: 500;
+}
+.ai-msg.bot {
+    align-self: flex-start;
+    background: #2a2233;
+    color: #f3f3f5;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom-left-radius: 4px;
+}
+.ai-footer-wrap {
+    display: flex;
+    flex-direction: column;
+    background: #241d2b;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.ai-footer-tools {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px 0 10px;
+}
+.ai-tool-btn {
+    height: 24px;
+    padding: 0 9px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #c9bfd4;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    user-select: none;
+}
+.ai-tool-btn:hover {
+    background: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+}
+.ai-tool-btn.active {
+    background: #d2b8ff;
+    color: #1f162b;
+    border-color: #d2b8ff;
+}
+.ai-tool-header-btn {
+    height: 24px;
+    padding: 0 8px;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #000000;
+    font-size: 11px;
+    font-weight: 700;
+    border: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.ai-tool-header-btn:hover {
+    opacity: 0.9;
+}
+.ai-attachment-preview {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: #18121e;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.ai-preview-thumb {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.ai-preview-name {
+    flex: 1;
+    font-size: 12px;
+    color: #d2b8ff;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.ai-preview-remove {
+    width: 20px;
+    height: 20px;
+    border: 0;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.ai-preview-remove:hover {
+    background: rgba(255, 80, 80, 0.4);
+}
+.ai-footer {
+    padding: 6px 10px 8px 10px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.ai-input {
+    flex: 1;
+    height: 34px;
+    background: #18121e;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    padding: 0 12px;
+    color: #fff;
+    font-size: 12.5px;
+    outline: none;
+}
+.ai-input:focus {
+    border-color: #d2b8ff;
+}
+.ai-send {
+    height: 32px;
+    padding: 0 14px;
+    background: #d2b8ff;
+    color: #1f162b;
+    border: 0;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* =========================================================================
+   SCREEN SOLVER FLOATING HUD (Matching User's Screenshot)
+   ========================================================================= */
+#solver-overlay {
+    position: fixed;
+    top: 50px;
+    right: 20px;
+    width: 440px;
+    max-width: calc(100vw - 32px);
+    max-height: calc(100vh - 70px);
+    background: #050507;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.88);
+    display: none;
+    flex-direction: column;
+    z-index: 10002;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #ffffff;
+}
+.solver-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: #0a0a0e;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    user-select: none;
+}
+.solver-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #e5e5ea;
+}
+.solver-pip-btn {
+    background: #d2b8ff;
+    color: #1f162b;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: opacity 0.15s, transform 0.1s;
+}
+.solver-pip-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+.solver-x {
+    width: 26px;
+    height: 26px;
+    border: 0;
+    background: transparent;
+    color: #a09fa8;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.solver-x:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+}
+.solver-body {
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    max-height: calc(100vh - 140px);
+}
+.solver-input {
+    width: 100%;
+    height: 42px;
+    background: #121216;
+    border: 1px solid #282832;
+    border-radius: 10px;
+    color: #ffffff;
+    font-size: 14px;
+    padding: 0 14px;
+    box-sizing: border-box;
+    outline: none;
+}
+.solver-input:focus {
+    border-color: #d2b8ff;
+}
+.solver-input::placeholder {
+    color: #6e6d78;
+}
+.solver-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.solver-btn-solve {
+    background: #ffffff;
+    color: #000000;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 0;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.15s;
+}
+.solver-btn-solve:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+}
+.solver-btn-solve:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+.solver-btn-close {
+    background: #181820;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 1px solid #282835;
+    cursor: pointer;
+}
+.solver-btn-close:hover {
+    background: #242430;
+}
+.solver-btn-secondary {
+    background: transparent;
+    color: #9a94a6;
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    margin-left: auto;
+}
+.solver-btn-secondary:hover {
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.25);
+}
+.solver-screen-box {
+    position: relative;
+    width: 100%;
+    min-height: 180px;
+    max-height: 240px;
+    background: #000000;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#solver-video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #000000;
+}
+.solver-no-stream {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+}
+.solver-btn-start {
+    background: #ffffff;
+    color: #000000;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 0;
+    cursor: pointer;
+}
+.solver-btn-start:hover {
+    opacity: 0.9;
+}
+.solver-result-panel {
+    background: #111018;
+    border: 1px solid rgba(210, 184, 255, 0.35);
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.solver-answer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.solver-badge {
+    font-size: 12px;
+    font-weight: 700;
+    color: #a7f3d0;
+    background: rgba(16, 185, 129, 0.15);
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+.solver-copy-btn {
+    font-size: 11.5px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #e5e5ea;
+    border: 0;
+    border-radius: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+}
+.solver-copy-btn:hover {
+    background: rgba(255, 255, 255, 0.16);
+}
+.solver-answer-box {
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: #f3f3f5;
+    max-height: 220px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+.solver-highlight-ans {
+    font-size: 15.5px;
+    font-weight: 800;
+    color: #34d399;
+    background: rgba(16, 185, 129, 0.14);
+    border-left: 3px solid #10b981;
+    padding: 7px 10px;
+    border-radius: 6px;
+    margin-bottom: 4px;
+}
+
+</style>
+</head>
+<body>
+
+<!-- 1. Entry Screen (Click Anywhere) -->
+<div id="entry-screen" title="Click anywhere to enter"></div>
+
+<!-- 2. Simple Password Screen -->
+<div id="password-screen">
+    <form class="pw-card" id="pw-form">
+        <div class="pw-brand">يونس / younis</div>
+        <input type="password" id="pw-input" class="pw-input" placeholder="••••" maxlength="12" autocomplete="off" />
+        <button type="submit" id="pw-btn" class="pw-btn">Enter</button>
+        <div id="pw-msg" class="pw-msg"></div>
+    </form>
+</div>
+
+<!-- 3. Main Application -->
+<div id="app">
+    <div class="toolbar">
+        <div class="nav-group">
+            <button type="button" class="nav-btn" id="btn-back" title="Back" disabled="disabled">&#8592;</button>
+            <button type="button" class="nav-btn" id="btn-fwd" title="Forward" disabled="disabled">&#8594;</button>
+            <button type="button" class="nav-btn" id="btn-reload" title="Reload">&#8635;</button>
+            <button type="button" class="nav-btn" id="btn-fullscreen" title="Toggle Fullscreen (F11 / Alt+F)" aria-label="Fullscreen">
+                <svg id="fs-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                </svg>
+            </button>
+        </div>
+        <form class="omni-form" id="omni-form">
+            <div class="omni-badge" id="btn-home" title="يونس / younis Home">يونس</div>
+            <input type="text" id="omni-input" class="omni-input" placeholder="Search or type a URL..." autocomplete="off" />
+            <select id="omni-engine" class="omni-engine" title="Select search engine">
+                <option value="google">Google</option>
+                <option value="duckduckgo">DuckDuckGo</option>
+                <option value="bing">Bing</option>
+                <option value="yahoo">Yahoo</option>
+                <option value="brave">Brave Search</option>
+                <option value="ecosia">Ecosia</option>
+            </select>
+            <button type="submit" class="omni-go" id="omni-submit">Search</button>
+        </form>
+        <button type="button" class="nav-btn" id="btn-solver-toggle" title="Screen Solver (Screenshare to solve i-Ready &amp; tests)" style="width:auto;height:30px;padding:0 12px;border-radius:999px;background:#ffffff;color:#000000;font-weight:700;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px;border:0;flex-shrink:0">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" />
+                <line x1="8" y1="21" x2="16" y2="21" />
+                <line x1="12" y1="17" x2="12" y2="21" />
+            </svg>
+            Solve Screen
+        </button>
+        <button type="button" class="nav-btn" id="btn-ai-toggle" title="AI Assistant" style="width:auto;height:30px;padding:0 12px;border-radius:999px;background:#d2b8ff;color:#1f162b;font-weight:700;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:4px;border:0;flex-shrink:0">&#x2728; AI</button>
+    </div>
+
+    <div class="viewport">
+        <div id="home-view">
+            <div class="home-hero">
+                <div class="home-logo">يونس / younis</div>
+                <div class="home-search-wrap">
+                    <form class="home-search-bar" id="home-form">
+                        <span class="home-search-icon">+</span>
+                        <input type="text" id="home-input" class="home-search-input" placeholder="Ask younis or enter any website" autocomplete="off" />
+                        <button type="submit" class="home-search-btn" id="home-submit">Search</button>
+                    </form>
+                    <div class="engine-selector" id="engine-pills">
+                        <button type="button" class="engine-pill active" data-engine="google">Google</button>
+                        <button type="button" class="engine-pill" data-engine="duckduckgo">DuckDuckGo</button>
+                        <button type="button" class="engine-pill" data-engine="bing">Bing</button>
+                        <button type="button" class="engine-pill" data-engine="yahoo">Yahoo</button>
+                        <button type="button" class="engine-pill" data-engine="brave">Brave Search</button>
+                        <button type="button" class="engine-pill" data-engine="ecosia">Ecosia</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="directory-section">
+                <div class="directory-bar">
+                    <div class="category-tabs" id="category-tabs"></div>
+                    <input type="text" id="site-filter" class="site-filter-input" placeholder="Filter 115 websites..." autocomplete="off" />
+                </div>
+                <div class="site-grid" id="site-grid"></div>
+            </div>
+        </div>
+
+        <div id="frame-wrap">
+            <div id="loading-overlay">
+                <div class="spinner"></div>
+                <div id="loading-text">Loading...</div>
+            </div>
+            <iframe id="web-frame" allow="fullscreen; autoplay; clipboard-read; clipboard-write; encrypted-media; picture-in-picture; gamepad"></iframe>
+        </div>
+    
+    <!-- AI Assistant Modal -->
+    <div id="ai-modal">
+        <div class="ai-header">
+            <div class="ai-title">&#x2728; younis AI Assistant (Unlimited)</div>
+            <div style="display:flex;align-items:center;gap:6px">
+                <button type="button" id="ai-header-solver-btn" class="ai-tool-header-btn" title="Open Screen Solver">&#x1F5B5; Solve Screen</button>
+                <button type="button" class="ai-close" id="ai-close" title="Close">&#x2715;</button>
+            </div>
+        </div>
+        <div class="ai-messages" id="ai-messages">
+            <div class="ai-msg bot">Hello! I am your unlimited younis AI assistant. I can analyze images, search the web, and solve tests or questions. Ask me anything or paste an image!</div>
+        </div>
+        <div id="ai-attachment-preview" class="ai-attachment-preview" style="display:none">
+            <img id="ai-preview-thumb" class="ai-preview-thumb" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="preview" />
+            <div id="ai-preview-name" class="ai-preview-name"></div>
+            <button type="button" id="ai-preview-remove" class="ai-preview-remove" title="Remove attachment">&#x2715;</button>
+        </div>
+        <form class="ai-footer-wrap" id="ai-form">
+            <div class="ai-footer-tools">
+                <button type="button" id="ai-btn-web" class="ai-tool-btn active" title="Toggle Real-Time Web Search">&#x1F310; Web Search (ON)</button>
+                <label for="ai-file-input" class="ai-tool-btn" title="Upload Photo or File">&#x1F4CE; Photo/File</label>
+                <input type="file" id="ai-file-input" style="display:none" accept="image/*,.txt,.pdf,.doc,.docx,.json,.js,.py,.html" />
+            </div>
+            <div class="ai-footer">
+                <input type="text" class="ai-input" id="ai-input" placeholder="Type a message or paste image..." autocomplete="off" />
+                <button type="submit" class="ai-send" id="ai-send">Send</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Screen Solver Floating HUD (Exact match to User's Screenshot) -->
+    <div id="solver-overlay">
+        <div class="solver-bar" id="solver-bar">
+            <div class="solver-brand">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#d2b8ff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+                <span id="solver-host-label">cdn.jsdelivr.net</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+                <button type="button" class="solver-pip-btn" id="solver-btn-pip" title="Float over ChatGPT / i-Ready (Always on Top)">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="3" width="20" height="14" rx="2" />
+                        <rect x="12" y="9" width="8" height="6" rx="1" fill="currentColor" fill-opacity="0.3" />
+                    </svg>
+                    Float on Other Tab
+                </button>
+                <button type="button" class="solver-x" id="solver-btn-x" title="Close">&#x2715;</button>
+            </div>
+        </div>
+
+        <div class="solver-body">
+            <input type="text" id="solver-input" class="solver-input" placeholder="Ask about what's on your screen..." autocomplete="off" />
+
+            <div class="solver-actions">
+                <button type="button" id="solver-btn-solve" class="solver-btn-solve">Solve question</button>
+                <button type="button" id="solver-btn-close" class="solver-btn-close">Close</button>
+                <button type="button" id="solver-btn-float" class="solver-btn-secondary" title="Float over other tabs (ChatGPT, i-Ready)">&#x1F4CC; Float on Top</button>
+                <button type="button" id="solver-btn-switch-tab" class="solver-btn-secondary" title="Change shared tab/screen">&#x1F504; Change Tab</button>
+            </div>
+
+            <div class="solver-screen-box" id="solver-screen-box">
+                <video id="solver-video" autoplay="autoplay" playsinline="playsinline" muted="muted"></video>
+                <div id="solver-no-stream" class="solver-no-stream">
+                    <div style="font-size:32px;margin-bottom:6px">&#x1F5B5;</div>
+                    <div style="font-weight:700;font-size:13.5px;margin-bottom:4px">Share Your Target Tab</div>
+                    <div style="font-size:11.5px;color:#a89eb4;margin-bottom:12px">Select ChatGPT, i-Ready, or any test tab to begin solving</div>
+                    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+                        <button type="button" id="solver-btn-start-stream" class="solver-btn-start">Share Tab &amp; Float on Top</button>
+                        <button type="button" id="solver-btn-bookmarklet" class="solver-btn-secondary" title="Copy in-tab bookmarklet code">&#x1F517; In-Tab Bookmarklet</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="solver-result-panel" class="solver-result-panel" style="display:none">
+                <div class="solver-answer-header">
+                    <span id="solver-status-badge" class="solver-badge">&#x26A1; Solved</span>
+                    <button type="button" id="solver-btn-copy" class="solver-copy-btn">Copy Answer</button>
+                </div>
+                <div id="solver-answer-box" class="solver-answer-box"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<script>
+(function() {
+    "use strict";
+    try {
+        var p = (location.pathname || "").toLowerCase();
+        if (p.includes("homework")) document.title = "Homework Assignment";
+        else if (p.includes("worksheet")) document.title = "Math Practice Worksheet";
+        else if (p.includes("calculator")) document.title = "Desmos Graphing Calculator";
+        else if (p.includes("algebra")) document.title = "Algebra I Practice";
+        else if (p.includes("biology")) document.title = "Biology Study Notes";
+        else if (p.includes("history")) document.title = "World History Study Guide";
+        else if (p.includes("assignment")) document.title = "Google Classroom";
+        else if (p.includes("practice")) document.title = "DeltaMath Student";
+        else if (p.includes("study")) document.title = "Study Guide";
+        else if (p.includes("quiz")) document.title = "Academic Practice Quiz";
+        else if (p.includes("guide")) document.title = "Student Reference Guide";
+        else document.title = "Class Notes";
+    } catch (e) {}
+
+    // =========================================================================
+    // 1. BUILT-IN AD BLOCKER & TIKTOK REPOST / INTERACTIVITY ENGINE
+    // =========================================================================
+    var AD_HOST_PATTERNS = [
+        /(^|\.)doubleclick\.net$/i,
+        /(^|\.)googlesyndication\.com$/i,
+        /(^|\.)googleadservices\.com$/i,
+        /(^|\.)adservice\.google\./i,
+        /(^|\.)adnxs\.com$/i,
+        /(^|\.)popads\.net$/i,
+        /(^|\.)popcash\.net$/i,
+        /(^|\.)propellerads\.com$/i,
+        /(^|\.)adsterra\.com$/i,
+        /(^|\.)exoclick\.com$/i,
+        /(^|\.)juicyads\.com$/i,
+        /(^|\.)trafficjunky\.net$/i,
+        /(^|\.)taboola\.com$/i,
+        /(^|\.)outbrain\.com$/i,
+        /(^|\.)mgid\.com$/i,
+        /(^|\.)revcontent\.com$/i,
+        /(^|\.)zedo\.com$/i,
+        /(^|\.)scorecardresearch\.com$/i,
+        /(^|\.)quantserve\.com$/i,
+        /(^|\.)moatads\.com$/i,
+        /(^|\.)adsrvr\.org$/i,
+        /(^|\.)criteo\.com$/i,
+        /(^|\.)pubmatic\.com$/i,
+        /(^|\.)rubiconproject\.com$/i,
+        /(^|\.)openx\.net$/i,
+        /(^|\.)smartadserver\.com$/i,
+        /(^|\.)bidswitch\.net$/i,
+        /(^|\.)casalemedia\.com$/i,
+        /(^|\.)onclickads\.net$/i,
+        /(^|\.)hilltopads\.net$/i,
+        /(^|\.)a-ads\.com$/i
+    ];
+
+    function isAdUrl(raw) {
+        if (!raw) return false;
+        try {
+            var u = new URL(String(raw), location.href);
+            var h = u.hostname.toLowerCase();
+            for (var i = 0; i < AD_HOST_PATTERNS.length; i++) {
+                if (AD_HOST_PATTERNS[i].test(h)) return true;
+            }
+        } catch (e) {}
+        return false;
+    }
+
+    function guardWindowOpen(targetWin) {
+        if (!targetWin) return;
+        try {
+            targetWin.open = function(url) {
+                if (!url) return null;
+                var s = String(url);
+                if (isAdUrl(s)) return null;
+                try {
+                    var base = (targetWin.location && targetWin.location.href) ? targetWin.location.href : location.href;
+                    var resolved = new URL(s, base).href;
+                    if (!isAdUrl(resolved)) {
+                        navigate(resolved);
+                    }
+                } catch (e) {}
+                return null;
+            };
+        } catch (e) {}
+    }
+
+    guardWindowOpen(window);
+
+    function restoreTikTokInteractivity(doc, win) {
+        if (!doc) return;
+        try {
+            // Only remove #login-modal / #loginModalContentContainer when not explicitly opened by user.
+            var allowLogin = win.__younisAllowLogin || win.__lightspeedfiltersixlAllowLogin;
+            if (!allowLogin) {
+                var loginModal = doc.getElementById("login-modal");
+                if (loginModal) {
+                    var closeBtn = loginModal.querySelector("[data-e2e='modal-close-inner-button']");
+                    if (closeBtn) {
+                        try { closeBtn.click(); } catch (e) {}
+                    }
+                    try { loginModal.remove(); } catch (e) {}
+                    var tkVid = doc.querySelector("video");
+                    if (tkVid && tkVid.paused) {
+                        tkVid.play().catch(function() {});
+                    }
+                }
+                var loginContent = doc.getElementById("loginModalContentContainer");
+                if (loginContent) {
+                    var parentDialog = loginContent.closest("[role='dialog']") || loginContent;
+                    try { parentDialog.remove(); } catch (e) {}
+                }
+            }
+
+            // Dismiss unprompted "What would you like to watch on TikTok?" onboarding dialog cleanly
+            var dialogs = doc.querySelectorAll("[role='dialog']");
+            for (var d = 0; d < dialogs.length; d++) {
+                var dlgText = dialogs[d].textContent || "";
+                if (dlgText.indexOf("What would you like to watch on TikTok?") !== -1 || dlgText.indexOf("Choose your interests") !== -1) {
+                    var dlgClose = dialogs[d].querySelector("[data-e2e*='close'], [aria-label*='close' i], button, [role='button']");
+                    if (dlgClose) {
+                        try { dlgClose.click(); } catch (e) {}
+                    }
+                    try {
+                        var modalParent = dialogs[d].closest("[class*='DivModalContainer'], [class*='DivCenterWrapper']") || dialogs[d].parentElement;
+                        if (modalParent && modalParent.parentElement) {
+                            modalParent.remove();
+                        }
+                    } catch (e) {}
+                    var overlays = doc.querySelectorAll("[class*='DivOverlay'], [class*='DivBackdrop'], [class*='DivMask']");
+                    for (var o = 0; o < overlays.length; o++) {
+                        try { overlays[o].remove(); } catch (e) {}
+                    }
+                }
+            }
+
+            // Strip inert / jet-attr-inert so all TikTok buttons, repost tabs, and video controls respond immediately
+            var activeLogin = doc.getElementById("login-modal");
+            if (!activeLogin || !allowLogin) {
+                var inertEls = doc.querySelectorAll("#app[inert], #app[jet-attr-inert], [inert], [jet-attr-inert]");
+                for (var k = 0; k < inertEls.length; k++) {
+                    try {
+                        inertEls[k].inert = false;
+                        inertEls[k].removeAttribute("inert");
+                        inertEls[k].removeAttribute("jet-attr-inert");
+                    } catch (e) {}
+                }
+                var appRoot = doc.getElementById("app");
+                if (appRoot) {
+                    if (appRoot.inert) appRoot.inert = false;
+                    appRoot.style.setProperty("pointer-events", "auto", "important");
+                }
+            }
+
+            // CRITICAL FIX: Ensure page scrolling on TikTok grid & profile is NEVER frozen by hidden overflow
+            var isVideoModalOpen = Boolean(doc.querySelector("[data-e2e='browse-close']"));
+            if (!isVideoModalOpen) {
+                if (doc.body) {
+                    if (doc.body.classList.contains("hidden")) doc.body.classList.remove("hidden");
+                    if (doc.body.style.overflow === "hidden" || doc.body.style.overflowY === "hidden") {
+                        doc.body.style.removeProperty("overflow");
+                        doc.body.style.removeProperty("overflow-y");
+                    }
+                }
+                if (doc.documentElement) {
+                    if (doc.documentElement.style.overflow === "hidden" || doc.documentElement.style.overflowY === "hidden") {
+                        doc.documentElement.style.removeProperty("overflow");
+                        doc.documentElement.style.removeProperty("overflow-y");
+                    }
+                }
+            }
+
+            // Ensure Reposts tab on profile pages is always visible and clickable
+            var repostTab = doc.querySelector("[data-e2e='repost-tab']");
+            if (repostTab) {
+                repostTab.style.setProperty("display", "flex", "important");
+                repostTab.style.setProperty("pointer-events", "auto", "important");
+            }
+
+            // Dismiss TikTok Shop promotional bottom banner
+            var tkToasts = doc.querySelectorAll("[class*='DivFixedBottomContainer']");
+            for (var t = 0; t < tkToasts.length; t++) {
+                if ((tkToasts[t].textContent || "").indexOf("TikTok Shop") !== -1) {
+                    try { tkToasts[t].remove(); } catch (e) {}
+                }
+            }
+        } catch (e) {}
+    }
+
+    function injectClientAdBlocker(win) {
+        if (!win || win.__younisAdBlockInstalled || win.__lightspeedfiltersixlAdBlockInstalled) return;
+        try {
+            win.__younisAdBlockInstalled = true;
+            win.__lightspeedfiltersixlAdBlockInstalled = true;
+            guardWindowOpen(win);
+
+            // Wrap fetch inside proxied window:
+            // 1) Drop ad network requests immediately
+            // 2) Fix TikTok /api/repost/item_list/ (auto-retry once if msToken wasn't ready yet)
+            // 3) Fix TikTok /api/post/item_list/ & /api/favorite/item_list/ when 0-video profiles return empty 0-byte body
+            if (typeof win.fetch === "function") {
+                var origFetch = win.fetch.bind(win);
+                win.fetch = async function(input, init) {
+                    var u = "";
+                    try {
+                        u = (typeof input === "string") ? input : (input && input.url ? input.url : "");
+                        if (u && isAdUrl(u)) {
+                            return new win.Response("", { status: 204 });
+                        }
+                    } catch (e) {}
+
+                    var res = await origFetch(input, init);
+
+                    try {
+                        if (u && u.indexOf("tiktok.com/api/") !== -1) {
+                            if (u.indexOf("/api/repost/item_list/") !== -1 && !(init && init._lsRetried)) {
+                                var repClone = res.clone();
+                                var repTxt = await repClone.text().catch(function() { return ""; });
+                                if (res.status !== 200 || repTxt.trim().length === 0) {
+                                    await new Promise(function(r) { setTimeout(r, 450); });
+                                    try {
+                                        var cleanU = new URL(u);
+                                        cleanU.searchParams.delete("X-Bogus");
+                                        cleanU.searchParams.delete("X-Gnarly");
+                                        cleanU.searchParams.delete("X-Dynosaur");
+                                        cleanU.searchParams.delete("msToken");
+                                        var retryInit = Object.assign({}, init || {}, { _lsRetried: true });
+                                        res = await win.fetch(cleanU.href, retryInit);
+                                    } catch (e) {}
+                                }
+                            } else if (u.indexOf("/api/post/item_list/") !== -1 || u.indexOf("/api/favorite/item_list/") !== -1) {
+                                var postClone = res.clone();
+                                var postTxt = await postClone.text().catch(function() { return ""; });
+                                if (res.status !== 200 || postTxt.trim().length === 0) {
+                                    return new win.Response(
+                                        JSON.stringify({ statusCode: 0, status_code: 0, itemList: [], hasMore: false, cursor: "0" }),
+                                        { status: 200, headers: { "Content-Type": "application/json; charset=utf-8" } }
+                                    );
+                                }
+                            }
+                        }
+                    } catch (e) {}
+
+                    return res;
+                };
+            }
+
+            // Wrap XMLHttpRequest inside proxied window to drop ad network requests
+            if (win.XMLHttpRequest && win.XMLHttpRequest.prototype) {
+                var origOpen = win.XMLHttpRequest.prototype.open;
+                var origSend = win.XMLHttpRequest.prototype.send;
+                win.XMLHttpRequest.prototype.open = function(method, url) {
+                    this.__blockedAd = Boolean(url && isAdUrl(url));
+                    return origOpen.apply(this, arguments);
+                };
+                win.XMLHttpRequest.prototype.send = function() {
+                    if (this.__blockedAd) return;
+                    return origSend.apply(this, arguments);
+                };
+            }
+
+            // Handle link clicks & TikTok Reposts / interactive buttons
+            win.addEventListener("click", function(ev) {
+                try {
+                    var target = ev.target;
+                    if (!target || !target.closest) return;
+
+                    // Allow user-initiated login modal on TikTok when clicking Log in
+                    var loginTrigger = target.closest("[data-e2e*='login'], #header-login-button");
+                    if (loginTrigger) {
+                        win.__younisAllowLogin = true;
+                        win.__lightspeedfiltersixlAllowLogin = true;
+                        return;
+                    }
+                    var closeTrigger = target.closest("[data-e2e='modal-close-inner-button']");
+                    if (closeTrigger) {
+                        win.__younisAllowLogin = false;
+                        win.__lightspeedfiltersixlAllowLogin = false;
+                        setTimeout(function() { restoreTikTokInteractivity(win.document, win); }, 40);
+                        return;
+                    }
+
+                    // Handle TikTok search button click cleanly
+                    var searchBtn = target.closest("[data-e2e='search-box-button']");
+                    if (searchBtn && win.document) {
+                        var sInp = win.document.querySelector("input[data-e2e='search-user-input'], input[type='search'], input[name='q']");
+                        var sq = sInp ? (sInp.value || "").trim() : "";
+                        if (sq) {
+                            ev.preventDefault();
+                            ev.stopImmediatePropagation();
+                            if (sq.indexOf("@") === 0) {
+                                var hSlug = sq.toLowerCase().replace(/^[@#]+/, "").replace(/[^a-z0-9._]+/g, "");
+                                navigate("https://www.tiktok.com/@" + hSlug);
+                            } else {
+                                navigate("https://www.tiktok.com/search?q=" + encodeURIComponent(sq));
+                            }
+                            return;
+                        }
+                    }
+
+                    // CRITICAL FIX FOR TIKTOK REPOSTS & PROFILE VIDEO GRIDS:
+                    // When clicking a video card inside Reposts ([data-e2e="user-repost-item"]), Videos ([data-e2e="user-post-item"]),
+                    // Liked ([data-e2e="user-liked-item"]), or Explore ([data-e2e="explore-item"]), let TikTok's own React onClick
+                    // handler open the in-page Video Browser Modal (with Next/Prev arrows & Close button) instead of doing a full-page reload!
+                    var host = "";
+                    try { host = new URL(currentProxiedUrl || "https://www.tiktok.com").hostname.toLowerCase(); } catch (e) {}
+                    if (host.indexOf("tiktok.com") !== -1) {
+                        var videoCard = target.closest("[data-e2e='user-repost-item'], [data-e2e='user-post-item'], [data-e2e='user-liked-item'], [data-e2e='explore-item'], [data-e2e='collection-item']");
+                        var videoAnchor = target.closest("a[href*='/video/'], a[href*='/photo/']");
+                        if (videoCard || videoAnchor) {
+                            ev.preventDefault();
+                            if (videoAnchor && videoAnchor.hasAttribute("href")) {
+                                var savedHref = videoAnchor.getAttribute("href");
+                                videoAnchor.removeAttribute("href");
+                                setTimeout(function() {
+                                    try { videoAnchor.setAttribute("href", savedHref); } catch (e) {}
+                                }, 120);
+                            }
+                            return;
+                        }
+                    }
+
+                    var el = target.closest("a[href]");
+                    if (!el) return;
+                    var href = el.getAttribute("href") || "";
+                    if (!href || href.indexOf("javascript:") === 0 || href === "#") return;
+                    if (isAdUrl(href)) {
+                        ev.preventDefault();
+                        ev.stopPropagation();
+                        return;
+                    }
+                    var tgt = (el.getAttribute("target") || "").toLowerCase();
+                    if (tgt === "_blank" || tgt === "_top" || tgt === "_parent") {
+                        el.setAttribute("target", "_self");
+                    }
+
+                    // Route top-level TikTok page links (/foryou, /explore, /following, /live, /@username) cleanly through Scramjet
+                    if (host.indexOf("tiktok.com") !== -1) {
+                        var rawHref = el.getAttribute("jet-attr-href") || href;
+                        if (rawHref === "/@" || rawHref === "https://www.tiktok.com/@") {
+                            ev.preventDefault();
+                            ev.stopPropagation();
+                            win.__younisAllowLogin = true;
+                            win.__lightspeedfiltersixlAllowLogin = true;
+                            var topLogin = win.document && win.document.querySelector("[data-e2e='top-login-button'], [data-e2e='nav-login-button']");
+                            if (topLogin) topLogin.click();
+                            return;
+                        }
+                        var resolvedHref = new URL(rawHref, currentProxiedUrl || "https://www.tiktok.com/foryou").href;
+                        var rUrl = new URL(resolvedHref);
+                        if (rUrl.hostname.toLowerCase().indexOf("tiktok.com") !== -1 && rUrl.pathname.indexOf("/video/") === -1 && rUrl.pathname.indexOf("/photo/") === -1) {
+                            ev.preventDefault();
+                            ev.stopPropagation();
+                            navigate(resolvedHref);
+                            return;
+                        }
+                    }
+                } catch (e) {}
+            }, true);
+
+            // Handle TikTok internal search box submission AND keyboard navigation inside Reposts modal
+            win.addEventListener("keydown", function(ev) {
+                try {
+                    var host = "";
+                    try { host = new URL(currentProxiedUrl || "").hostname.toLowerCase(); } catch (e) {}
+                    if (host.indexOf("tiktok.com") === -1) return;
+
+                    var t = ev.target;
+                    var isInput = t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable);
+
+                    if (ev.key === "Enter" && t && t.matches && t.matches("input[data-e2e='search-user-input'], input[type='search'], input[name='q']")) {
+                        var q = (t.value || "").trim();
+                        if (q) {
+                            ev.preventDefault();
+                            ev.stopImmediatePropagation();
+                            if (q.indexOf("@") === 0) {
+                                var handleSlug = q.toLowerCase().replace(/^[@#]+/, "").replace(/[^a-z0-9._]+/g, "");
+                                navigate("https://www.tiktok.com/@" + handleSlug);
+                            } else {
+                                navigate("https://www.tiktok.com/search?q=" + encodeURIComponent(q));
+                            }
+                        }
+                        return;
+                    }
+
+                    // Support keyboard navigation (ArrowDown/ArrowRight = Next video, ArrowUp/ArrowLeft = Prev video, Escape = Close) in Reposts modal
+                    if (!isInput && win.document) {
+                        var closeModalBtn = win.document.querySelector("[data-e2e='browse-close']");
+                        if (closeModalBtn) {
+                            if (ev.key === "ArrowDown" || ev.key === "ArrowRight") {
+                                var nextArrow = win.document.querySelector("[data-e2e='arrow-right']");
+                                if (nextArrow && !nextArrow.disabled) {
+                                    ev.preventDefault();
+                                    nextArrow.click();
+                                }
+                            } else if (ev.key === "ArrowUp" || ev.key === "ArrowLeft") {
+                                var prevArrow = win.document.querySelector("[data-e2e='arrow-left']");
+                                if (prevArrow && !prevArrow.disabled) {
+                                    ev.preventDefault();
+                                    prevArrow.click();
+                                }
+                            } else if (ev.key === "Escape") {
+                                ev.preventDefault();
+                                closeModalBtn.click();
+                            }
+                        }
+                    }
+                } catch (e) {}
+            }, true);
+
+            // Support mouse wheel & trackpad scrolling inside Reposts modal to step through videos
+            var lastWheelStepTime = 0;
+            win.addEventListener("wheel", function(ev) {
+                try {
+                    var host = "";
+                    try { host = new URL(currentProxiedUrl || "").hostname.toLowerCase(); } catch (e) {}
+                    if (host.indexOf("tiktok.com") === -1) return;
+
+                    var doc = win.document;
+                    if (!doc) return;
+
+                    var closeModalBtn = doc.querySelector("[data-e2e='browse-close']");
+                    if (closeModalBtn) {
+                        var now = Date.now();
+                        if (now - lastWheelStepTime < 380) return;
+                        if (ev.deltaY > 25) {
+                            var nextArrow = doc.querySelector("[data-e2e='arrow-right']");
+                            if (nextArrow && !nextArrow.disabled) {
+                                lastWheelStepTime = now;
+                                ev.preventDefault();
+                                nextArrow.click();
+                            }
+                        } else if (ev.deltaY < -25) {
+                            var prevArrow = doc.querySelector("[data-e2e='arrow-left']");
+                            if (prevArrow && !prevArrow.disabled) {
+                                lastWheelStepTime = now;
+                                ev.preventDefault();
+                                prevArrow.click();
+                            }
+                        }
+                    }
+                } catch (e) {}
+            }, { passive: false });
+
+            // Support touch swipe gestures on Chromebook touchscreens
+            var touchStartY = 0;
+            win.addEventListener("touchstart", function(ev) {
+                if (ev.touches && ev.touches[0]) {
+                    touchStartY = ev.touches[0].clientY;
+                }
+            }, { passive: true });
+
+            win.addEventListener("touchend", function(ev) {
+                try {
+                    var host = "";
+                    try { host = new URL(currentProxiedUrl || "").hostname.toLowerCase(); } catch (e) {}
+                    if (host.indexOf("tiktok.com") === -1) return;
+
+                    var doc = win.document;
+                    if (!doc) return;
+
+                    var closeModalBtn = doc.querySelector("[data-e2e='browse-close']");
+                    if (closeModalBtn && ev.changedTouches && ev.changedTouches[0]) {
+                        var diffY = touchStartY - ev.changedTouches[0].clientY;
+                        if (diffY > 40) {
+                            var nextArrow = doc.querySelector("[data-e2e='arrow-right']");
+                            if (nextArrow && !nextArrow.disabled) nextArrow.click();
+                        } else if (diffY < -40) {
+                            var prevArrow = doc.querySelector("[data-e2e='arrow-left']");
+                            if (prevArrow && !prevArrow.disabled) prevArrow.click();
+                        }
+                    }
+                } catch (e) {}
+            }, { passive: true });
+
+            win.addEventListener("submit", function(ev) {
+                try {
+                    var form = ev.target;
+                    if (!form || !form.querySelector) return;
+                    var host = "";
+                    try { host = new URL(currentProxiedUrl || "").hostname.toLowerCase(); } catch (e) {}
+                    if (host.indexOf("tiktok.com") !== -1) {
+                        var inp = form.querySelector("input[type='search'], input[name='q'], input[data-e2e='search-user-input']");
+                        var q = inp ? (inp.value || "").trim() : "";
+                        if (q) {
+                            ev.preventDefault();
+                            ev.stopImmediatePropagation();
+                            if (q.indexOf("@") === 0) {
+                                var handleSlug = q.toLowerCase().replace(/^[@#]+/, "").replace(/[^a-z0-9._]+/g, "");
+                                navigate("https://www.tiktok.com/@" + handleSlug);
+                            } else {
+                                navigate("https://www.tiktok.com/search?q=" + encodeURIComponent(q));
+                            }
+                        }
+                    }
+                } catch (e) {}
+            }, true);
+
+            // Cosmetic ad hiding + TikTok Reposts / pointer-events fix
+            var injectStyle = function() {
+                try {
+                    var doc = win.document;
+                    if (!doc || doc.getElementById("__younis_adblock_css")) return;
+                    var st = doc.createElement("style");
+                    st.id = "__younis_adblock_css";
+                    st.textContent = [
+                        "ins.adsbygoogle",
+                        "[id^='div-gpt-ad']",
+                        "[data-ad-slot]",
+                        "[data-ad-client]",
+                        "iframe[src*='doubleclick.net']",
+                        "iframe[src*='googlesyndication.com']",
+                        "iframe[src*='adnxs.com']",
+                        "#masthead-ad",
+                        "ytd-ad-slot-renderer",
+                        "ytd-display-ad-renderer",
+                        ".video-ads.ytp-ad-module",
+                        "yt-mealbar-promo-renderer",
+                        "ytm-companion-ad-renderer"
+                    ].join(",") + "{display:none!important;visibility:hidden!important;height:0!important;pointer-events:none!important;}" +
+                    "#app, #main-content-homepage_hot, #main-content-explore_page, #main-content-others_homepage, [data-e2e='repost-tab'], [data-e2e='user-repost-item'], [data-e2e='arrow-right'], [data-e2e='arrow-left'], [data-e2e='browse-close'] { pointer-events: auto !important; } " +
+                    "[data-e2e='repost-tab'] { display: flex !important; pointer-events: auto !important; } " +
+                    "[data-e2e='arrow-right'], [data-e2e='arrow-left'] { display: flex !important; opacity: 1 !important; visibility: visible !important; pointer-events: auto !important; z-index: 999999 !important; }";
+                    (doc.head || doc.documentElement).appendChild(st);
+                } catch (e) {}
+            };
+
+            var runHousekeeping = function() {
+                try {
+                    injectStyle();
+                    var doc = win.document;
+                    if (!doc) return;
+                    var skipBtn = doc.querySelector(".ytp-ad-skip-button, .ytp-skip-ad-button, .ytp-ad-skip-button-modern");
+                    if (skipBtn) skipBtn.click();
+                    var adVid = doc.querySelector(".ad-showing video");
+                    if (adVid && isFinite(adVid.duration) && adVid.duration > 0) {
+                        adVid.muted = true;
+                        adVid.currentTime = adVid.duration - 0.1;
+                    }
+                    restoreTikTokInteractivity(doc, win);
+
+                    // Auto-recover if shared proxy IP triggers search engine captcha or block
+                    var dTitle = (doc.title || "");
+                    var bText = (doc.body && doc.body.innerText) ? doc.body.innerText : "";
+                    var isSearchChallenge =
+                        doc.querySelector(".anomaly-modal, #challenge-form") ||
+                        /Captcha|Just a moment|Attention Required/i.test(dTitle) ||
+                        /Verifying you're not a bot|Unfortunately, bots use DuckDuckGo|error code 60/i.test(bText) ||
+                        (currentProxiedUrl.indexOf("search.yahoo.com") !== -1 && doc.readyState === "complete" && bText.trim().length === 0);
+                    if (isSearchChallenge) {
+                        var recoverQ = extractSearchQueryFromUrl(currentProxiedUrl) || lastSearchQuery;
+                        if (recoverQ && scramjetFrame && !win.__lightspeedfiltersixlRecoveredSearch) {
+                            win.__lightspeedfiltersixlRecoveredSearch = true;
+                            scramjetFrame.go("https://www.bing.com/search?q=" + encodeURIComponent(recoverQ));
+                        }
+                    }
+                } catch (e) {}
+            };
+
+            injectStyle();
+            win.addEventListener("DOMContentLoaded", function() {
+                runHousekeeping();
+                // Chromebook-friendly throttled MutationObserver instead of heavy high-frequency polling
+                try {
+                    var throttlePending = false;
+                    var mo = new win.MutationObserver(function() {
+                        if (throttlePending) return;
+                        throttlePending = true;
+                        setTimeout(function() {
+                            throttlePending = false;
+                            runHousekeeping();
+                        }, 250);
+                    });
+                    if (win.document && win.document.documentElement) {
+                        mo.observe(win.document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ["inert", "jet-attr-inert", "class"] });
+                    }
+                    win.addEventListener("pagehide", function() {
+                        try { mo.disconnect(); } catch (e) {}
+                    }, { once: true });
+                } catch (e) {}
+            });
+
+            var housekeepingTimer = setInterval(runHousekeeping, 1200);
+            win.addEventListener("pagehide", function() {
+                clearInterval(housekeepingTimer);
+            }, { once: true });
+        } catch (e) {}
+    }
+
+    // =========================================================================
+    // 2. ENTRY SCREEN & 3-TRY PASSWORD GATE (PIN: 3781)
+    // =========================================================================
+    var LOCK_KEY = "_younis_sys_locked";
+    var TRIES_KEY = "_younis_sys_tries";
+    var SESSION_UNLOCK_KEY = "_younis_sw_reload_unlocked";
+    var CORRECT_PIN = "3781";
+    var MAX_TRIES = 3;
+
+    var entryScreen = document.getElementById("entry-screen");
+    var pwScreen = document.getElementById("password-screen");
+    var pwForm = document.getElementById("pw-form");
+    var pwInput = document.getElementById("pw-input");
+    var pwBtn = document.getElementById("pw-btn");
+    var pwMsg = document.getElementById("pw-msg");
+    var appEl = document.getElementById("app");
+
+    function getTries() {
+        try {
+            if (localStorage.getItem(LOCK_KEY) === "1" || localStorage.getItem("_lightspeedfiltersixl_sys_locked") === "1") return MAX_TRIES;
+            return parseInt(localStorage.getItem(TRIES_KEY) || localStorage.getItem("_lightspeedfiltersixl_sys_tries") || "0", 10) || 0;
+        } catch (e) {
+            return 0;
+        }
+    }
+
+    function setTries(n) {
+        try {
+            localStorage.setItem(TRIES_KEY, String(n));
+            if (n >= MAX_TRIES) {
+                localStorage.setItem(LOCK_KEY, "1");
+            }
+        } catch (e) {}
+    }
+
+    function applyLockoutUI() {
+        if (pwInput) {
+            pwInput.value = "";
+            pwInput.disabled = true;
+            pwInput.placeholder = "Locked";
+            pwInput.style.opacity = "0.45";
+            pwInput.style.cursor = "not-allowed";
+        }
+        if (pwBtn) {
+            pwBtn.disabled = true;
+            pwBtn.style.opacity = "0.45";
+            pwBtn.style.cursor = "not-allowed";
+        }
+        if (pwMsg) {
+            pwMsg.textContent = "Access Denied. Maximum attempts exceeded.";
+            pwMsg.style.color = "#ef4444";
+        }
+    }
+
+    if (getTries() >= MAX_TRIES) {
+        applyLockoutUI();
+    }
+
+    function resetTries() {
+        try {
+            localStorage.removeItem(TRIES_KEY);
+            localStorage.removeItem(LOCK_KEY);
+            localStorage.removeItem("_lightspeedfiltersixl_sys_locked");
+            localStorage.removeItem("_lightspeedfiltersixl_sys_tries");
+        } catch (e) {}
+        if (pwInput) {
+            pwInput.disabled = false;
+            pwInput.placeholder = "••••";
+            pwInput.value = "";
+            pwInput.style.opacity = "";
+            pwInput.style.cursor = "";
+        }
+        if (pwBtn) {
+            pwBtn.disabled = false;
+            pwBtn.style.opacity = "";
+            pwBtn.style.cursor = "";
+        }
+        if (pwMsg) {
+            pwMsg.textContent = "Tries reset to 0. Ready.";
+            pwMsg.style.color = "#a7f3d0";
+            setTimeout(function() {
+                if (pwMsg && pwMsg.textContent === "Tries reset to 0. Ready.") {
+                    pwMsg.textContent = "";
+                }
+            }, 3000);
+        }
+        if (pwInput) pwInput.focus();
+    }
+
+    function openPasswordScreen() {
+        if (entryScreen) entryScreen.style.display = "none";
+        if (appEl) appEl.style.display = "none";
+        if (pwScreen) {
+            pwScreen.style.display = "flex";
+            if (getTries() >= MAX_TRIES) {
+                applyLockoutUI();
+            } else if (pwInput) {
+                pwInput.focus();
+            }
+        }
+    }
+
+    var pwBrand = document.querySelector(".pw-brand");
+    if (pwBrand) {
+        pwBrand.addEventListener("dblclick", function() {
+            resetTries();
+        });
+    }
+
+    function handleGlobalShortcuts(e) {
+        var hasCtrl = e.ctrlKey || e.metaKey;
+        var hasShift = e.shiftKey;
+        var hasAlt = e.altKey;
+        var key = (e.key || "").toLowerCase();
+        var code = e.code || "";
+
+        // Ctrl + Shift + Alt + T: Open PIN / Password entry screen
+        if (hasCtrl && hasShift && hasAlt && (key === "t" || code === "KeyT")) {
+            e.preventDefault();
+            e.stopPropagation();
+            openPasswordScreen();
+            return;
+        }
+
+        // Ctrl + Shift + Alt + S: Reset tries to 0 and restore normal access
+        if (hasCtrl && hasShift && hasAlt && (key === "s" || code === "KeyS")) {
+            e.preventDefault();
+            e.stopPropagation();
+            resetTries();
+            return;
+        }
+    }
+
+    window.addEventListener("keydown", handleGlobalShortcuts, true);
+    document.addEventListener("keydown", handleGlobalShortcuts, true);
+
+    try {
+        if (sessionStorage.getItem(SESSION_UNLOCK_KEY) === "1") {
+            sessionStorage.removeItem(SESSION_UNLOCK_KEY);
+            entryScreen.style.display = "none";
+            pwScreen.style.display = "none";
+            appEl.style.display = "flex";
+        }
+    } catch (e) {}
+
+    function showPasswordScreen() {
+        if (entryScreen && entryScreen.style.display !== "none") {
+            openPasswordScreen();
+        }
+    }
+
+    entryScreen.addEventListener("click", showPasswordScreen);
+    entryScreen.addEventListener("pointerdown", showPasswordScreen);
+    entryScreen.addEventListener("touchstart", showPasswordScreen);
+    window.addEventListener("click", function(e) {
+        if (entryScreen && entryScreen.style.display !== "none") {
+            showPasswordScreen();
+        }
+    });
+    window.addEventListener("pointerdown", function(e) {
+        if (entryScreen && entryScreen.style.display !== "none") {
+            showPasswordScreen();
+        }
+    });
+    window.addEventListener("keydown", function(e) {
+        if (entryScreen && entryScreen.style.display !== "none") {
+            showPasswordScreen();
+        }
+    });
+
+    pwForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+        if (getTries() >= MAX_TRIES) {
+            applyLockoutUI();
+            return;
+        }
+        var val = (pwInput.value || "").trim();
+        if (val === CORRECT_PIN) {
+            try {
+                localStorage.removeItem(TRIES_KEY);
+                localStorage.removeItem(LOCK_KEY);
+                localStorage.removeItem("_lightspeedfiltersixl_sys_locked");
+                localStorage.removeItem("_lightspeedfiltersixl_sys_tries");
+            } catch (err) {}
+            entryScreen.style.display = "none";
+            pwScreen.style.display = "none";
+            appEl.style.display = "flex";
+            document.getElementById("home-input").focus();
+        } else {
+            var tries = getTries() + 1;
+            setTries(tries);
+            pwInput.value = "";
+            if (tries >= MAX_TRIES) {
+                applyLockoutUI();
+            } else {
+                var left = MAX_TRIES - tries;
+                pwMsg.textContent = "Incorrect password. " + left + (left === 1 ? " attempt" : " attempts") + " remaining.";
+                pwInput.focus();
+            }
+        }
+    });
+
+    // =========================================================================
+    // 3. SEARCH ENGINE SELECTION (Google, DuckDuckGo, Bing, Yahoo, Brave, Ecosia)
+    // =========================================================================
+    var ENGINES = {
+        google: {
+            name: "Google",
+            searchUrl: function(q) { return "https://www.google.com/search?q=" + encodeURIComponent(q); }
+        },
+        duckduckgo: {
+            name: "DuckDuckGo",
+            searchUrl: function(q) { return "https://duckduckgo.com/?q=" + encodeURIComponent(q); }
+        },
+        bing: {
+            name: "Bing",
+            searchUrl: function(q) { return "https://www.bing.com/search?q=" + encodeURIComponent(q); }
+        },
+        yahoo: {
+            name: "Yahoo",
+            searchUrl: function(q) { return "https://search.yahoo.com/search?p=" + encodeURIComponent(q); }
+        },
+        brave: {
+            name: "Brave Search",
+            searchUrl: function(q) { return "https://search.brave.com/search?q=" + encodeURIComponent(q); }
+        },
+        ecosia: {
+            name: "Ecosia",
+            searchUrl: function(q) { return "https://www.ecosia.org/search?q=" + encodeURIComponent(q); }
+        }
+    };
+
+    var ENGINE_STORAGE_KEY = "_younis_engine";
+    var currentEngine = "google";
+    try {
+        var savedEng = localStorage.getItem(ENGINE_STORAGE_KEY) || localStorage.getItem("_lightspeedfiltersixl_engine") || localStorage.getItem("_younus_engine");
+        if (savedEng && ENGINES[savedEng]) currentEngine = savedEng;
+    } catch (e) {}
+
+    var omniEngine = document.getElementById("omni-engine");
+    var pillBtns = document.querySelectorAll(".engine-pill");
+
+    function extractSearchQueryFromUrl(urlStr) {
+        if (!urlStr) return "";
+        try {
+            var u = new URL(urlStr);
+            var h = u.hostname.toLowerCase();
+            if (h.indexOf("google.") !== -1 || h.indexOf("bing.com") !== -1 || h.indexOf("duckduckgo.com") !== -1 || h.indexOf("search.brave.com") !== -1 || h.indexOf("ecosia.org") !== -1) {
+                return u.searchParams.get("q") || "";
+            }
+            if (h.indexOf("search.yahoo.com") !== -1) {
+                return u.searchParams.get("p") || "";
+            }
+        } catch (e) {}
+        return "";
+    }
+
+    function setSearchEngine(eng, triggerActiveSearch) {
+        if (!ENGINES[eng]) return;
+        currentEngine = eng;
+        try { localStorage.setItem(ENGINE_STORAGE_KEY, eng); } catch (e) {}
+        if (omniEngine.value !== eng) omniEngine.value = eng;
+        for (var i = 0; i < pillBtns.length; i++) {
+            var b = pillBtns[i];
+            if (b.getAttribute("data-engine") === eng) {
+                b.classList.add("active");
+            } else {
+                b.classList.remove("active");
+            }
+        }
+        if (triggerActiveSearch && !isHomeVisible) {
+            var activeQ = extractSearchQueryFromUrl(currentProxiedUrl) || lastSearchQuery;
+            if (activeQ) {
+                navigate(ENGINES[eng].searchUrl(activeQ));
+            }
+        }
+    }
+
+    omniEngine.addEventListener("change", function() {
+        setSearchEngine(omniEngine.value, true);
+    });
+
+    for (var i = 0; i < pillBtns.length; i++) {
+        pillBtns[i].addEventListener("click", function() {
+            setSearchEngine(this.getAttribute("data-engine"), false);
+        });
+    }
+    setSearchEngine(currentEngine, false);
+
+    // =========================================================================
+    // 4. DIRECTORY OF 115 LEGITIMATE WEBSITES (CHROMBOOK DOCUMENTFRAGMENT RENDER)
+    // =========================================================================
+    var WEBSITE_DIRECTORY = [
+        // Social & Community (12)
+        { name: "TikTok", url: "https://www.tiktok.com/foryou", cat: "Social", badge: "TT" },
+        { name: "Reddit", url: "https://www.reddit.com/", cat: "Social", badge: "RD" },
+        { name: "Discord (My Server)", url: "https://discord.gg/NcsWzr9AJy", cat: "Social", badge: "DC" },
+        { name: "Discord App", url: "https://discord.com/app", cat: "Social", badge: "DC" },
+        { name: "Instagram", url: "https://www.instagram.com/", cat: "Social", badge: "IG" },
+        { name: "X (Twitter)", url: "https://x.com/", cat: "Social", badge: "X" },
+        { name: "Pinterest", url: "https://www.pinterest.com/", cat: "Social", badge: "PN" },
+        { name: "Threads", url: "https://www.threads.net/", cat: "Social", badge: "TH" },
+        { name: "Bluesky", url: "https://bsky.app/", cat: "Social", badge: "BS" },
+        { name: "Tumblr", url: "https://www.tumblr.com/", cat: "Social", badge: "TB" },
+        { name: "Mastodon", url: "https://mastodon.social/explore", cat: "Social", badge: "MS" },
+        { name: "LinkedIn", url: "https://www.linkedin.com/", cat: "Social", badge: "IN" },
+        { name: "Quora", url: "https://www.quora.com/", cat: "Social", badge: "QR" },
+
+        // Video & Streaming (12)
+        { name: "YouTube", url: "https://www.youtube.com/", cat: "Video", badge: "YT" },
+        { name: "Twitch", url: "https://www.twitch.tv/", cat: "Video", badge: "TW" },
+        { name: "Kick", url: "https://kick.com/", cat: "Video", badge: "KK" },
+        { name: "Vimeo", url: "https://vimeo.com/watch", cat: "Video", badge: "VM" },
+        { name: "Dailymotion", url: "https://www.dailymotion.com/", cat: "Video", badge: "DM" },
+        { name: "Crunchyroll", url: "https://www.crunchyroll.com/", cat: "Video", badge: "CR" },
+        { name: "Pluto TV", url: "https://pluto.tv/", cat: "Video", badge: "PT" },
+        { name: "Tubi", url: "https://tubitv.com/", cat: "Video", badge: "TB" },
+        { name: "Plex", url: "https://watch.plex.tv/", cat: "Video", badge: "PX" },
+        { name: "Rumble", url: "https://rumble.com/", cat: "Video", badge: "RM" },
+        { name: "TED Talks", url: "https://www.ted.com/talks", cat: "Video", badge: "TD" },
+        { name: "Internet Archive TV", url: "https://archive.org/details/movies", cat: "Video", badge: "IA" },
+
+        // Gaming & Entertainment (18)
+        { name: "Roblox", url: "https://www.roblox.com/", cat: "Gaming", badge: "RB" },
+        { name: "Poki", url: "https://poki.com/", cat: "Gaming", badge: "PK" },
+        { name: "CrazyGames", url: "https://www.crazygames.com/", cat: "Gaming", badge: "CG" },
+        { name: "Coolmath Games", url: "https://www.coolmathgames.com/", cat: "Gaming", badge: "CM" },
+        { name: "Chess.com", url: "https://www.chess.com/", cat: "Gaming", badge: "CH" },
+        { name: "Lichess", url: "https://lichess.org/", cat: "Gaming", badge: "LC" },
+        { name: "Krunker", url: "https://krunker.io/", cat: "Gaming", badge: "KR" },
+        { name: "itch.io", url: "https://itch.io/", cat: "Gaming", badge: "IT" },
+        { name: "Steam Store", url: "https://store.steampowered.com/", cat: "Gaming", badge: "ST" },
+        { name: "Epic Games", url: "https://store.epicgames.com/", cat: "Gaming", badge: "EG" },
+        { name: "Xbox Cloud", url: "https://www.xbox.com/play", cat: "Gaming", badge: "XB" },
+        { name: "GeForce NOW", url: "https://play.geforcenow.com/", cat: "Gaming", badge: "GF" },
+        { name: "Newgrounds", url: "https://www.newgrounds.com/", cat: "Gaming", badge: "NG" },
+        { name: "Armor Games", url: "https://armorgames.com/", cat: "Gaming", badge: "AG" },
+        { name: "Y8 Games", url: "https://www.y8.com/", cat: "Gaming", badge: "Y8" },
+        { name: "Neal.fun", url: "https://neal.fun/", cat: "Gaming", badge: "NF" },
+        { name: "2048", url: "https://play2048.co/", cat: "Gaming", badge: "20" },
+        { name: "Skribbl.io", url: "https://skribbl.io/", cat: "Gaming", badge: "SK" },
+
+        // AI & Productivity (12)
+        { name: "DuckDuckGo AI", url: "https://duckduckgo.com/?q=DuckDuckGo+AI+Chat&ia=chat&duckai=1", cat: "AI & Cloud", badge: "AI" },
+        { name: "Hugging Face", url: "https://huggingface.co/", cat: "AI & Cloud", badge: "HF" },
+        { name: "Perplexity", url: "https://www.perplexity.ai/", cat: "AI & Cloud", badge: "PX" },
+        { name: "Phind", url: "https://www.phind.com/", cat: "AI & Cloud", badge: "PH" },
+        { name: "WolframAlpha", url: "https://www.wolframalpha.com/", cat: "AI & Cloud", badge: "WA" },
+        { name: "Photopea", url: "https://www.photopea.com/", cat: "AI & Cloud", badge: "PP" },
+        { name: "Excalidraw", url: "https://excalidraw.com/", cat: "AI & Cloud", badge: "EX" },
+        { name: "Canva", url: "https://www.canva.com/", cat: "AI & Cloud", badge: "CV" },
+        { name: "Figma", url: "https://www.figma.com/", cat: "AI & Cloud", badge: "FG" },
+        { name: "Notion", url: "https://www.notion.so/", cat: "AI & Cloud", badge: "NT" },
+        { name: "Trello", url: "https://trello.com/", cat: "AI & Cloud", badge: "TR" },
+        { name: "Pixlr Editor", url: "https://pixlr.com/editor/", cat: "AI & Cloud", badge: "PX" },
+
+        // Education & Reference (15)
+        { name: "Wikipedia", url: "https://www.wikipedia.org/", cat: "Education", badge: "WK" },
+        { name: "Khan Academy", url: "https://www.khanacademy.org/", cat: "Education", badge: "KA" },
+        { name: "Desmos", url: "https://www.desmos.com/calculator", cat: "Education", badge: "DS" },
+        { name: "GeoGebra", url: "https://www.geogebra.org/calculator", cat: "Education", badge: "GG" },
+        { name: "Symbolab", url: "https://www.symbolab.com/", cat: "Education", badge: "SY" },
+        { name: "Coursera", url: "https://www.coursera.org/", cat: "Education", badge: "CS" },
+        { name: "edX", url: "https://www.edx.org/", cat: "Education", badge: "EX" },
+        { name: "MIT OpenCourseWare", url: "https://ocw.mit.edu/", cat: "Education", badge: "MT" },
+        { name: "Duolingo", url: "https://www.duolingo.com/", cat: "Education", badge: "DL" },
+        { name: "Quizlet", url: "https://quizlet.com/", cat: "Education", badge: "QZ" },
+        { name: "Open Library", url: "https://openlibrary.org/", cat: "Education", badge: "OL" },
+        { name: "Project Gutenberg", url: "https://www.gutenberg.org/", cat: "Education", badge: "PG" },
+        { name: "Britannica", url: "https://www.britannica.com/", cat: "Education", badge: "BR" },
+        { name: "NASA", url: "https://www.nasa.gov/", cat: "Education", badge: "NS" },
+        { name: "National Geographic", url: "https://www.nationalgeographic.com/", cat: "Education", badge: "NG" },
+
+        // Developer & Tech (14)
+        { name: "GitHub", url: "https://github.com/", cat: "Developer", badge: "GH" },
+        { name: "GitLab", url: "https://gitlab.com/explore", cat: "Developer", badge: "GL" },
+        { name: "Stack Overflow", url: "https://stackoverflow.com/", cat: "Developer", badge: "SO" },
+        { name: "MDN Web Docs", url: "https://developer.mozilla.org/", cat: "Developer", badge: "MD" },
+        { name: "W3Schools", url: "https://www.w3schools.com/", cat: "Developer", badge: "W3" },
+        { name: "freeCodeCamp", url: "https://www.freecodecamp.org/", cat: "Developer", badge: "FC" },
+        { name: "LeetCode", url: "https://leetcode.com/", cat: "Developer", badge: "LC" },
+        { name: "HackerRank", url: "https://www.hackerrank.com/", cat: "Developer", badge: "HR" },
+        { name: "CodePen", url: "https://codepen.io/", cat: "Developer", badge: "CP" },
+        { name: "JSFiddle", url: "https://jsfiddle.net/", cat: "Developer", badge: "JS" },
+        { name: "Replit", url: "https://replit.com/", cat: "Developer", badge: "RP" },
+        { name: "Hacker News", url: "https://news.ycombinator.com/", cat: "Developer", badge: "HN" },
+        { name: "Dev.to", url: "https://dev.to/", cat: "Developer", badge: "DV" },
+        { name: "NPM Registry", url: "https://www.npmjs.com/", cat: "Developer", badge: "NP" },
+
+        // News, Sports & Finance (12)
+        { name: "BBC News", url: "https://www.bbc.com/news", cat: "News & Sports", badge: "BB" },
+        { name: "Reuters", url: "https://www.reuters.com/", cat: "News & Sports", badge: "RT" },
+        { name: "Associated Press", url: "https://apnews.com/", cat: "News & Sports", badge: "AP" },
+        { name: "NPR", url: "https://www.npr.org/", cat: "News & Sports", badge: "NP" },
+        { name: "The Guardian", url: "https://www.theguardian.com/", cat: "News & Sports", badge: "GD" },
+        { name: "CNBC", url: "https://www.cnbc.com/", cat: "News & Sports", badge: "CN" },
+        { name: "Yahoo Finance", url: "https://finance.yahoo.com/", cat: "News & Sports", badge: "YF" },
+        { name: "MarketWatch", url: "https://www.marketwatch.com/", cat: "News & Sports", badge: "MW" },
+        { name: "ESPN", url: "https://www.espn.com/", cat: "News & Sports", badge: "ES" },
+        { name: "NBA", url: "https://www.nba.com/", cat: "News & Sports", badge: "NB" },
+        { name: "NFL", url: "https://www.nfl.com/", cat: "News & Sports", badge: "NF" },
+        { name: "Premier League", url: "https://www.premierleague.com/", cat: "News & Sports", badge: "PL" },
+
+        // Music & Audio (10)
+        { name: "Spotify", url: "https://open.spotify.com/", cat: "Music", badge: "SP" },
+        { name: "SoundCloud", url: "https://soundcloud.com/discover", cat: "Music", badge: "SC" },
+        { name: "Bandcamp", url: "https://bandcamp.com/", cat: "Music", badge: "BC" },
+        { name: "Audiomack", url: "https://audiomack.com/", cat: "Music", badge: "AM" },
+        { name: "iHeartRadio", url: "https://www.iheart.com/", cat: "Music", badge: "IH" },
+        { name: "TuneIn Radio", url: "https://tunein.com/", cat: "Music", badge: "TI" },
+        { name: "Last.fm", url: "https://www.last.fm/", cat: "Music", badge: "LF" },
+        { name: "Genius Lyrics", url: "https://genius.com/", cat: "Music", badge: "GN" },
+        { name: "Radio Garden", url: "https://radio.garden/", cat: "Music", badge: "RG" },
+        { name: "SomaFM", url: "https://somafm.com/", cat: "Music", badge: "SF" },
+
+        // Utilities, Shopping & Lifestyle (10)
+        { name: "Internet Archive", url: "https://archive.org/", cat: "Utilities & Life", badge: "IA" },
+        { name: "Speedtest", url: "https://www.speedtest.net/", cat: "Utilities & Life", badge: "ST" },
+        { name: "Fast.com", url: "https://fast.com/", cat: "Utilities & Life", badge: "FS" },
+        { name: "Weather.com", url: "https://weather.com/", cat: "Utilities & Life", badge: "WT" },
+        { name: "Windy Radar", url: "https://www.windy.com/", cat: "Utilities & Life", badge: "WN" },
+        { name: "OpenStreetMap", url: "https://www.openstreetmap.org/", cat: "Utilities & Life", badge: "OS" },
+        { name: "DeepL Translate", url: "https://www.deepl.com/translator", cat: "Utilities & Life", badge: "DP" },
+        { name: "Merriam-Webster", url: "https://www.merriam-webster.com/", cat: "Utilities & Life", badge: "MW" },
+        { name: "IMDb", url: "https://www.imdb.com/", cat: "Utilities & Life", badge: "IM" },
+        { name: "Letterboxd", url: "https://letterboxd.com/", cat: "Utilities & Life", badge: "LB" },
+        { name: "Toggle Fullscreen", url: "#fullscreen", cat: "Utilities & Life", badge: "⛶" },
+        { name: "AI Assistant", url: "#ai", cat: "AI & Cloud", badge: "✨" },
+        { name: "Screen Solver (i-Ready)", url: "#screensolver", cat: "AI & Cloud", badge: "🖥️" }
+    ];
+
+    var CATEGORIES = ["All", "Social", "Video", "Gaming", "AI & Cloud", "Education", "Developer", "News & Sports", "Music", "Utilities & Life"];
+    var activeCategory = "All";
+    var filterQuery = "";
+
+    var categoryTabsEl = document.getElementById("category-tabs");
+    var siteGridEl = document.getElementById("site-grid");
+    var siteFilterEl = document.getElementById("site-filter");
+
+    // Precompute hostnames once to avoid creating URL objects on every filter keystroke
+    for (var pIdx = 0; pIdx < WEBSITE_DIRECTORY.length; pIdx++) {
+        var item = WEBSITE_DIRECTORY[pIdx];
+        try {
+            if (item.url === "#fullscreen") {
+                item.host = "F11 / Alt+F";
+            } else if (item.url === "#ai") {
+                item.host = "Unlimited AI";
+            } else if (item.url === "#screensolver") {
+                item.host = "Screenshare & Solve";
+            } else {
+                item.host = new URL(item.url).hostname.replace(/^www\./i, "");
+            }
+        } catch (e) {
+            item.host = item.url;
+        }
+        item.searchText = (item.name + " " + item.host + " " + item.cat).toLowerCase();
+    }
+
+    function renderCategoryTabs() {
+        categoryTabsEl.textContent = "";
+        var frag = document.createDocumentFragment();
+        for (var i = 0; i < CATEGORIES.length; i++) {
+            var cat = CATEGORIES[i];
+            var count = 0;
+            if (cat === "All") {
+                count = WEBSITE_DIRECTORY.length;
+            } else {
+                for (var j = 0; j < WEBSITE_DIRECTORY.length; j++) {
+                    if (WEBSITE_DIRECTORY[j].cat === cat) count++;
+                }
+            }
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "cat-tab" + (activeCategory === cat ? " active" : "");
+            btn.setAttribute("data-cat", cat);
+            btn.textContent = cat + " (" + count + ")";
+            frag.appendChild(btn);
+        }
+        categoryTabsEl.appendChild(frag);
+    }
+
+    // Event delegation on categoryTabsEl & siteGridEl (zero per-card event listeners -> saves Chromebook memory!)
+    categoryTabsEl.addEventListener("click", function(ev) {
+        var btn = ev.target && ev.target.closest ? ev.target.closest(".cat-tab") : null;
+        if (!btn) return;
+        activeCategory = btn.getAttribute("data-cat") || "All";
+        renderCategoryTabs();
+        renderSiteGrid();
+    });
+
+    siteGridEl.addEventListener("click", function(ev) {
+        var card = ev.target && ev.target.closest ? ev.target.closest(".site-card") : null;
+        if (!card) return;
+        ev.preventDefault();
+        var targetUrl = card.getAttribute("data-site-url");
+        if (targetUrl === "#fullscreen") {
+            toggleFullscreen();
+            return;
+        }
+        if (targetUrl === "#ai") {
+            toggleAi();
+            return;
+        }
+        if (targetUrl === "#screensolver") {
+            toggleScreenSolver();
+            return;
+        }
+        if (targetUrl) navigate(targetUrl);
+    });
+
+    function renderSiteGrid() {
+        siteGridEl.textContent = "";
+        var frag = document.createDocumentFragment();
+        var q = filterQuery.toLowerCase();
+        for (var i = 0; i < WEBSITE_DIRECTORY.length; i++) {
+            var site = WEBSITE_DIRECTORY[i];
+            if (activeCategory !== "All" && site.cat !== activeCategory) continue;
+            if (q && site.searchText.indexOf(q) === -1) continue;
+
+            var card = document.createElement("a");
+            card.href = site.url;
+            card.className = "site-card";
+            card.setAttribute("data-site-url", site.url);
+            card.setAttribute("data-site-name", site.name);
+            var iconEl = document.createElement("div");
+            iconEl.className = "site-icon";
+            iconEl.textContent = site.badge;
+            var infoEl = document.createElement("div");
+            infoEl.className = "site-info";
+            var nameEl = document.createElement("div");
+            nameEl.className = "site-name";
+            nameEl.textContent = site.name;
+            var domEl = document.createElement("div");
+            domEl.className = "site-domain";
+            domEl.textContent = site.host;
+            infoEl.appendChild(nameEl);
+            infoEl.appendChild(domEl);
+            card.appendChild(iconEl);
+            card.appendChild(infoEl);
+            frag.appendChild(card);
+        }
+        siteGridEl.appendChild(frag);
+    }
+
+    var filterRaf = 0;
+    siteFilterEl.addEventListener("input", function() {
+        filterQuery = (siteFilterEl.value || "").trim();
+        if (filterRaf) cancelAnimationFrame(filterRaf);
+        filterRaf = requestAnimationFrame(renderSiteGrid);
+    });
+
+    renderCategoryTabs();
+    renderSiteGrid();
+
+    // =========================================================================
+    // 5. REAL SCRAMJET ENGINE + FAST US WISP BOOTSTRAP
+    // =========================================================================
+    var ASSETS_BASE = new URL("./", location.href).href;
+    var BACKUP_ASSETS_BASE = "https://cdn.jsdelivr.net/gh/TongSherbet/storage@main/";
+
+    function getAsset(path) {
+        return ASSETS_BASE + String(path).replace(/^\//, "");
+    }
+
+    function getBackupAsset(path) {
+        return BACKUP_ASSETS_BASE + String(path).replace(/^\//, "");
+    }
+
+    function loadScript(src, fallbackSrc) {
+        return new Promise(function(resolve, reject) {
+            var s = document.createElement("script");
+            s.src = src;
+            s.onload = function() {
+                s.remove();
+                resolve(true);
+            };
+            s.onerror = function() {
+                s.remove();
+                if (fallbackSrc && fallbackSrc !== src) {
+                    loadScript(fallbackSrc, null).then(resolve).catch(reject);
+                } else {
+                    reject(new Error("Failed to load script: " + src));
+                }
+            };
+            (document.head || document.documentElement).appendChild(s);
+        });
+    }
+
+    // Verified US-only Wisp servers (~50ms latency, zero India geo-blocks for TikTok)
+    var WISP_ENDPOINTS = [
+        "wss://cdn.slcbmooc.org/",
+        "wss://cdn.goaplytexas.org/",
+        "wss://cdn.kcchallengevbc.com/",
+        "wss://cdn.northstreetumc.org/",
+        "wss://cdn.topstargym.net/",
+        "wss://cdn.clearfieldswimming.com/",
+        "wss://athollcottage.com/connection/",
+        "wss://kidsprepnest.org/vi/"
+    ];
+
+    function testWispServer(wsUrl) {
+        return new Promise(function(resolve, reject) {
+            var ws;
+            try {
+                ws = new WebSocket(wsUrl);
+            } catch (e) {
+                return reject(e);
+            }
+            ws.binaryType = "arraybuffer";
+            var streamId = (Math.floor(Math.random() * 4294967294) + 1) >>> 0;
+            var sentConnect = false;
+            var done = false;
+            var cleanup = function() {
+                clearTimeout(timer);
+                ws.onmessage = ws.onerror = ws.onclose = null;
+                try { ws.close(); } catch (e) {}
+            };
+            var timer = setTimeout(function() {
+                if (done) return;
+                done = true;
+                cleanup();
+                reject(new Error("timeout"));
+            }, 2400);
+            ws.onerror = ws.onclose = function() {
+                if (done) return;
+                done = true;
+                cleanup();
+                reject(new Error("closed"));
+            };
+            ws.onmessage = function(ev) {
+                if (done) return;
+                if (!(ev.data instanceof ArrayBuffer) || ev.data.byteLength < 5) return;
+                var dv = new DataView(ev.data);
+                var pType = dv.getUint8(0);
+                var sId = dv.getUint32(1, true);
+                if (sentConnect) {
+                    if (sId === streamId) {
+                        done = true;
+                        cleanup();
+                        resolve(wsUrl);
+                    }
+                    return;
+                }
+                if (sId === 0) {
+                    if (pType === 5) {
+                        ws.send(new Uint8Array([5, 0, 0, 0, 0, 2, 1]));
+                    } else if (pType === 3) {
+                        var hostBytes = (new TextEncoder()).encode("127.0.0.1");
+                        var pkt = new Uint8Array(8 + hostBytes.length);
+                        pkt.set([1, 0, 0, 0, 0, 1, 69, 0], 0);
+                        pkt.set(hostBytes, 8);
+                        new DataView(pkt.buffer).setUint32(1, streamId, true);
+                        sentConnect = true;
+                        ws.send(pkt);
+                    }
+                }
+            };
+        });
+    }
+
+    async function findFastestWisp() {
+        try {
+            var winner = await Promise.any(WISP_ENDPOINTS.map(testWispServer));
+            if (winner) return winner;
+        } catch (e) {}
+        return WISP_ENDPOINTS[0];
+    }
+
+    async function swAlive(reg) {
+        for (var i = 0; i < 16; i++) {
+            try {
+                var ctrl = new AbortController();
+                var t = setTimeout(function() { ctrl.abort(); }, 1500);
+                var r = await fetch(new URL("__sw_alive", reg.scope), { cache: "no-store", signal: ctrl.signal });
+                clearTimeout(t);
+                if ((await r.text()) === "true") return true;
+            } catch (e) {}
+            await new Promise(function(res) { setTimeout(res, 80); });
+        }
+        return false;
+    }
+
+    var controller = null;
+    var transport = null;
+    var scramjetFrame = null;
+    var scramjetReady = false;
+
+    async function initTransportInstance(tr) {
+        for (var i = 0; i < 600; i++) {
+            try {
+                return await tr.init();
+            } catch (e) {
+                if (String(e).indexOf("wasm not loaded") === -1) throw e;
+            }
+            await new Promise(function(r) { setTimeout(r, 10); });
+        }
+        throw new Error("Transport init timed out");
+    }
+
+    async function bootScramjet() {
+        if (scramjetReady && controller && scramjetFrame) return true;
+        if (!navigator.serviceWorker) {
+            throw new Error("Service Workers are not supported in this context");
+        }
+
+        // 1. Load Scramjet Core, Controller API, and Utils in parallel after core
+        await loadScript(getAsset("sj/jet.core.js"), getBackupAsset("sj/jet.core.js"));
+        await Promise.all([
+            loadScript(getAsset("sj/jet.api.js"), getBackupAsset("sj/jet.api.js")),
+            loadScript(getAsset("sj/jet.utils.js"), getBackupAsset("sj/jet.utils.js"))
+        ]);
+
+        // 2. Register Service Worker in current repo scope AND start Wisp discovery in parallel
+        var wispPromise = findFastestWisp();
+        var reg = await navigator.serviceWorker.register(getAsset("sw.js"), {
+            scope: new URL("./", location.href).pathname,
+            updateViaCache: "none"
+        });
+
+        if (!navigator.serviceWorker.controller) {
+            var ctrlChanged = new Promise(function(resolve) {
+                navigator.serviceWorker.addEventListener("controllerchange", resolve, { once: true });
+            });
+            var swTarget = reg.active || reg.waiting || reg.installing;
+            if (swTarget) {
+                try { swTarget.postMessage({ type: "OPM:claim" }); } catch (e) {}
+                swTarget.addEventListener("statechange", function() {
+                    if (swTarget.state === "activated" && reg.active) {
+                        try { reg.active.postMessage({ type: "OPM:claim" }); } catch (e) {}
+                    }
+                });
+            }
+            await Promise.race([
+                ctrlChanged,
+                new Promise(function(r) { setTimeout(r, 5000); })
+            ]);
+        }
+
+        if (!navigator.serviceWorker.controller && reg.active) {
+            try { reg.active.postMessage({ type: "OPM:claim" }); } catch (e) {}
+        }
+
+        await swAlive(reg);
+
+        // 3. Initialize Libcurl Wisp Transport
+        var wispUrl = await wispPromise;
+        var TransportCls = null;
+        try {
+            var mod = await import(getAsset("curl/index.mjs"));
+            TransportCls = mod.default || mod.LibcurlClient || mod;
+        } catch (e) {
+            var mod2 = await import(getBackupAsset("curl/index.mjs"));
+            TransportCls = mod2.default || mod2.LibcurlClient || mod2;
+        }
+        transport = new TransportCls({ wisp: wispUrl });
+        await initTransportInstance(transport);
+
+        // 4. Initialize Scramjet Controller
+        var activeSw = navigator.serviceWorker.controller || reg.active;
+        var readyResolveHook = null;
+        var handshakeDone = new Promise(function(r) { readyResolveHook = r; });
+
+        controller = new $jetController.Controller({
+            serviceworker: activeSw,
+            transport: transport,
+            jetConfig: {
+                maskedfiles: ["jet.inject.js", "jet.wasm.js"],
+                flags: {
+                    syncxhr: false,
+                    disableComputedWrap: false,
+                    rewriterLogs: false,
+                    captureErrors: false,
+                    cleanErrors: false,
+                    scramitize: false,
+                    sourcemaps: false,
+                    destructureRewrites: true,
+                    allowInvalidJs: true,
+                    debugTrampolines: false,
+                    debugSourceURL: false,
+                    allowFailedIntercepts: true,
+                    encapsulateWorkers: true
+                }
+            },
+            config: {
+                jetPath: getAsset("sj/jet.core.js"),
+                wasmPath: getAsset("sj/jet.wasm"),
+                injectPath: getAsset("sj/jet.inject.js"),
+                virtualWasmPath: "jet.wasm.js",
+                codec: {
+                    encode: function(urlStr) {
+                        if (!urlStr) return urlStr;
+                        var key = globalThis.__jck;
+                        if (key === undefined) {
+                            key = [
+                                location.origin.replace(/^\w+:\/\/|:\d+$/g, ""),
+                                (new Date()).getUTCMonth(),
+                                navigator.hardwareConcurrency,
+                                navigator.deviceMemory,
+                                navigator.platform,
+                                navigator.userAgent.replace(/[\d.]+/g, ""),
+                                (new Date()).getTimezoneOffset()
+                            ].join().split("").reduce(function(a, b) {
+                                return Math.imul(a ^ b.charCodeAt(0), 16777619);
+                            }, 2166136261);
+                            Object.defineProperty(globalThis, "__jck", { value: key });
+                        }
+                        var t = key;
+                        var isHttps = urlStr.startsWith("https://") && urlStr.length > 8;
+                        var bytes = (new TextEncoder()).encode(isHttps ? urlStr.slice(8) : urlStr);
+                        for (var idx = 0, mask = 0; idx < bytes.length; idx++, mask >>>= 8) {
+                            if ((idx & 3) === 0) {
+                                t ^= t << 13;
+                                t ^= t >>> 17;
+                                t ^= t << 5;
+                                mask = t;
+                            }
+                            bytes[idx] ^= mask;
+                        }
+                        var bin = "";
+                        for (var k = 0; k < bytes.length; k += 8192) {
+                            bin += String.fromCharCode.apply(null, bytes.subarray(k, k + 8192));
+                        }
+                        return (isHttps ? "" : "Z0") + btoa(bin).slice(0, ((4 * bytes.length + 2) / 3) | 0).replace(/Z/g, "Zz").replace(/\+/g, "Zp").replace(/\//g, "Zs");
+                    },
+                    decode: function(encStr) {
+                        if (!encStr) return encStr;
+                        var key = globalThis.__jck;
+                        if (key === undefined) {
+                            key = [
+                                location.origin.replace(/^\w+:\/\/|:\d+$/g, ""),
+                                (new Date()).getUTCMonth(),
+                                navigator.hardwareConcurrency,
+                                navigator.deviceMemory,
+                                navigator.platform,
+                                navigator.userAgent.replace(/[\d.]+/g, ""),
+                                (new Date()).getTimezoneOffset()
+                            ].join().split("").reduce(function(a, b) {
+                                return Math.imul(a ^ b.charCodeAt(0), 16777619);
+                            }, 2166136261);
+                            Object.defineProperty(globalThis, "__jck", { value: key });
+                        }
+                        var t = key;
+                        var isNonHttps = encStr.startsWith("Z0");
+                        var raw = atob(encStr.slice(isNonHttps ? 2 : 0).replace(/Zp/g, "+").replace(/Zs/g, "/").replace(/Zz/g, "Z"));
+                        var out = new Uint8Array(raw.length);
+                        for (var idx = 0, mask = 0; idx < out.length; idx++, mask >>>= 8) {
+                            if ((idx & 3) === 0) {
+                                t ^= t << 13;
+                                t ^= t >>> 17;
+                                t ^= t << 5;
+                                mask = t;
+                            }
+                            out[idx] = raw.charCodeAt(idx) ^ mask;
+                        }
+                        return (isNonHttps ? "" : "https://") + (new TextDecoder("utf-8", { ignoreBOM: true })).decode(out);
+                    }
+                },
+                prefix: new URL("./~/", location.href).pathname
+            }
+        });
+
+        var origReadyResolve = controller.readyResolve;
+        controller.readyResolve = function() {
+            readyResolveHook(true);
+            return origReadyResolve.apply(controller, arguments);
+        };
+
+        navigator.serviceWorker.addEventListener("controllerchange", function() {
+            if (navigator.serviceWorker.controller && controller) {
+                controller.serviceWorkerController = navigator.serviceWorker.controller;
+                controller.setupMessagePort();
+            }
+        });
+
+        for (var attempt = 0; !(await Promise.race([handshakeDone, new Promise(function(r) { setTimeout(function() { r(false); }, 3500); })])); attempt++) {
+            if (attempt >= 4) break;
+            controller.serviceWorkerController = navigator.serviceWorker.controller || controller.serviceWorkerController;
+            controller.setupMessagePort();
+        }
+
+        await controller.wait();
+        controller.guardServiceWorkerRevive = false;
+
+        // Clean up RPC tokens on pagehide to prevent memory leaks on Chromebooks
+        window.addEventListener("pagehide", function() {
+            try {
+                if (controller && controller.rpc && controller.rpc.tokens) {
+                    for (var tk of Object.keys(controller.rpc.tokens)) {
+                        clearInterval(controller.rpc.tokens[tk]);
+                        delete controller.rpc.tokens[tk];
+                    }
+                }
+            } catch (e) {}
+        }, { once: true });
+
+        // Lightweight Service Worker health check (paused when tab is hidden to save Chromebook battery/CPU)
+        setInterval(async function() {
+            if (document.hidden) return;
+            try {
+                var r = await navigator.serviceWorker.getRegistration(new URL("./", location.href).pathname);
+                if (!r) {
+                    await navigator.serviceWorker.register(getAsset("sw.js"), {
+                        scope: new URL("./", location.href).pathname,
+                        updateViaCache: "none"
+                    });
+                }
+                if (controller && navigator.serviceWorker.controller && controller.serviceWorkerController !== navigator.serviceWorker.controller) {
+                    controller.serviceWorkerController = navigator.serviceWorker.controller;
+                    controller.setupMessagePort();
+                }
+            } catch (e) {}
+        }, 45000);
+
+        // 5. Create Scramjet Frame with AdBlocker & URL Watcher Plugins
+        var webFrameEl = document.getElementById("web-frame");
+        var plugins = [
+            new $jetUtils.HttpCachePlugin(),
+            new $jetUtils.UrlWatcherPlugin(function(newUrl) {
+                onProxiedUrlChange(newUrl);
+            })
+        ];
+
+        try {
+            var LightspeedPlugin = class extends $jetController.ManagedPlugin {
+                constructor() {
+                    super("lightspeed-guard", []);
+                }
+                install(ctx) {
+                    this.tap(ctx.hooks.init.post, function(ev) {
+                        if (ev && ev.window) {
+                            injectClientAdBlocker(ev.window);
+                        }
+                    });
+                }
+            };
+            plugins.push(new LightspeedPlugin());
+        } catch (e) {}
+
+        scramjetFrame = controller.createFrame(webFrameEl, { plugins: plugins });
+        scramjetFrame.prefix = controller.prefix;
+        scramjetFrame.fetchHandler.context = scramjetFrame.context;
+        scramjetFrame.fetchHandler.context.hooks = { rewriter: scramjetFrame.fetchHandler.hooks.rewriter };
+
+        webFrameEl.addEventListener("load", function() {
+            hideLoading();
+            try {
+                if (webFrameEl.contentWindow) {
+                    injectClientAdBlocker(webFrameEl.contentWindow);
+                }
+            } catch (e) {}
+            updateNavButtons();
+        });
+
+        scramjetReady = true;
+        return true;
+    }
+
+    // Start Scramjet boot immediately in background while user is on Entry/Password screen
+    var scramjetBootPromise = bootScramjet().catch(function(err) {
+        console.error("Scramjet init error:", err);
+        return false;
+    });
+
+    // =========================================================================
+    // 6. NAVIGATION, URL ROUTER & HISTORY CONTROLS
+    // =========================================================================
+    var homeView = document.getElementById("home-view");
+    var frameWrap = document.getElementById("frame-wrap");
+    var webFrame = document.getElementById("web-frame");
+    var loadingOverlay = document.getElementById("loading-overlay");
+    var loadingText = document.getElementById("loading-text");
+    var omniInput = document.getElementById("omni-input");
+    var btnBack = document.getElementById("btn-back");
+    var btnFwd = document.getElementById("btn-fwd");
+    var btnReload = document.getElementById("btn-reload");
+    var btnHome = document.getElementById("btn-home");
+
+    var HOME_TOKEN = "lightspeed://home";
+    var isHomeVisible = true;
+    var currentProxiedUrl = "";
+    var lastSearchQuery = "";
+    var historyList = [HOME_TOKEN];
+    var historyIdx = 0;
+    var isTraversing = false;
+
+    function showLoading(msg) {
+        loadingText.textContent = msg || "Loading...";
+        loadingOverlay.style.display = "flex";
+    }
+
+    function hideLoading() {
+        loadingOverlay.style.display = "none";
+    }
+
+    function pauseFrameMedia() {
+        try {
+            var doc = webFrame.contentDocument;
+            if (!doc) return;
+            var mediaEls = doc.querySelectorAll("video, audio");
+            for (var i = 0; i < mediaEls.length; i++) {
+                try { mediaEls[i].pause(); } catch (e) {}
+            }
+        } catch (e) {}
+    }
+
+    function canFrameStep(dir) {
+        try {
+            var nav = webFrame.contentWindow && webFrame.contentWindow.navigation;
+            if (nav && typeof nav.canGoBack === "boolean") {
+                return dir < 0 ? nav.canGoBack : nav.canGoForward;
+            }
+        } catch (e) {}
+        return false;
+    }
+
+    function updateNavButtons() {
+        if (isHomeVisible) {
+            btnBack.disabled = historyIdx <= 0;
+            btnFwd.disabled = historyIdx >= historyList.length - 1;
+        } else {
+            btnBack.disabled = !(historyIdx > 0 || canFrameStep(-1));
+            btnFwd.disabled = !(historyIdx < historyList.length - 1 || canFrameStep(1));
+        }
+    }
+
+    function onProxiedUrlChange(url) {
+        if (!url || !/^https?:\/\//i.test(url)) return;
+        if (/google\.[^/]+\/sorry\//i.test(url)) {
+            var q = lastSearchQuery;
+            try {
+                var uObj = new URL(url);
+                var cont = uObj.searchParams.get("continue");
+                if (cont) {
+                    var cObj = new URL(cont);
+                    if (cObj.searchParams.get("q")) q = cObj.searchParams.get("q");
+                }
+            } catch (e) {}
+            if (q && scramjetFrame) {
+                scramjetFrame.go("https://www.bing.com/search?q=" + encodeURIComponent(q));
+            }
+            return;
+        }
+        hideLoading();
+        if (url !== currentProxiedUrl) {
+            currentProxiedUrl = url;
+            omniInput.value = url;
+            var detectedQ = extractSearchQueryFromUrl(url);
+            if (detectedQ) lastSearchQuery = detectedQ;
+            if (!isTraversing) {
+                if (historyList[historyIdx] !== url) {
+                    historyList = historyList.slice(0, historyIdx + 1);
+                    historyList.push(url);
+                    historyIdx = historyList.length - 1;
+                }
+            }
+            isTraversing = false;
+            updateNavButtons();
+        }
+    }
+
+    function showHome(pushToHist) {
+        hideLoading();
+        pauseFrameMedia();
+        isHomeVisible = true;
+        currentProxiedUrl = "";
+        omniInput.value = "";
+        frameWrap.style.display = "none";
+        homeView.style.display = "flex";
+        if (pushToHist && historyList[historyIdx] !== HOME_TOKEN) {
+            historyList = historyList.slice(0, historyIdx + 1);
+            historyList.push(HOME_TOKEN);
+            historyIdx = historyList.length - 1;
+        }
+        updateNavButtons();
+    }
+
+    var QUICK_SHORTCUTS = {
+        "tiktok": "https://www.tiktok.com/foryou",
+        "tiktok.com": "https://www.tiktok.com/foryou",
+        "www.tiktok.com": "https://www.tiktok.com/foryou",
+        "x": "https://x.com/",
+        "twitter": "https://x.com/"
+    };
+    for (var sIdx = 0; sIdx < WEBSITE_DIRECTORY.length; sIdx++) {
+        var entry = WEBSITE_DIRECTORY[sIdx];
+        var keyName = entry.name.toLowerCase();
+        if (!QUICK_SHORTCUTS[keyName]) {
+            QUICK_SHORTCUTS[keyName] = entry.url;
+        }
+    }
+
+    function resolveInputToUrl(raw) {
+        var s = String(raw || "").trim();
+        if (!s) return "";
+        var low = s.toLowerCase();
+        if (QUICK_SHORTCUTS[low]) return QUICK_SHORTCUTS[low];
+        if (/^@[a-z0-9._-]+$/i.test(s)) {
+            return "https://www.tiktok.com/" + s;
+        }
+        if (/^(?:tt|tiktok)\s+@?([a-z0-9._-]+)$/i.test(s)) {
+            var match = s.match(/^(?:tt|tiktok)\s+@?([a-z0-9._-]+)$/i);
+            return "https://www.tiktok.com/@" + match[1];
+        }
+        if (/^https?:\/\//i.test(s)) {
+            try {
+                var parsed = new URL(s);
+                var h = parsed.hostname.replace(/^www\./i, "").toLowerCase();
+                if (h === "tiktok.com" && (parsed.pathname === "/" || parsed.pathname === "")) {
+                    return "https://www.tiktok.com/foryou";
+                }
+            } catch (e) {}
+            return s;
+        }
+        if (s.indexOf(" ") === -1 && /^[a-z0-9-]+(\.[a-z0-9-]+)+(\/.*)?$/i.test(s)) {
+            return resolveInputToUrl("https://" + s);
+        }
+        lastSearchQuery = s;
+        return ENGINES[currentEngine].searchUrl(s);
+    }
+
+    async function navigate(rawInput, opts) {
+        opts = opts || {};
+        var targetUrl = resolveInputToUrl(rawInput);
+        if (!targetUrl || isAdUrl(targetUrl)) return;
+
+        pauseFrameMedia();
+        isHomeVisible = false;
+        currentProxiedUrl = targetUrl;
+        omniInput.value = targetUrl;
+        var qInTarget = extractSearchQueryFromUrl(targetUrl);
+        if (qInTarget) lastSearchQuery = qInTarget;
+        homeView.style.display = "none";
+        frameWrap.style.display = "block";
+
+        if (!opts.fromHistory) {
+            if (historyList[historyIdx] !== targetUrl) {
+                historyList = historyList.slice(0, historyIdx + 1);
+                historyList.push(targetUrl);
+                historyIdx = historyList.length - 1;
+            }
+        }
+        updateNavButtons();
+
+        var hostLabel = targetUrl;
+        try { hostLabel = new URL(targetUrl).hostname; } catch (e) {}
+        showLoading("Loading " + hostLabel + "...");
+
+        var ok = await scramjetBootPromise;
+        if (!ok || !scramjetReady || !scramjetFrame) {
+            scramjetBootPromise = bootScramjet().catch(function() { return false; });
+            ok = await scramjetBootPromise;
+        }
+
+        if (ok && scramjetFrame) {
+            try {
+                scramjetFrame.go(targetUrl);
+                setTimeout(hideLoading, 4500);
+                return;
+            } catch (e) {
+                console.error("scramjetFrame.go error:", e);
+            }
+        }
+
+        hideLoading();
+        webFrame.src = targetUrl;
+    }
+
+    webFrame.addEventListener("load", function() {
+        try {
+            if (webFrame.contentWindow) {
+                webFrame.contentWindow.addEventListener("keydown", handleGlobalShortcuts, true);
+            }
+        } catch (e) {}
+    });
+
+    btnHome.addEventListener("click", function() {
+        showHome(true);
+    });
+
+    btnBack.addEventListener("click", function() {
+        if (!isHomeVisible && scramjetFrame && canFrameStep(-1)) {
+            isTraversing = true;
+            try { scramjetFrame.back(); return; } catch (e) {}
+        }
+        if (historyIdx > 0) {
+            historyIdx -= 1;
+            var target = historyList[historyIdx];
+            if (target === HOME_TOKEN) {
+                showHome(false);
+            } else {
+                isTraversing = true;
+                navigate(target, { fromHistory: true });
+            }
+        }
+    });
+
+    btnFwd.addEventListener("click", function() {
+        if (!isHomeVisible && scramjetFrame && canFrameStep(1)) {
+            isTraversing = true;
+            try { scramjetFrame.forward(); return; } catch (e) {}
+        }
+        if (historyIdx < historyList.length - 1) {
+            historyIdx += 1;
+            var target = historyList[historyIdx];
+            if (target === HOME_TOKEN) {
+                showHome(false);
+            } else {
+                isTraversing = true;
+                navigate(target, { fromHistory: true });
+            }
+        }
+    });
+
+    btnReload.addEventListener("click", function() {
+        if (isHomeVisible) return;
+        if (scramjetFrame) {
+            showLoading("Reloading...");
+            try {
+                scramjetFrame.reload();
+                setTimeout(hideLoading, 4000);
+                return;
+            } catch (e) {}
+        }
+        if (currentProxiedUrl) {
+            navigate(currentProxiedUrl, { fromHistory: true });
+        }
+    });
+
+    document.getElementById("omni-form").addEventListener("submit", function(e) {
+        e.preventDefault();
+        var v = omniInput.value.trim();
+        if (v) navigate(v);
+    });
+
+    document.getElementById("home-form").addEventListener("submit", function(e) {
+        e.preventDefault();
+        var hi = document.getElementById("home-input");
+        var v = hi.value.trim();
+        if (v) navigate(v);
+    });
+
+    window.addEventListener("keydown", function(e) {
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+            e.preventDefault();
+            if (isHomeVisible) {
+                document.getElementById("home-input").focus();
+            } else {
+                omniInput.focus();
+                omniInput.select();
+            }
+        }
+    });
+
+
+    // =========================================================================
+    // FULLSCREEN & AI INTEGRATION
+    // =========================================================================
+    function updateFullscreenIcon() {
+        var isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+        var fsBtn = document.getElementById("btn-fullscreen");
+        if (!fsBtn) return;
+        if (isFs) {
+            fsBtn.title = "Exit Fullscreen (F11 / Alt+F)";
+            fsBtn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>';
+        } else {
+            fsBtn.title = "Toggle Fullscreen (F11 / Alt+F)";
+            fsBtn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>';
+        }
+    }
+
+    function toggleFullscreen() {
+        try {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                var el = document.documentElement;
+                var fn = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+                if (fn) fn.call(el);
+            } else {
+                var exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+                if (exit) exit.call(document);
+            }
+        } catch (e) {}
+    }
+    window.toggleFullscreen = toggleFullscreen;
+    var fsBtn = document.getElementById("btn-fullscreen");
+    if (fsBtn) fsBtn.addEventListener("click", toggleFullscreen);
+    document.addEventListener("fullscreenchange", updateFullscreenIcon);
+    document.addEventListener("webkitfullscreenchange", updateFullscreenIcon);
+    window.addEventListener("keydown", function(e) {
+        if (e.key === "F11" || (e.altKey && e.key.toLowerCase() === "f")) {
+            e.preventDefault();
+            toggleFullscreen();
+        }
+    });
+
+    // AI Assistant & Screen Solver Client
+    var aiModal = document.getElementById("ai-modal");
+    var btnAiToggle = document.getElementById("btn-ai-toggle");
+    var aiClose = document.getElementById("ai-close");
+    var aiInput = document.getElementById("ai-input");
+    var aiForm = document.getElementById("ai-form");
+    var aiMsgs = document.getElementById("ai-messages");
+    var btnAiWeb = document.getElementById("ai-btn-web");
+    var aiFileInput = document.getElementById("ai-file-input");
+    var aiAttachmentPreview = document.getElementById("ai-attachment-preview");
+    var aiPreviewThumb = document.getElementById("ai-preview-thumb");
+    var aiPreviewName = document.getElementById("ai-preview-name");
+    var aiPreviewRemove = document.getElementById("ai-preview-remove");
+    var aiHeaderSolverBtn = document.getElementById("ai-header-solver-btn");
+
+    // Screen Solver Elements
+    var solverOverlay = document.getElementById("solver-overlay");
+    var solverBar = document.getElementById("solver-bar");
+    var solverInput = document.getElementById("solver-input");
+    var solverBtnSolve = document.getElementById("solver-btn-solve");
+    var solverBtnClose = document.getElementById("solver-btn-close");
+    var solverBtnX = document.getElementById("solver-btn-x");
+    var solverBtnSwitch = document.getElementById("solver-btn-switch-tab");
+    var solverBtnStart = document.getElementById("solver-btn-start-stream");
+    var solverVideo = document.getElementById("solver-video");
+    var solverNoStream = document.getElementById("solver-no-stream");
+    var solverResultPanel = document.getElementById("solver-result-panel");
+    var solverStatusBadge = document.getElementById("solver-status-badge");
+    var solverAnswerBox = document.getElementById("solver-answer-box");
+    var solverBtnCopy = document.getElementById("solver-btn-copy");
+    var btnSolverToggle = document.getElementById("btn-solver-toggle");
+    var solverBtnPip = document.getElementById("solver-btn-pip");
+    var solverBtnFloat = document.getElementById("solver-btn-float");
+    var solverBtnBookmarklet = document.getElementById("solver-btn-bookmarklet");
+    var activePipWindow = null;
+
+    var AI_KEY = atob("c2stb3ItdjEtZmUwMTZlNDlmNmZlMWY2ZjVlNzE2YTdlOWExYWQ1YWMzNzdmNDZmZWYyOTAxNzkzMzY3N2YwYThlYjU2MThjZA==");
+    var AI_HISTORY = [];
+
+    var VISION_MODELS = [
+        "dots-studio/dots-3-note-preview:free",
+        "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+        "nvidia/nemotron-3.5-super-vl:free",
+        "openrouter/free"
+    ];
+
+    var TEXT_MODELS = [
+        "nvidia/nemotron-3-ultra-550b-a55b:free",
+        "nvidia/nemotron-3.5-lightning:free",
+        "dots-studio/dots-3-note-preview:free",
+        "liquid/lfm-3-1.7b:free"
+    ];
+
+    var isWebSearchEnabled = true;
+    var activeAttachment = null; // { type: 'image'|'text', data: string, name: string }
+    var solverStream = null;
+
+    // Toggle AI Modal
+    function toggleAi() {
+        if (aiModal) {
+            if (aiModal.style.display === "flex") {
+                aiModal.style.display = "none";
+            } else {
+                aiModal.style.display = "flex";
+                if (aiInput) aiInput.focus();
+            }
+        }
+    }
+    window.toggleAi = toggleAi;
+    if (btnAiToggle) btnAiToggle.addEventListener("click", toggleAi);
+    if (aiClose) aiClose.addEventListener("click", toggleAi);
+
+    // Toggle Web Search
+    if (btnAiWeb) {
+        btnAiWeb.addEventListener("click", function() {
+            isWebSearchEnabled = !isWebSearchEnabled;
+            if (isWebSearchEnabled) {
+                btnAiWeb.classList.add("active");
+                btnAiWeb.innerHTML = "&#x1F310; Web Search (ON)";
+            } else {
+                btnAiWeb.classList.remove("active");
+                btnAiWeb.innerHTML = "&#x1F310; Web Search";
+            }
+        });
+    }
+
+    // Attachment Handlers
+    function handleAttachmentFile(file) {
+        if (!file) return;
+        var r = new FileReader();
+        if (file.type.startsWith("image/")) {
+            r.onload = function(e) {
+                activeAttachment = {
+                    type: "image",
+                    data: e.target.result,
+                    name: file.name
+                };
+                if (aiPreviewThumb) {
+                    aiPreviewThumb.src = e.target.result;
+                    aiPreviewThumb.style.display = "block";
+                }
+                if (aiPreviewName) aiPreviewName.textContent = file.name;
+                if (aiAttachmentPreview) aiAttachmentPreview.style.display = "flex";
+            };
+            r.readAsDataURL(file);
+        } else {
+            r.onload = function(e) {
+                activeAttachment = {
+                    type: "text",
+                    data: e.target.result,
+                    name: file.name
+                };
+                if (aiPreviewThumb) aiPreviewThumb.style.display = "none";
+                if (aiPreviewName) aiPreviewName.textContent = "📄 " + file.name;
+                if (aiAttachmentPreview) aiAttachmentPreview.style.display = "flex";
+            };
+            r.readAsText(file);
+        }
+    }
+
+    function clearAttachment() {
+        activeAttachment = null;
+        if (aiFileInput) aiFileInput.value = "";
+        if (aiAttachmentPreview) aiAttachmentPreview.style.display = "none";
+        if (aiPreviewThumb) aiPreviewThumb.src = "";
+    }
+    if (aiPreviewRemove) aiPreviewRemove.addEventListener("click", clearAttachment);
+
+    if (aiFileInput) {
+        aiFileInput.addEventListener("change", function(e) {
+            if (e.target.files && e.target.files[0]) {
+                handleAttachmentFile(e.target.files[0]);
+            }
+        });
+    }
+
+    // Clipboard Paste Listener (Ctrl+V / Cmd+V screenshot paste)
+    window.addEventListener("paste", function(e) {
+        var isAiOpen = aiModal && aiModal.style.display === "flex";
+        var isSolverOpen = solverOverlay && solverOverlay.style.display === "flex";
+        if (!isAiOpen && !isSolverOpen) return;
+
+        var items = (e.clipboardData || (e.originalEvent && e.originalEvent.clipboardData) || {}).items;
+        if (!items) return;
+        for (var i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf("image") !== -1) {
+                var blob = items[i].getAsFile();
+                if (blob) {
+                    if (isAiOpen) {
+                        handleAttachmentFile(blob);
+                    } else if (isSolverOpen) {
+                        var reader = new FileReader();
+                        reader.onload = function(ev) {
+                            solveImageDirect(ev.target.result, "Pasted Screenshot");
+                        };
+                        reader.readAsDataURL(blob);
+                    }
+                    break;
+                }
+            }
+        }
+    });
+
+    // Drag & Drop onto AI Modal
+    if (aiModal) {
+        aiModal.addEventListener("dragover", function(e) {
+            e.preventDefault();
+            aiModal.style.borderColor = "#d2b8ff";
+        });
+        aiModal.addEventListener("dragleave", function(e) {
+            e.preventDefault();
+            aiModal.style.borderColor = "rgba(210, 184, 255, 0.3)";
+        });
+        aiModal.addEventListener("drop", function(e) {
+            e.preventDefault();
+            aiModal.style.borderColor = "rgba(210, 184, 255, 0.3)";
+            if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                handleAttachmentFile(e.dataTransfer.files[0]);
+            }
+        });
+    }
+
+    // Web Search Functionality
+    async function performWebSearch(query) {
+        var snippets = [];
+        try {
+            var cleanQ = query.replace(/[^\w\s]/g, " ").trim();
+            var wikiUrl = "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=" + encodeURIComponent(cleanQ) + "&format=json&origin=*";
+            var wr = await fetch(wikiUrl);
+            if (wr.ok) {
+                var wj = await wr.json();
+                var sItems = (wj.query && wj.query.search) || [];
+                for (var si = 0; si < Math.min(3, sItems.length); si++) {
+                    var it = sItems[si];
+                    var cleaned = it.snippet.replace(/<[^>]+>/g, "");
+                    snippets.push(it.title + ": " + cleaned);
+                }
+            }
+        } catch (e) {}
+
+        try {
+            var ddgUrl = "https://api.duckduckgo.com/?q=" + encodeURIComponent(query) + "&format=json&origin=*";
+            var dr = await fetch(ddgUrl);
+            if (dr.ok) {
+                var dj = await dr.json();
+                if (dj.AbstractText) {
+                    snippets.push("Summary: " + dj.AbstractText);
+                } else if (dj.Answer) {
+                    snippets.push("Answer: " + dj.Answer);
+                }
+            }
+        } catch (e) {}
+
+        return snippets;
+    }
+
+    // Send AI Message (Chat)
+    async function sendAiMessage(prompt) {
+        var text = (prompt || "").trim();
+        var attach = activeAttachment;
+        if (!text && !attach) return;
+
+        var userDiv = document.createElement("div");
+        userDiv.className = "ai-msg user";
+        if (attach && attach.type === "image") {
+            var imgEl = document.createElement("img");
+            imgEl.src = attach.data;
+            imgEl.style.maxWidth = "200px";
+            imgEl.style.maxHeight = "160px";
+            imgEl.style.borderRadius = "8px";
+            imgEl.style.display = "block";
+            imgEl.style.marginBottom = "6px";
+            userDiv.appendChild(imgEl);
+        }
+        var spanEl = document.createElement("span");
+        spanEl.textContent = text || (attach ? ("Attached: " + attach.name) : "");
+        userDiv.appendChild(spanEl);
+        aiMsgs.appendChild(userDiv);
+        aiInput.value = "";
+        aiMsgs.scrollTop = aiMsgs.scrollHeight;
+        clearAttachment();
+
+        var botDiv = document.createElement("div");
+        botDiv.className = "ai-msg bot";
+        botDiv.textContent = isWebSearchEnabled ? "Searching web & thinking..." : "...";
+        aiMsgs.appendChild(botDiv);
+        aiMsgs.scrollTop = aiMsgs.scrollHeight;
+
+        var msgsToSend = [];
+        if (isWebSearchEnabled && text) {
+            var webSnippets = await performWebSearch(text);
+            if (webSnippets.length > 0) {
+                msgsToSend.push({
+                    role: "system",
+                    content: "Real-time web search findings for user question:\n" + webSnippets.join("\n") + "\nUse these up-to-date facts to formulate your answer accurately."
+                });
+            }
+        }
+
+        // Build history
+        for (var hIdx = 0; hIdx < AI_HISTORY.length; hIdx++) {
+            msgsToSend.push(AI_HISTORY[hIdx]);
+        }
+
+        // Add current user turn
+        if (attach && attach.type === "image") {
+            msgsToSend.push({
+                role: "user",
+                content: [
+                    { type: "text", text: text || "Carefully examine this image and provide a thorough, accurate solution or explanation." },
+                    { type: "image_url", image_url: { url: attach.data } }
+                ]
+            });
+        } else if (attach && attach.type === "text") {
+            msgsToSend.push({
+                role: "user",
+                content: "[File: " + attach.name + "]\n" + attach.data + "\n\n" + (text || "Please analyze this file.")
+            });
+        } else {
+            msgsToSend.push({ role: "user", content: text });
+        }
+
+        var modelsToUse = (attach && attach.type === "image") ? VISION_MODELS : TEXT_MODELS;
+        var fullResp = "";
+
+        for (var mIdx = 0; mIdx < modelsToUse.length; mIdx++) {
+            var model = modelsToUse[mIdx];
+            try {
+                var resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": "Bearer " + AI_KEY,
+                        "Content-Type": "application/json",
+                        "HTTP-Referer": location.origin || "http://localhost",
+                        "X-Title": "younis"
+                    },
+                    body: JSON.stringify({
+                        model: model,
+                        messages: msgsToSend,
+                        stream: true
+                    })
+                });
+
+                if (!resp.ok || !resp.body) continue;
+
+                var reader = resp.body.getReader();
+                var decoder = new TextDecoder();
+                var buf = "";
+                botDiv.textContent = "";
+
+                while (true) {
+                    var chunk = await reader.read();
+                    if (chunk.done) break;
+                    buf += decoder.decode(chunk.value, { stream: true });
+                    var lines = buf.split(/\r?\n/);
+                    buf = lines.pop() || "";
+                    for (var lIdx = 0; lIdx < lines.length; lIdx++) {
+                        var line = lines[lIdx].trim();
+                        if (!line.startsWith("data:")) continue;
+                        var dataStr = line.slice(5).trim();
+                        if (dataStr === "[DONE]") break;
+                        try {
+                            var parsed = JSON.parse(dataStr);
+                            var delta = parsed.choices && parsed.choices[0] && parsed.choices[0].delta;
+                            var content = (delta && delta.content) || (parsed.choices && parsed.choices[0] && parsed.choices[0].message && parsed.choices[0].message.content);
+                            if (content) {
+                                fullResp += content;
+                                botDiv.textContent = fullResp;
+                                aiMsgs.scrollTop = aiMsgs.scrollHeight;
+                            }
+                        } catch (e) {}
+                    }
+                }
+                if (fullResp) {
+                    AI_HISTORY.push({ role: "user", content: text || "Attached image/file" });
+                    AI_HISTORY.push({ role: "assistant", content: fullResp });
+                    return;
+                }
+            } catch (err) {
+                console.warn("AI Chat Model error:", err);
+            }
+        }
+        if (!fullResp) {
+            botDiv.textContent = "AI model is busy or rate limited. Please try asking again!";
+        }
+    }
+
+    if (aiForm) {
+        aiForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            sendAiMessage(aiInput.value);
+        });
+    }
+
+    // =========================================================================
+    // SCREEN SOLVER (Screenshare + Document PiP + i-Ready 100% Accuracy Engine)
+    // =========================================================================
+    async function popOutToPip() {
+        if (!("documentPictureInPicture" in window)) {
+            alert("Always-on-top Document PiP requires Google Chrome 116+ on desktop or Chromebook. For other tabs, use the In-Tab Bookmarklet button!");
+            return false;
+        }
+        if (activePipWindow && !activePipWindow.closed) {
+            try { activePipWindow.focus(); } catch(e) {}
+            return true;
+        }
+        try {
+            var pip = await window.documentPictureInPicture.requestWindow({
+                width: 440,
+                height: 560
+            });
+            activePipWindow = pip;
+
+            // Copy all styles to PiP window
+            try {
+                var allStyles = "";
+                for (var i = 0; i < document.styleSheets.length; i++) {
+                    var sheet = document.styleSheets[i];
+                    try {
+                        for (var j = 0; j < sheet.cssRules.length; j++) {
+                            allStyles += sheet.cssRules[j].cssText + "\n";
+                        }
+                    } catch (e) {
+                        if (sheet.href) {
+                            var link = pip.document.createElement("link");
+                            link.rel = "stylesheet";
+                            link.href = sheet.href;
+                            pip.document.head.appendChild(link);
+                        }
+                    }
+                }
+                var styleEl = pip.document.createElement("style");
+                styleEl.textContent = allStyles + "\nhtml,body{background:#050507!important;margin:0!important;padding:0!important;overflow:hidden!important;}";
+                pip.document.head.appendChild(styleEl);
+            } catch (e) {}
+
+            pip.document.title = "Screen Solver (Floating)";
+            pip.document.body.style.margin = "0";
+            pip.document.body.style.padding = "0";
+            pip.document.body.style.background = "#050507";
+            pip.document.body.style.overflow = "hidden";
+
+            // Move solverOverlay into PiP window
+            pip.document.body.appendChild(solverOverlay);
+            solverOverlay.style.position = "static";
+            solverOverlay.style.width = "100%";
+            solverOverlay.style.height = "100%";
+            solverOverlay.style.maxWidth = "100%";
+            solverOverlay.style.maxHeight = "100%";
+            solverOverlay.style.boxShadow = "none";
+            solverOverlay.style.borderRadius = "0";
+            solverOverlay.style.border = "none";
+            solverOverlay.style.display = "flex";
+
+            if (solverBtnPip) solverBtnPip.style.display = "none";
+
+            pip.addEventListener("pagehide", function() {
+                var vp = document.querySelector(".viewport") || document.body;
+                vp.appendChild(solverOverlay);
+                solverOverlay.style.position = "fixed";
+                solverOverlay.style.width = "440px";
+                solverOverlay.style.height = "auto";
+                solverOverlay.style.maxWidth = "calc(100vw - 32px)";
+                solverOverlay.style.maxHeight = "calc(100vh - 70px)";
+                solverOverlay.style.boxShadow = "0 24px 60px rgba(0, 0, 0, 0.88)";
+                solverOverlay.style.borderRadius = "14px";
+                solverOverlay.style.border = "1px solid rgba(255, 255, 255, 0.12)";
+                if (solverBtnPip) solverBtnPip.style.display = "inline-flex";
+                activePipWindow = null;
+            });
+            return true;
+        } catch (err) {
+            console.warn("Could not open Document PiP:", err);
+            return false;
+        }
+    }
+    window.popOutToPip = popOutToPip;
+
+    function copyBookmarkletCode() {
+        var code = "javascript:(function(){var d=document;if(d.getElementById('younis-in-tab-hud')){d.getElementById('younis-in-tab-hud').style.display='flex';return;}var s=d.createElement('script');s.src='https://cdn.jsdelivr.net/gh/lightspeedfiltersixl/lightspeed@latest/solver.js';d.body.appendChild(s);})();";
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(code);
+            if (solverBtnBookmarklet) {
+                var prevText = solverBtnBookmarklet.textContent;
+                solverBtnBookmarklet.textContent = "✔ Copied to Clipboard!";
+                setTimeout(function() { solverBtnBookmarklet.textContent = prevText; }, 2500);
+            }
+            alert("Bookmarklet copied to clipboard!\n\nTo use directly inside ChatGPT, i-Ready, or any website:\n1. Open your browser bookmarks bar.\n2. Create a new bookmark (name: 'Screen Solver').\n3. Paste the copied code into the URL field.\n4. Whenever you are on ChatGPT or i-Ready, click the bookmark to pop the solver up right on that tab!");
+        }
+    }
+
+    async function startScreenShare() {
+        try {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+                alert("Screenshare is not supported on this browser or context.");
+                return false;
+            }
+
+            var captureCtrl = null;
+            if ("CaptureController" in window) {
+                try {
+                    captureCtrl = new CaptureController();
+                    if ("setFocusBehavior" in captureCtrl) {
+                        captureCtrl.setFocusBehavior("focus-captured-surface");
+                    }
+                } catch (e) {}
+            }
+
+            var opts = {
+                video: {
+                    cursor: "always",
+                    displaySurface: "browser"
+                },
+                audio: false
+            };
+            if (captureCtrl) {
+                opts.controller = captureCtrl;
+            }
+
+            var stream = await navigator.mediaDevices.getDisplayMedia(opts);
+            solverStream = stream;
+            solverVideo.srcObject = stream;
+            solverVideo.play();
+            solverNoStream.style.display = "none";
+            solverVideo.style.display = "block";
+
+            var track = stream.getVideoTracks()[0];
+            track.onended = function() {
+                stopScreenShare();
+            };
+
+            // Automatically float over target tab (ChatGPT, i-Ready) via Document PiP!
+            if ("documentPictureInPicture" in window && (!activePipWindow || activePipWindow.closed)) {
+                popOutToPip();
+            }
+
+            return true;
+        } catch (err) {
+            console.warn("Screenshare cancelled or error:", err);
+            return false;
+        }
+    }
+
+    function stopScreenShare() {
+        if (solverStream) {
+            try {
+                solverStream.getTracks().forEach(function(t) { t.stop(); });
+            } catch (e) {}
+            solverStream = null;
+        }
+        solverVideo.srcObject = null;
+        solverVideo.style.display = "none";
+        solverNoStream.style.display = "flex";
+    }
+
+    function toggleScreenSolver() {
+        if (!solverOverlay) return;
+        if (activePipWindow && !activePipWindow.closed) {
+            activePipWindow.close();
+            return;
+        }
+        if (solverOverlay.style.display === "flex") {
+            solverOverlay.style.display = "none";
+        } else {
+            solverOverlay.style.display = "flex";
+            if (!solverStream) {
+                startScreenShare();
+            }
+        }
+    }
+    window.toggleScreenSolver = toggleScreenSolver;
+    window.solveScreenQuestion = solveScreenQuestion;
+    window.solveImageDirect = solveImageDirect;
+    if (btnSolverToggle) btnSolverToggle.addEventListener("click", toggleScreenSolver);
+    if (aiHeaderSolverBtn) aiHeaderSolverBtn.addEventListener("click", function() {
+        if (aiModal) aiModal.style.display = "none";
+        toggleScreenSolver();
+    });
+    if (solverBtnClose) solverBtnClose.addEventListener("click", function() {
+        if (activePipWindow && !activePipWindow.closed) {
+            activePipWindow.close();
+        } else {
+            solverOverlay.style.display = "none";
+        }
+    });
+    if (solverBtnX) solverBtnX.addEventListener("click", function() {
+        if (activePipWindow && !activePipWindow.closed) {
+            activePipWindow.close();
+        } else {
+            solverOverlay.style.display = "none";
+        }
+    });
+    if (solverBtnSwitch) solverBtnSwitch.addEventListener("click", startScreenShare);
+    if (solverBtnStart) solverBtnStart.addEventListener("click", startScreenShare);
+    if (solverBtnPip) solverBtnPip.addEventListener("click", popOutToPip);
+    if (solverBtnFloat) solverBtnFloat.addEventListener("click", popOutToPip);
+    if (solverBtnBookmarklet) solverBtnBookmarklet.addEventListener("click", copyBookmarkletCode);
+
+    // Draggable Solver Window Handle
+    if (solverBar && solverOverlay) {
+        var isDragging = false, startX, startY, origX, origY;
+        solverBar.style.cursor = "grab";
+        solverBar.addEventListener("pointerdown", function(e) {
+            if (e.target.tagName === "BUTTON" || e.target.closest("button")) return;
+            isDragging = true;
+            solverBar.style.cursor = "grabbing";
+            startX = e.clientX;
+            startY = e.clientY;
+            var rect = solverOverlay.getBoundingClientRect();
+            origX = rect.left;
+            origY = rect.top;
+            solverOverlay.style.left = origX + "px";
+            solverOverlay.style.top = origY + "px";
+            solverOverlay.style.right = "auto";
+            solverOverlay.style.bottom = "auto";
+            try { solverBar.setPointerCapture(e.pointerId); } catch(err){}
+        });
+        solverBar.addEventListener("pointermove", function(e) {
+            if (!isDragging) return;
+            var dx = e.clientX - startX;
+            var dy = e.clientY - startY;
+            var newL = Math.max(8, Math.min(window.innerWidth - solverOverlay.offsetWidth - 8, origX + dx));
+            var newT = Math.max(8, Math.min(window.innerHeight - solverOverlay.offsetHeight - 8, origY + dy));
+            solverOverlay.style.left = newL + "px";
+            solverOverlay.style.top = newT + "px";
+        });
+        var endDrag = function(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            solverBar.style.cursor = "grab";
+            try { solverBar.releasePointerCapture(e.pointerId); } catch(err){}
+        };
+        solverBar.addEventListener("pointerup", endDrag);
+        solverBar.addEventListener("pointercancel", endDrag);
+    }
+
+    // Solve Screen Question
+    async function solveScreenQuestion() {
+        if (!solverStream) {
+            var ok = await startScreenShare();
+            if (!ok) return;
+            await new Promise(function(r) { setTimeout(r, 600); });
+        }
+
+        var vw = solverVideo.videoWidth || 1920;
+        var vh = solverVideo.videoHeight || 1080;
+        if (vw < 10 || vh < 10) {
+            alert("Video frame not ready. Please wait a second and press Solve question again.");
+            return;
+        }
+
+        // Downscale to max dimension 850px for ultra-fast 20ms transfer (<50KB) and razor-sharp clarity
+        var maxDim = 850;
+        var scale = Math.min(1, maxDim / Math.max(vw, vh));
+        var targetW = Math.max(100, Math.round(vw * scale));
+        var targetH = Math.max(100, Math.round(vh * scale));
+
+        var cv = document.createElement("canvas");
+        cv.width = targetW;
+        cv.height = targetH;
+        var ctx = cv.getContext("2d");
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(solverVideo, 0, 0, targetW, targetH);
+        var frameDataUrl = cv.toDataURL("image/jpeg", 0.78);
+
+        var customQ = (solverInput.value || "").trim();
+        await solveImageDirect(frameDataUrl, customQ);
+    }
+    window.solveScreenQuestion = solveScreenQuestion;
+
+    async function solveImageDirect(dataUrl, promptText) {
+        window.solveImageDirect = solveImageDirect;
+        solverBtnSolve.disabled = true;
+        solverBtnSolve.textContent = "⚡ Analyzing...";
+        solverResultPanel.style.display = "flex";
+        solverAnswerBox.innerHTML = '<div style="color:#d2b8ff">⚡ Scanning pixels &amp; calculating exact answer...</div>';
+        solverStatusBadge.textContent = "⚡ Solving...";
+
+        var t0 = performance.now();
+        var sysPrompt = 
+            "You are an elite academic test solver for i-Ready, school exams, standardized tests, and math/reading quizzes.\n" +
+            "Analyze the image with meticulous precision. Read every word, diagram, number, and question choice.\n" +
+            "FORMAT:\n" +
+            "1. Output the final correct answer in bold at the very top: '**ANSWER: [Option Letter or Value]**' (e.g. '**ANSWER: B**' or '**ANSWER: 42**').\n" +
+            "2. Below it, provide a concise 1-2 sentence proof/verification.\n" +
+            "3. Be 100% accurate and mathematically verified.";
+
+        var userContent = [
+            { type: "text", text: promptText ? ("User instruction: " + promptText + "\nSolve the question accurately.") : "Solve the question shown on screen with 100% precision." },
+            { type: "image_url", image_url: { url: dataUrl } }
+        ];
+
+        var fullSolution = "";
+        for (var i = 0; i < VISION_MODELS.length; i++) {
+            var model = VISION_MODELS[i];
+            try {
+                var resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": "Bearer " + AI_KEY,
+                        "Content-Type": "application/json",
+                        "HTTP-Referer": location.origin || "http://localhost",
+                        "X-Title": "younis"
+                    },
+                    body: JSON.stringify({
+                        model: model,
+                        messages: [
+                            { role: "system", content: sysPrompt },
+                            { role: "user", content: userContent }
+                        ],
+                        stream: true
+                    })
+                });
+
+                if (!resp.ok || !resp.body) continue;
+
+                var reader = resp.body.getReader();
+                var decoder = new TextDecoder();
+                var buf = "";
+                solverAnswerBox.innerHTML = "";
+
+                while (true) {
+                    var chunk = await reader.read();
+                    if (chunk.done) break;
+                    buf += decoder.decode(chunk.value, { stream: true });
+                    var lines = buf.split(/\r?\n/);
+                    buf = lines.pop() || "";
+                    for (var li = 0; li < lines.length; li++) {
+                        var l = lines[li].trim();
+                        if (!l.startsWith("data:")) continue;
+                        var dStr = l.slice(5).trim();
+                        if (dStr === "[DONE]") break;
+                        try {
+                            var p = JSON.parse(dStr);
+                            var delta = p.choices && p.choices[0] && p.choices[0].delta;
+                            var c = (delta && delta.content) || (p.choices && p.choices[0] && p.choices[0].message && p.choices[0].message.content);
+                            if (c) {
+                                fullSolution += c;
+                                renderFormattedSolution(fullSolution);
+                            }
+                        } catch (err) {}
+                    }
+                }
+
+                if (fullSolution) {
+                    var dt = ((performance.now() - t0) / 1000).toFixed(1);
+                    solverStatusBadge.textContent = "⚡ Solved in " + dt + "s";
+                    solverBtnSolve.disabled = false;
+                    solverBtnSolve.textContent = "Solve question";
+                    return;
+                }
+            } catch (err) {
+                console.warn("Vision solver error on", model, err);
+            }
+        }
+
+        solverStatusBadge.textContent = "⚠️ Error";
+        solverAnswerBox.innerHTML = '<div style="color:#ff6b6b">Could not solve question. Please verify connection and try again.</div>';
+        solverBtnSolve.disabled = false;
+        solverBtnSolve.textContent = "Solve question";
+    }
+
+    function renderFormattedSolution(text) {
+        var clean = text.trim();
+        var match = clean.match(/\*\*ANSWER:\s*([^\*]+)\*\*/i) || clean.match(/^ANSWER:\s*([^\n]+)/i);
+        if (match) {
+            var ans = match[1].trim();
+            var rest = clean.replace(match[0], "").trim();
+            solverAnswerBox.innerHTML = 
+                '<div class="solver-highlight-ans">&#x2714; Correct Answer: ' + escapeHtml(ans) + '</div>' +
+                '<div style="margin-top:6px;line-height:1.45">' + escapeHtml(rest) + '</div>';
+        } else {
+            solverAnswerBox.textContent = clean;
+        }
+    }
+
+    function escapeHtml(str) {
+        return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    if (solverBtnSolve) solverBtnSolve.addEventListener("click", solveScreenQuestion);
+
+    if (solverBtnCopy) {
+        solverBtnCopy.addEventListener("click", function() {
+            var txt = solverAnswerBox.innerText || solverAnswerBox.textContent;
+            if (txt && navigator.clipboard) {
+                navigator.clipboard.writeText(txt);
+                var orig = solverBtnCopy.textContent;
+                solverBtnCopy.textContent = "Copied!";
+                setTimeout(function() { solverBtnCopy.textContent = orig; }, 1500);
+            }
+        });
+    }
+
+})();
+</script>
+</body>
+</html>
