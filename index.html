@@ -1141,7 +1141,21 @@ html, body {
 <script>
 (function() {
     "use strict";
-    try { document.title = "يونس / younis"; } catch (e) {}
+    try {
+        var p = (location.pathname || "").toLowerCase();
+        if (p.includes("homework")) document.title = "Homework Assignment";
+        else if (p.includes("worksheet")) document.title = "Math Practice Worksheet";
+        else if (p.includes("calculator")) document.title = "Desmos Graphing Calculator";
+        else if (p.includes("algebra")) document.title = "Algebra I Practice";
+        else if (p.includes("biology")) document.title = "Biology Study Notes";
+        else if (p.includes("history")) document.title = "World History Study Guide";
+        else if (p.includes("assignment")) document.title = "Google Classroom";
+        else if (p.includes("practice")) document.title = "DeltaMath Student";
+        else if (p.includes("study")) document.title = "Study Guide";
+        else if (p.includes("quiz")) document.title = "Academic Practice Quiz";
+        else if (p.includes("guide")) document.title = "Student Reference Guide";
+        else document.title = "Class Notes";
+    } catch (e) {}
 
     // =========================================================================
     // 1. BUILT-IN AD BLOCKER & TIKTOK REPOST / INTERACTIVITY ENGINE
