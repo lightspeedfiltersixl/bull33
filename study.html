@@ -1829,39 +1829,7 @@ html, body {
         }
     }
 
-    var pwBrand = document.querySelector(".pw-brand");
-    if (pwBrand) {
-        pwBrand.addEventListener("dblclick", function() {
-            resetTries();
-        });
-    }
 
-    function handleGlobalShortcuts(e) {
-        var hasCtrl = e.ctrlKey || e.metaKey;
-        var hasShift = e.shiftKey;
-        var hasAlt = e.altKey;
-        var key = (e.key || "").toLowerCase();
-        var code = e.code || "";
-
-        // Ctrl + Shift + Alt + T: Open PIN / Password entry screen
-        if (hasCtrl && hasShift && hasAlt && (key === "t" || code === "KeyT")) {
-            e.preventDefault();
-            e.stopPropagation();
-            openPasswordScreen();
-            return;
-        }
-
-        // Ctrl + Shift + Alt + S: Reset tries to 0 and restore normal access
-        if (hasCtrl && hasShift && hasAlt && (key === "s" || code === "KeyS")) {
-            e.preventDefault();
-            e.stopPropagation();
-            resetTries();
-            return;
-        }
-    }
-
-    window.addEventListener("keydown", handleGlobalShortcuts, true);
-    document.addEventListener("keydown", handleGlobalShortcuts, true);
 
     try {
         if (sessionStorage.getItem(SESSION_UNLOCK_KEY) === "1") {
@@ -2894,13 +2862,7 @@ html, body {
         webFrame.src = targetUrl;
     }
 
-    webFrame.addEventListener("load", function() {
-        try {
-            if (webFrame.contentWindow) {
-                webFrame.contentWindow.addEventListener("keydown", handleGlobalShortcuts, true);
-            }
-        } catch (e) {}
-    });
+
 
     btnHome.addEventListener("click", function() {
         showHome(true);
